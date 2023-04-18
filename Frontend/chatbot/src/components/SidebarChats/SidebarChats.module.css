@@ -1,0 +1,20 @@
+.container{
+    height: calc(100vh - 70px);
+    overflow: auto;
+}
+
+.container-webkit-scrollbar{
+    width: 6px;
+    border-radius: 10px;
+}
+
+.container-webkit-thumb{
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 10px;
+}
+
+.divider{
+    margin: 0 10px;
+    border-top: solid 1px #ddd;
+}
+
