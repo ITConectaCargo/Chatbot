@@ -4,3 +4,7 @@
     border-right: 1px solid #ddd;
     height: 100vh;
 }
+
+.container .pesquisa{
+    padding: 15px 20px;
+}

@@ -6,7 +6,6 @@ export default function Chat() {
     <>
       <section className={styles.container}>
         <Sidebar />
-        
       </section>
     </>
   )

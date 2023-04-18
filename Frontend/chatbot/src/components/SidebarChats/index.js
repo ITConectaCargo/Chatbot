@@ -10,6 +10,7 @@ export default function SidebarChats() {
           key={contato.id}
           imagem={contato.imagem}
           nome={contato.nome}
+          mensagem={contato.mensagem}
         />
       })}
     </div>

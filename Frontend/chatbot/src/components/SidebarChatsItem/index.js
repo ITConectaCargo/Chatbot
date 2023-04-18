@@ -1,6 +1,6 @@
 import styles from './SidebarChatsItem.module.css'
 
-export default function SidebarChatsItem({imagem, nome}) {
+export default function SidebarChatsItem({imagem, nome, mensagem}) {
   return (
     <div className={styles.container}>
         <div >
@@ -8,6 +8,7 @@ export default function SidebarChatsItem({imagem, nome}) {
         </div>
         <div>
             <span className={styles.nome}>{nome}</span>
+            <p>{mensagem}</p>
         </div>
     </div>
   )
