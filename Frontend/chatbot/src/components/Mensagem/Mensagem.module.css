@@ -1,6 +1,6 @@
 .container{
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
 }
 
 .containerRemetente{
@@ -12,7 +12,6 @@
     display: flex;
     border-radius: 10px;
     box-shadow: 0 1px 1px #ccc;
-    display: flex;
     flex-direction: column;
     padding: 3px;
     max-width: 50%;
@@ -24,7 +23,6 @@
     display: flex;
     border-radius: 10px;
     box-shadow: 0 1px 1px #ccc;
-    display: flex;
     flex-direction: column;
     padding: 3px;
     max-width: 50%;
