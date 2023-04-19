@@ -6,7 +6,7 @@ export default function ConversasBody() {
   return (
     <div className={styles.container}>
     {conversas.map((conversa) => {
-      return <Mensagem remetente={conversa.remetente} mensagem={conversa.mensagem} hora={conversa.hora}/>
+      return <Mensagem key={conversa.id} remetente={conversa.remetente} mensagem={conversa.mensagem} hora={conversa.hora}/>
     })}
     </div>
   )

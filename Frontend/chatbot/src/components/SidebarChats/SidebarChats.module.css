@@ -3,12 +3,12 @@
     overflow: auto;
 }
 
-.container-webkit-scrollbar{
+.container::-webkit-scrollbar{
     width: 6px;
     border-radius: 10px;
 }
 
-.container-webkit-thumb{
+.container::-webkit-thumb{
     background-color: rgba(0,0,0,0.2);
     border-radius: 10px;
 }
