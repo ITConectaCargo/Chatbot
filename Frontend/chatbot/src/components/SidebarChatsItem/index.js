@@ -8,7 +8,6 @@ export default function SidebarChatsItem({imagem, nome, mensagem}) {
         </div>
         <div>
             <span className={styles.nome}>{nome}</span>
-            <p>{mensagem}</p>
         </div>
     </div>
   )
