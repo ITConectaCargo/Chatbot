@@ -9,7 +9,7 @@ export default function ConversasFooter() {
   return (
     <div className={styles.container}>
       <form>
-      <IoMdHappy />
+        <IoMdHappy />
         <input placeholder="Mensagem"
           onChange={(e) => setMensagem(e.target.value)}
           value={mensagem}/>
