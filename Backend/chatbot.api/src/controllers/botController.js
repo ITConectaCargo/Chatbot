@@ -1,6 +1,5 @@
 import mensagens from "../models/mensagem.js"
 
-
 class bot {
 
     static listaMensagens = async (req, res) => {

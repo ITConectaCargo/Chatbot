@@ -1,5 +1,5 @@
-const token = ""
-const mytoken = "ConectaCargo"
+const token = process.env.TOKEN
+const mytoken = process.env.MYTOKEN
 
 class whatsapp {
 

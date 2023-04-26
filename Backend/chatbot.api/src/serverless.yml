@@ -1,1 +1,0 @@
-service: whatsapp-webhooks frameworkVersion: '2' provider: name: aws runtime: nodejs14.x lambdaHashingVersion: 20201221 environment: TOKEN: ${env:APP_TOKEN} plugins: - serverle
