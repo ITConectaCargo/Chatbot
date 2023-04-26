@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 
 const mensagemSchema = new mongoose.Schema(
     {
-        id: { type: String },
-        titulo: { type: String, required: true},
-        autor: {type: String, required: true},
+        name: {type: String},
+        from: {type: String},
+        to: { type: String},
         text: {type: String}
     }
 )
