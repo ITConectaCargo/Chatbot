@@ -4,6 +4,6 @@ import botController from "../controllers/botController.js"
 const router = express.Router()
 
 router
-    .get("/bot", botController.Mensagens)
+    .post("/bot", botController.Mensagens)
 
 export default router
