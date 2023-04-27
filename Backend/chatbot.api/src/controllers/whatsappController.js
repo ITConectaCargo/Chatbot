@@ -32,46 +32,10 @@ class whatsapp {
         console.log(JSON.stringify(body_param, null, 2))
         console.log(`Encontrei nome: ${nome} e o telefone ${telefone} id ${telefoneId} timestamp ${timestamp} com o seguinte texto ${texto}`)
         this.salvaMensagem(nome, telefone, telefoneId, timestamp, texto)
-        bot.verificaAtendimento(telefone)
-        this.enviaMensagem(telefone, texto)
+        bot.verificaAtendimento(telefone, timestamp)
+        //this.enviaMensagem(telefone, texto)
 
         res.sendStatus(200)
-
-        /*
-        console.log(JSON.stringify(body_param, null, 2))
-
-        if (body_param.object) {
-            if (body_param.entry &&
-                body_param.entry[0].changes[0] &&
-                body_param.entry[0].changes[0].value.message &&
-                body_param.entry[0].changes[0].value.message[0]
-            ) {
-                let phoneNumberID = body_param.entry[0].changes[0].value.metadata.phone_number_id
-                let from = body_param.entry[0].changes[0].value.messages[0].from
-                let msgBody = body_param.entry[0].changes[0].value.messages[0].text.body
-
-                axios({
-                    method: "POST",
-                    url: "https://graph.facebook.com/v13.0/" + phoneNumberID + "/messages?access_token=" + token,
-                    data: {
-                        messaging_product: "whatsapp",
-                        to: from,
-                        text: {
-                            body: "Hi... I'm Wesley"
-                        }
-                    },
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                })
-
-                res.sendStatus(200)
-            }
-            else {
-                res.sendStatus(404)
-            }
-        }
-        */
     }
 
     static listaMensagensByTelefone = async (req, res) =>{
@@ -100,7 +64,6 @@ class whatsapp {
             return console.log(err)
         }
     }
-
 
     static enviaMensagem(para, texto) {
         axios({
