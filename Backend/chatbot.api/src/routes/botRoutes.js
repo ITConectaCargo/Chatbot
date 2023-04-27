@@ -5,6 +5,5 @@ const router = express.Router()
 
 router
     .get("/bot", botController.listaMensagens)
-    .post("/bot", botController.criaMensagens)
 
 export default router
