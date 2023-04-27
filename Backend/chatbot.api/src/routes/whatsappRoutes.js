@@ -5,7 +5,7 @@ const router = express.Router()
 
 router
     .get("/whatsapp", whatsappController.validacao)
-    .get("/whatsapp/:numero", whatsappController.listaMensagensByTelefone)
+    .get("/whatsapp/:telefone", whatsappController.listaMensagensByTelefone)
     .post("/whatsapp", whatsappController.recebeMensagem)
 
 

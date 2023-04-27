@@ -1,6 +1,7 @@
 import axios from "axios"
 import mensagens from "../models/mensagem.js"
-const token = "EAAK36iZBViigBACPyjZAgRg0x9mEzKMGEAz4hAXFhqDL5PUvJrZCNFtHWhk54kqdzhjSeu3ZCSXOKxWx8F0Be5d3JoqHYVKyll6DnwiRQTLqZBwOBq01qijrDnRUfLgdUZCudnqyf99xqfQu5DmCgZBr7cmyozv6TYg1lPyvU9qhYuPSzUJnhnsMYfvA1bAdfGKHoikaXWXcP8viK7Ob3Rb"
+import bot from "./botController.js"
+const token = "EAAK36iZBViigBALOMnacGVHtVTiiwoUeBXCh3XYeeMqMyn1icZASKWhJfwrfCa8tAu5JrvNYuwSJkMWknE3J7VLjq4AKOm2QrIvehDHlUExbMg2qjZAPncJ2dtxTh6xT3HgN88bFGjdLBfLGBEicPauMwMSHWIecw0mmXp9wSqKtUtlgS27rB9RgqeZCDnHaFvo0wjircZC1hYVn4NDYx"
 const mytoken = "ConectaCargo"
 
 class whatsapp {
@@ -24,12 +25,14 @@ class whatsapp {
         let body_param = req.body
         let nome = body_param.entry[0].changes[0].value.contacts[0].profile.name
         let telefone = body_param.entry[0].changes[0].value.messages[0].from
+        let telefoneId = body_param.entry[0].changes[0].value.metadata.phone_number_id
         let timestamp = body_param.entry[0].changes[0].value.messages[0].timestamp
         let texto = body_param.entry[0].changes[0].value.messages[0].text.body
 
         console.log(JSON.stringify(body_param, null, 2))
-        console.log(`Encontrei o nome: ${nome} e o telefone ${telefone} timestamp ${timestamp} com o seguinte texto ${texto}`)
-        this.salvaMensagem(nome, telefone, timestamp, texto)
+        console.log(`Encontrei nome: ${nome} e o telefone ${telefone} id ${telefoneId} timestamp ${timestamp} com o seguinte texto ${texto}`)
+        this.salvaMensagem(nome, telefone, telefoneId, timestamp, texto)
+        bot.verificaAtendimento(telefone)
         this.enviaMensagem(telefone, texto)
 
         res.sendStatus(200)
@@ -72,20 +75,20 @@ class whatsapp {
     }
 
     static listaMensagensByTelefone = async (req, res) =>{
-        const numero = req.params.numero;
+        const telefone = req.params.telefone;
         try {
-            const mensagem = await mensagens.find({ from: numero });
+            const mensagem = await mensagens.find({ from: telefone });
             res.status(200).json(mensagem);
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
     }
 
-    static async salvaMensagem(name, from, timestamp, text) {
-
+    static async salvaMensagem(name, from, phoneId, timestamp, text) {
         const mensagem = new mensagens({
             name,
             from,
+            phoneId,
             timestamp,
             text
         });

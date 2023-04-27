@@ -1,15 +1,28 @@
-import mensagens from "../models/mensagem.js"
-
+import fila from '../models/fila.js'
 class bot {
+    static async verificaAtendimento(tel){
+        const telTabela = await fila.find({ from: tel });
 
-    static listaMensagens = async (req, res) => {
-        try {
-            const mensagem = await mensagens.find();
-            res.json(mensagem);
-        } catch (err) {
-            res.status(500).json({ message: err.message });
+        if(telTabela != ""){
+            console.log(`telefone: ${telTabela} Encontrado`)
         }
+        else{
+            console.log(`Telefone nao encontrado`)
+        }        
     }
+
+    static async adicionaFila(){
+
+    }
+    
+    static alteraStatus(){
+
+    }
+
+    static uraAtendimento(){
+
+    }
+
 }
 
 export default bot
