@@ -1,24 +1,25 @@
 import Fila from '../models/fila.js'
-import Whatsapp from './whatsappController.js'
-import MensagemAutomatica from '../models/mensagemAutomatica.js'
-class bot {
+import Ura from "./uraController.js"
+
+class fila {
     static async verificaAtendimento(tel, timestamp) {
-        const telTabela = await Fila.find({ from: tel })
+        const telFila = await Fila.find({ from: tel })
         const hora = timestamp * 1000 //transforma o timestamp em milisengundos
         let botStage = ""
         let status = ""
 
-        if (telTabela != "") {
-            console.log(`telefone: ${telTabela[0].from} Encontrado`)
-            if (telTabela[0].status == "finalizado") {
+        console.log(telFila)
+
+        if (telFila != "") {
+            console.log(`Verificando telefone: ${telFila[0].from}`)
+            if (telFila[0].status == "finalizado") {
                 botStage = "0"
                 status = "ura"
-                console.log("Adicionando a Fila")
+
                 this.adicionaNaFila(tel, hora, botStage, status)
             }
-            else if (telTabela[0].status == "ura") {
-                console.log("enviando para URA")
-                this.uraAtendimento(telTabela)
+            else if (telFila[0].status == "ura") {
+                Ura.uraAtendimento(telFila[0])
             }
         }
         else {
@@ -30,6 +31,7 @@ class bot {
     }
 
     static async adicionaNaFila(from, timestamp, botStage, status) {
+        console.log("Adicionando a Fila")
         const atendimento = new Fila({
             from,
             timestamp,
@@ -38,8 +40,9 @@ class bot {
         })
         try {
             const newAtendimento = await atendimento.save();
-            console.log("adicionado na fila com sucesso")
-            this.uraAtendimento(newAtendimento)
+            console.log("Adicionado na fila com sucesso")
+            console.log(newAtendimento)
+            Ura.uraAtendimento(newAtendimento)
         } catch (err) {
             return console.log(err)
         }
@@ -52,7 +55,9 @@ class bot {
 
     static async alteraBotStage(atendimento, estagio) {
         console.log("Alterando BotStage")
-        const { botStage } = estagio
+        console.log(estagio)
+        let botStage = estagio
+
         try {
             const fila = await Fila.findByIdAndUpdate(
                 atendimento._id,
@@ -65,30 +70,13 @@ class bot {
             }
             console.log("Estagio alterado")
 
+
         } catch (err) {
             console.log(err);
             return res.status(500).send('Internal Server Error');
         }
 
     }
-
-    static uraAtendimento(atendimento) {
-        console.log(atendimento)
-
-        if (atendimento[0].botStage == 0) {
-            let texto = `Ola! Bem vindo a Conecta Cargo sou sua assistente virtual \n Por favor, informe seu Nome para prosseguirmos o atendimento. \U+00a0`
-
-            Whatsapp.enviaMensagem(atendimento[0].from, texto)
-            this.alteraBotStage(atendimento, "1")
-        }
-        else if (atendimento[0].botStage == 1) {
-            let texto = "Digite a opção desejada" + "\n1-SAC" + "\n2-Comercial" + "\n3-Motoristas" + "\n3-Sair"
-
-            Whatsapp.enviaMensagem(atendimento[0].from, texto)
-            this.alteraBotStage(atendimento, "2")
-        }
-
-    }
 }
 
-export default bot
+export default fila

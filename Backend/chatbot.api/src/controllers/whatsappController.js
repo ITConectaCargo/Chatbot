@@ -1,7 +1,7 @@
 import axios from "axios"
-import mensagens from "../models/mensagem.js"
-import bot from "./botController.js"
-const token = "EAAK36iZBViigBAGvdLlcmyCgzL7GF6yhIgMsEjtgJzZAXhDZA4HOOVioUkyUBHC7IrL2xwYFROPFqKFMyVX52CHGEFein0tgEsjJIKMtZBrENpd0jqxrhZBDaa64vLsa8FK1BB51FIlkcXAQE7pZBzgqmyQXR76kGkAu5P6inmRqlcKMM1C9NxAWzKsKMPV7KZBZCOKqZChMgYZAg4gZBvHsCw9"
+import Mensagem from "../models/mensagem.js"
+import Fila from "./filaController.js"
+const token = "EAAK36iZBViigBABdhynNeLXn3F3WRCY7SqnyQnU5nbuHTwmWpoRrZA5DleCqqgBdDjPZCziKYY5if4InfCwo1apYZAmC0pBg26cDDnr12xwtvrXZCt8i0v0gypu91qMpAYVkkeHTZCHb32n9E3PRsmtnOq2yotIIrxWwtoPjOK0MIw4ZBOZBxwvsuwkXW1rqiXFZA7SGqMCAiNbpe1itdjkE1"
 const mytoken = "ConectaCargo"
 
 class whatsapp {
@@ -32,7 +32,7 @@ class whatsapp {
         console.log(JSON.stringify(body_param, null, 2))
         console.log(`Encontrei nome: ${nome} e o telefone ${telefone} id ${telefoneId} timestamp ${timestamp} com o seguinte texto ${texto}`)
         this.salvaMensagem(nome, telefone, telefoneId, timestamp, texto)
-        bot.verificaAtendimento(telefone, timestamp)
+        Fila.verificaAtendimento(telefone, timestamp)
         //this.enviaMensagem(telefone, texto)
 
         res.sendStatus(200)
@@ -41,7 +41,7 @@ class whatsapp {
     static listaMensagensByTelefone = async (req, res) =>{
         const telefone = req.params.telefone;
         try {
-            const mensagem = await mensagens.find({ from: telefone });
+            const mensagem = await Mensagens.find({ from: telefone });
             res.status(200).json(mensagem);
         } catch (err) {
             res.status(500).json({ message: err.message });
@@ -49,7 +49,7 @@ class whatsapp {
     }
 
     static async salvaMensagem(name, from, phoneId, timestamp, text) {
-        const mensagem = new mensagens({
+        const mensagem = new Mensagem({
             name,
             from,
             phoneId,

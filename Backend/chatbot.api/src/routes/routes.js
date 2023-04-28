@@ -1,6 +1,5 @@
 import express from "express";
 import whatsapp from "./whatsappRoutes.js"
-import bot from "./botRoutes.js"
 
 const routes = (app) => {
     app.route('/').get((req, res) => {
@@ -9,8 +8,7 @@ const routes = (app) => {
 
     app.use(
         express.json(),
-        whatsapp,
-        bot
+        whatsapp
     )
 }
 
