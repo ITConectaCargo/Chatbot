@@ -1,7 +1,7 @@
 import axios from "axios"
 import mensagens from "../models/mensagem.js"
 import bot from "./botController.js"
-const token = "EAAK36iZBViigBALOMnacGVHtVTiiwoUeBXCh3XYeeMqMyn1icZASKWhJfwrfCa8tAu5JrvNYuwSJkMWknE3J7VLjq4AKOm2QrIvehDHlUExbMg2qjZAPncJ2dtxTh6xT3HgN88bFGjdLBfLGBEicPauMwMSHWIecw0mmXp9wSqKtUtlgS27rB9RgqeZCDnHaFvo0wjircZC1hYVn4NDYx"
+const token = "EAAK36iZBViigBAGvdLlcmyCgzL7GF6yhIgMsEjtgJzZAXhDZA4HOOVioUkyUBHC7IrL2xwYFROPFqKFMyVX52CHGEFein0tgEsjJIKMtZBrENpd0jqxrhZBDaa64vLsa8FK1BB51FIlkcXAQE7pZBzgqmyQXR76kGkAu5P6inmRqlcKMM1C9NxAWzKsKMPV7KZBZCOKqZChMgYZAg4gZBvHsCw9"
 const mytoken = "ConectaCargo"
 
 class whatsapp {
