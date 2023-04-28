@@ -8,8 +8,6 @@ class fila {
         let botStage = ""
         let status = ""
 
-        console.log(telFila)
-
         if (telFila != "") {
             console.log(`Verificando telefone: ${telFila[0].from}`)
             if (telFila[0].status == "finalizado") {
@@ -41,7 +39,6 @@ class fila {
         try {
             const newAtendimento = await atendimento.save();
             console.log("Adicionado na fila com sucesso")
-            console.log(newAtendimento)
             Ura.uraAtendimento(newAtendimento)
         } catch (err) {
             return console.log(err)
@@ -55,7 +52,6 @@ class fila {
 
     static async alteraBotStage(atendimento, estagio) {
         console.log("Alterando BotStage")
-        console.log(estagio)
         let botStage = estagio
 
         try {

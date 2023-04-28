@@ -1,7 +1,7 @@
 import axios from "axios"
 import Mensagem from "../models/mensagem.js"
 import Fila from "./filaController.js"
-const token = "EAAK36iZBViigBABdhynNeLXn3F3WRCY7SqnyQnU5nbuHTwmWpoRrZA5DleCqqgBdDjPZCziKYY5if4InfCwo1apYZAmC0pBg26cDDnr12xwtvrXZCt8i0v0gypu91qMpAYVkkeHTZCHb32n9E3PRsmtnOq2yotIIrxWwtoPjOK0MIw4ZBOZBxwvsuwkXW1rqiXFZA7SGqMCAiNbpe1itdjkE1"
+const token = "EAAK36iZBViigBALAJBXh9ZAEqTsFZCrnOrnf0wWRiWI9crY6p5TqRndJ8selkNBMGqOSJG7xRrXazj7HyivSdwmY8nOFOaCuUhwkZBBpIUZAzFjBvKAB6f5wURpQMvh0b77qK8H73JbJYZAh0Yt0xSmQjxo7Bs0aqDZC1ENnYBDhvLEJ4BUIIHIKFINVdIZCzlVZALdW8lCz4Mu9d5NaZC15mL"
 const mytoken = "ConectaCargo"
 
 class whatsapp {
@@ -30,7 +30,7 @@ class whatsapp {
         let texto = body_param.entry[0].changes[0].value.messages[0].text.body
 
         console.log(JSON.stringify(body_param, null, 2))
-        console.log(`Encontrei nome: ${nome} e o telefone ${telefone} id ${telefoneId} timestamp ${timestamp} com o seguinte texto ${texto}`)
+        console.log(`Encontrei nome: ${nome}, telefone: ${telefone}, id: ${telefoneId}, timestamp: ${timestamp}, texto: ${texto}`)
         this.salvaMensagem(nome, telefone, telefoneId, timestamp, texto)
         Fila.verificaAtendimento(telefone, timestamp)
         //this.enviaMensagem(telefone, texto)
