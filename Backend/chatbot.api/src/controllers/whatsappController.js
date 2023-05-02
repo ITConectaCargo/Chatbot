@@ -1,7 +1,7 @@
 import axios from "axios"
 import Mensagem from "../models/mensagem.js"
 import Fila from "./filaController.js"
-const token = "EAAK36iZBViigBALAJBXh9ZAEqTsFZCrnOrnf0wWRiWI9crY6p5TqRndJ8selkNBMGqOSJG7xRrXazj7HyivSdwmY8nOFOaCuUhwkZBBpIUZAzFjBvKAB6f5wURpQMvh0b77qK8H73JbJYZAh0Yt0xSmQjxo7Bs0aqDZC1ENnYBDhvLEJ4BUIIHIKFINVdIZCzlVZALdW8lCz4Mu9d5NaZC15mL"
+const token = "EAAK36iZBViigBAMd7ZCTQnYFsnSUiimACp9fk3FzSPsZBXQJdqbZB4yaekNPAmm2v33iosj5M04VK64DrpurwKPZBZBxZAb1m3GVOqJUxkkmuZBVD2a6fZACVmjTAMKpWzUDego9OZBZAsNLzvaTqVZCWhSSdz8HLK3JZAAtaHQ6lAZCig8oIQMLebUFdywHMoppGKWyX2dlFEsxVoSv88tZBUS6zNJ"
 const mytoken = "ConectaCargo"
 
 class whatsapp {
