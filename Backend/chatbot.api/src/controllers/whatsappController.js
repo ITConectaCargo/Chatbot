@@ -1,7 +1,7 @@
 import axios from "axios"
 import Mensagem from "../models/mensagem.js"
 import Fila from "./filaController.js"
-const token = "EAAK36iZBViigBAMd7ZCTQnYFsnSUiimACp9fk3FzSPsZBXQJdqbZB4yaekNPAmm2v33iosj5M04VK64DrpurwKPZBZBxZAb1m3GVOqJUxkkmuZBVD2a6fZACVmjTAMKpWzUDego9OZBZAsNLzvaTqVZCWhSSdz8HLK3JZAAtaHQ6lAZCig8oIQMLebUFdywHMoppGKWyX2dlFEsxVoSv88tZBUS6zNJ"
+const token = "EAAK36iZBViigBAJJwZAow0fBR5oebNtAFtBLk7clH0WmfRI7l44wDj4JP11jgPkCrz7gMkMGbqltQUrhervuZB5zC14whcW1ZAl9bYkRedaDOOVv9211UVowotU3VxmJed1MQDkGOHPzaIlQl4LZCKHo2Tal96wzquPJiZBKfZBE1kf5UKZBdob4TFGBwfG8eaPlUjdQoGTYgfJwhawOH8Rq"
 const mytoken = "ConectaCargo"
 
 class whatsapp {
@@ -10,7 +10,7 @@ class whatsapp {
         let mode = req.query["hub.mode"]
         let challenge = req.query["hub.challenge"]
         let token = req.query["hub.verify_token"]
-
+        
         if (mode && token) {
             if (mode === "subscribe" && token === mytoken) {
                 res.status(200).send(challenge)
@@ -33,7 +33,6 @@ class whatsapp {
         console.log(`Encontrei nome: ${nome}, telefone: ${telefone}, id: ${telefoneId}, timestamp: ${timestamp}, texto: ${texto}`)
         this.salvaMensagem(nome, telefone, telefoneId, timestamp, texto)
         Fila.verificaAtendimento(telefone, timestamp)
-        //this.enviaMensagem(telefone, texto)
 
         res.sendStatus(200)
     }
