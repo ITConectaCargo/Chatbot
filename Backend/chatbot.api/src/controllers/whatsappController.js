@@ -2,7 +2,7 @@ import axios from "axios"
 //import Mensagem from "../models/mensagem.js"
 import Fila from "./filaController.js"
 import Mensagem from "../models/mensagem.js"
-const token = "EAAK36iZBViigBAI3XjaxTZB7dEWgAuBwpOTbZBNPCq3HRCMPV6JyF5RGTr9pM6bUoArxL7BwrRUQEJZA7Chw24783YvbDZBhG7rH8zzCQxNqZBKrrSV2OYU7sppDqxZB2QvzcWa94ZAQoBMFujc4WxwKlVeqTU1QHAsEYpoEU5rgaSS9AhYymOX2QpQEb7ZCRS9gW17v5m1KO9uxByI1LNQZAt"
+const token = "EAAK36iZBViigBAIllpZB27iTLPbzzPRh1s1PGg8ivqbGMW3FSYuHtAX3h4wleValuvZCrsWIctVRi9eGC0tcB14URQro1t3Gs8wVf3tJAdFh8PstM9Qz9psjDNjIM6atQz0ilhZA8qDy4QPdHWV9egCjO0YlZAXtOTLda6xkkkjJBLDGhve04lYgkVntc8fzb39tL7HJoDw9KXzNp8gob"
 const mytoken = "ConectaCargo"
 
 class whatsapp {
@@ -31,8 +31,6 @@ class whatsapp {
         let telefoneId = body_param.entry[0].changes[0].value.metadata.phone_number_id
         let timestamp = body_param.entry[0].changes[0].value.messages[0].timestamp
         let texto = body_param.entry[0].changes[0].value.messages[0].text.body
-        let contato = ""
-        let novaMensagem = ""
         const mensagem = {
             telefoneId,
             timestamp,
@@ -42,7 +40,15 @@ class whatsapp {
         //console.log(JSON.stringify(body_param, null, 2))
         console.log(`Encontrei nome: ${nome}, telefone: ${telefone}, id: ${telefoneId}, timestamp: ${timestamp}, texto: ${texto}`)
 
+        this.verificaContato(telefone, mensagem)
+        res.sendStatus(200)
+    }
+
+    static async verificaContato(telefone, mensagem) {
         //verifica se telefone esta no BD
+        let contato = ""
+        let novaMensagem = ""
+
         try {
             let resposta = await axios.get(`http://localhost:9000/contato/${telefone}`)
             contato = resposta.data
@@ -76,7 +82,6 @@ class whatsapp {
         }
 
         Fila.verificaAtendimento(novaMensagem)
-        res.sendStatus(200)
     }
 
     static async salvaMensagem(contato, mensagem) {
@@ -127,7 +132,7 @@ class whatsapp {
         } catch (error) {
             console.log(error)
         }
-        
+
     }
 }
 
