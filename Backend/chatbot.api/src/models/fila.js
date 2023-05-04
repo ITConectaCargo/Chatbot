@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 
 const filaSchema = new mongoose.Schema({
-    from: {type: String, require: true},
+    from: {type: mongoose.Schema.Types.ObjectId, ref: 'contato', required: true},
     timestamp: {type: Date, require: true},
     botStage: {type: String},
     status: {type: String},

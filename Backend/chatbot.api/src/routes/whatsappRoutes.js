@@ -8,5 +8,4 @@ router
     .get("/whatsapp/:telefone", whatsappController.listaMensagensByTelefone)
     .post("/whatsapp", whatsappController.recebeMensagem)
 
-
 export default router

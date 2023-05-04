@@ -1,0 +1,10 @@
+[
+    {
+        "stage": 0,
+        "text": "Ola! Bem vindo a Conecta Cargo sou sua assistente virtual\nPor favor, informe seu Nome para prosseguirmos o atendimento. \u1F60A"
+    },
+    {
+        "stage": 1,
+        "text": "Digite a opção desejada\n1-SAC\n2-Comercial\n3-Motoristas\n4-Sair"
+    }
+]

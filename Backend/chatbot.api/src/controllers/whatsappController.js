@@ -1,16 +1,18 @@
 import axios from "axios"
-import Mensagem from "../models/mensagem.js"
+//import Mensagem from "../models/mensagem.js"
 import Fila from "./filaController.js"
-const token = "EAAK36iZBViigBAJJwZAow0fBR5oebNtAFtBLk7clH0WmfRI7l44wDj4JP11jgPkCrz7gMkMGbqltQUrhervuZB5zC14whcW1ZAl9bYkRedaDOOVv9211UVowotU3VxmJed1MQDkGOHPzaIlQl4LZCKHo2Tal96wzquPJiZBKfZBE1kf5UKZBdob4TFGBwfG8eaPlUjdQoGTYgfJwhawOH8Rq"
+import Mensagem from "../models/mensagem.js"
+const token = "EAAK36iZBViigBAHho8Ahd9qW6YZABvGfh4GaTLWJlc6paEtozeWNA2iXlfL2DG7PruA2FeGwXJBKIm2BcUQbr0kAe6QlIZAYx0wFm45mgXZChrZCJWSMZA2C5H4vNyNbS6hMCK5kYNCZAQVZCPcrdcfUeMfyWfktOwrNYAW7O0QsfBA19uQKVc7pNJ28ZAFNMB4XDiVp321aDH1tJpfVSQrPI"
 const mytoken = "ConectaCargo"
 
 class whatsapp {
 
     static validacao = (req, res) => {
+        //faz a validação com o Whatsapp api 
         let mode = req.query["hub.mode"]
         let challenge = req.query["hub.challenge"]
         let token = req.query["hub.verify_token"]
-        
+
         if (mode && token) {
             if (mode === "subscribe" && token === mytoken) {
                 res.status(200).send(challenge)
@@ -21,23 +23,79 @@ class whatsapp {
         }
     }
 
-    static recebeMensagem = (req, res) => {
+    static recebeMensagem = async (req, res) => {
+        //trata mensagem recebida
         let body_param = req.body
         let nome = body_param.entry[0].changes[0].value.contacts[0].profile.name
         let telefone = body_param.entry[0].changes[0].value.messages[0].from
         let telefoneId = body_param.entry[0].changes[0].value.metadata.phone_number_id
         let timestamp = body_param.entry[0].changes[0].value.messages[0].timestamp
         let texto = body_param.entry[0].changes[0].value.messages[0].text.body
+        let contato = ""
+        let novaMensagem = ""
+        const mensagem = {
+            telefoneId,
+            timestamp,
+            texto
+        }
 
-        console.log(JSON.stringify(body_param, null, 2))
+        //console.log(JSON.stringify(body_param, null, 2))
         console.log(`Encontrei nome: ${nome}, telefone: ${telefone}, id: ${telefoneId}, timestamp: ${timestamp}, texto: ${texto}`)
-        this.salvaMensagem(nome, telefone, telefoneId, timestamp, texto)
-        Fila.verificaAtendimento(telefone, timestamp)
 
+        //verifica se telefone esta no BD
+        try {
+            let resposta = await axios.get(`http://localhost:9000/contato/${telefone}`)
+            contato = resposta.data
+            console.log(`Encontrei o contato ${contato.tel}`)
+        } catch (error) {
+            console.log(error)
+        }
+
+        //verifica se contato esta vazio ou nao
+        if (contato) {
+            console.log(`possui contato`)
+            //Salva a mensagem
+            let resposta = await this.salvaMensagem(contato, mensagem)
+            novaMensagem = resposta
+        }
+        else {
+            console.log(`contato esta vazio`)
+            //cria contato no BD
+            try {
+                let resposta = await axios.post(`http://localhost:9000/contato/`, {
+                    name: nome,
+                    tel: telefone
+                })
+                contato = resposta
+            } catch (error) {
+                console.log(error)
+            }
+            //Salva a mensagem
+            let resposta = await this.salvaMensagem(contato, mensagem)
+            novaMensagem = resposta
+        }
+
+        Fila.verificaAtendimento(novaMensagem)
         res.sendStatus(200)
     }
 
-    static listaMensagensByTelefone = async (req, res) =>{
+    static async salvaMensagem(contato, mensagem) {
+        console.log("salvando mensagem")
+        try {
+            const msg = new Mensagem({
+                from: contato._id,
+                phoneId: mensagem.telefoneId,
+                timestamp: mensagem.timestamp * 1000, //transforma timestamp em milisegundos
+                text: mensagem.texto
+            });
+            const novaMensagem = await msg.save();
+            return novaMensagem
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    static listaMensagensByTelefone = async (req, res) => {
         const telefone = req.params.telefone;
         try {
             const mensagem = await Mensagens.find({ from: telefone });
@@ -47,39 +105,29 @@ class whatsapp {
         }
     }
 
-    static async salvaMensagem(name, from, phoneId, timestamp, text) {
-        const mensagem = new Mensagem({
-            name,
-            from,
-            phoneId,
-            timestamp,
-            text
-        });
+    static enviaMensagem(para, texto) {
+        console.log("Enviando Mensagem")
 
         try {
-            const newMensagem = await mensagem.save();
-            return newMensagem
-        } catch (err) {
-            return console.log(err)
-        }
-    }
-
-    static enviaMensagem(para, texto) {
-        axios({
-            method: "POST",
-            url: "https://graph.facebook.com/v16.0/105378582538953/messages?access_token=" + token,
-            data: {
-                messaging_product: "whatsapp",
-                to: para,
-                text: {
-                    body: texto
+            axios({
+                method: "POST",
+                url: "https://graph.facebook.com/v16.0/105378582538953/messages?access_token=" + token,
+                data: {
+                    messaging_product: "whatsapp",
+                    to: para,
+                    text: {
+                        body: texto
+                    }
+                },
+                headers: {
+                    "Authorization": "Bearer",
+                    "Content-Type": "application/json"
                 }
-            },
-            headers: {
-                "Authorization": "Bearer",
-                "Content-Type": "application/json"
-            }
-        })
+            })
+        } catch (error) {
+            console.log(error)
+        }
+        
     }
 }
 
