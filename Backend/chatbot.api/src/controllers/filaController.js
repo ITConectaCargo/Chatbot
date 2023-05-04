@@ -64,6 +64,7 @@ class fila {
                 return console.log('Fila nao encontrada');
             }
             console.log("Estagio alterado")
+            console.log(fila)
 
         } catch (err) {
             console.log(err);
