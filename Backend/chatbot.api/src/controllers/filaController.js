@@ -27,7 +27,8 @@ class fila {
                 .exec();
 
             if (!newFila) {
-                return console.log('Fila nao encontrada');
+                console.log('Fila nao encontrada');
+                return res.status(500).send('Internal Server Error');
             }
             res.status(200).send(newFila)
         } catch (err) {

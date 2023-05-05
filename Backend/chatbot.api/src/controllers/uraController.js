@@ -7,14 +7,16 @@ class ura {
     static async uraAtendimento(fila) {
         console.log("Ura de atendimento")
         let ultimaMensagem = ""
+        let botMensagem = ""
 
         //Busca ultima Mensagem e contato
         try {
             ultimaMensagem = await Mensagem.findOne({ from: fila.from })
                 .sort({ date: 'desc' })
-                .select('text')
                 .populate('from')
                 .exec()
+            
+                botMensagem = ultimaMensagem
         } catch (error) {
             console.log(error)
         }
@@ -28,7 +30,8 @@ class ura {
                 + `1 - SAC\n`
                 + `2 - Comercial\n`
                 + `3 - Motorista\n`
-            Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
+
+            Whatsapp.enviaMensagem(ultimaMensagem)
             Fila.alteraBotStage(fila, 1)
         }
         //Opcoes
@@ -38,20 +41,20 @@ class ura {
                 console.log("ura 1.1")
                 let texto = `Para agilizar o nosso atendimento me informe o CPF ou CNPJ da NFe\n`
                     + `digite apenas numeros`
-                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
+                Whatsapp.enviaMensagem(ultimaMensagem)
                 Fila.alteraBotStage(fila, "1.1")
             }
             else if (ultimaMensagem.text == "2") {
                 console.log("ura 1.2")
                 let texto = `Aguarde enquanto te tranfiro para um dos nossos atendendentes`
-                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
+                Whatsapp.enviaMensagem(ultimaMensagem)
                 Fila.alteraBotStage(fila, 0)
                 this.adicionaFilaEspera(fila)
             }
             else if (ultimaMensagem.text == "3") {
                 console.log("ura 1.3")
                 let texto = `Aguarde enquanto te tranfiro para um dos nossos atendendentes`
-                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
+                Whatsapp.enviaMensagem(ultimaMensagem)
                 Fila.alteraBotStage(fila, 0)
                 this.adicionaFilaEspera(fila)
             }
@@ -62,7 +65,7 @@ class ura {
                     + `1 - SAC\n`
                     + `2 - Comercial\n`
                     + `3 - Motorista\n`
-                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
+                Whatsapp.enviaMensagem(ultimaMensagem)
                 Fila.alteraBotStage(fila, 1)
             }
         }
@@ -83,12 +86,12 @@ class ura {
                     + `Voce confirma os dados acima?\n`
                     + `1 - Sim\n`
                     + `2 - Nao\n`
-                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
+                Whatsapp.enviaMensagem(ultimaMensagem)
                 Fila.alteraBotStage(fila, "1.1.1")
             }
             else {
                 let texto = `O CPF ou CNPJ ${ultimaMensagem.text} esta Invalido`
-                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
+                Whatsapp.enviaMensagem(ultimaMensagem)
             }
         }
         //SAC Valida se as informações estao corretas
@@ -97,7 +100,7 @@ class ura {
                 console.log("ura 1.1.1")
                 let texto = `Perfeito\n`
                     + `Aguarde enquanto te tranfiro para um dos nossos atendendentes\n`
-                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
+                Whatsapp.enviaMensagem(ultimaMensagem)
                 Fila.alteraBotStage(fila, "0")
                 this.adicionaFilaEspera(fila)
             }
@@ -105,7 +108,7 @@ class ura {
                 console.log("ura 1.1.2")
                 let texto = `Entendi!\n Pelo visto tem algo errado com sua coleta\n`
                     + `Aguarde enquanto te tranfiro para um dos nossos atendendentes\n`
-                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
+                Whatsapp.enviaMensagem(ultimaMensagem)
                 Fila.alteraBotStage(fila, "0")
                 this.adicionaFilaEspera(fila)
             }
@@ -119,13 +122,13 @@ class ura {
                     + `Voce confirma os dados acima?\n`
                     + `1 - Sim\n`
                     + `2 - Nao\n`
-                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
+                Whatsapp.enviaMensagem(ultimaMensagem)
                 Fila.alteraBotStage(fila, "1.1.1")
             }
         }
     }
 
-    static async adicionaFilaEspera (fila) {
+    static async adicionaFilaEspera(fila) {
         fila.status = "espera"
         try {
             axios.put(`http://localhost:9000/fila/`, fila)

@@ -24,31 +24,33 @@ class whatsapp {
     }
 
     static recebeMensagem = async (req, res) => {
-        try {
-            //trata mensagem recebida
+        //trata mensagem recebida
         let body_param = req.body
-        let nome = body_param.entry[0].changes[0].value.contacts[0].profile.name
-        let telefone = body_param.entry[0].changes[0].value.messages[0].from
-        let telefoneId = body_param.entry[0].changes[0].value.metadata.phone_number_id
-        let timestamp = body_param.entry[0].changes[0].value.messages[0].timestamp
-        let texto = body_param.entry[0].changes[0].value.messages[0].text.body
-        const mensagem = {
-            telefoneId,
-            timestamp,
-            texto
-        }
 
-        //console.log(JSON.stringify(body_param, null, 2))
-        console.log(`Encontrei nome: ${nome}, telefone: ${telefone}, id: ${telefoneId}, timestamp: ${timestamp}, texto: ${texto}`)
+        try {
+            if (body_param.object) {
+                if (body_param.entry[0].changes[0].value.messages[0].text.body) {
+                    let nome = body_param.entry[0].changes[0].value.contacts[0].profile.name
+                    let telefone = body_param.entry[0].changes[0].value.messages[0].from
+                    let telefoneId = body_param.entry[0].changes[0].value.metadata.phone_number_id
+                    let timestamp = body_param.entry[0].changes[0].value.messages[0].timestamp
+                    let texto = body_param.entry[0].changes[0].value.messages[0].text.body
+                    const mensagem = {
+                        telefoneId,
+                        timestamp,
+                        texto
+                    }
+                    console.log(`Encontrei nome: ${nome}, telefone: ${telefone}, id: ${telefoneId}, timestamp: ${timestamp}, texto: ${texto}`)
 
-        this.verificaContato(nome, telefone, mensagem)
-        res.status(200)
+                    this.verificaContato(nome, telefone, mensagem)
+                    res.status(200)
+                }
+            }
         } catch (error) {
-            console.log(error)
+            console.log(JSON.stringify(body_param, null, 2))
         }
-        
     }
-
+    // -------------------------------------------------------------------------------------------
     static async verificaContato(nome, telefone, mensagem) {
         let contato = ""
         let novaMensagem = ""
@@ -118,12 +120,15 @@ class whatsapp {
         }
     }
 
-    static enviaMensagem(para, texto) {
+    static enviaMensagem(req, res) {
+        const para = req.from.tel
+        const telefoneId = req.phoneId
+        const texto = req.text
         console.log("Enviando Mensagem")
         try {
             axios({
                 method: "POST",
-                url: "https://graph.facebook.com/v16.0/105378582538953/messages?access_token=" + token,
+                url: "https://graph.facebook.com/v16.0/"+ telefoneId +"/messages?access_token=" + token,
                 data: {
                     messaging_product: "whatsapp",
                     to: para,
