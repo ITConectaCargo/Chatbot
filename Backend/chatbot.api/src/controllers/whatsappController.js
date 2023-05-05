@@ -2,7 +2,7 @@ import axios from "axios"
 //import Mensagem from "../models/mensagem.js"
 import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
-const token = "EAAK36iZBViigBAONZBPE7PZBPtnnTDe9NaPQQJZBRNWBMYXk2EplF0yuIFZBpetfY0ExZCICNlUXcZCYogd98m4NfphnJUjALHZCOCBHD2F5ZBZA3FbH7Q4TiJsBQmMDcFQw8ZCBD1VZBNIeA7GU4I9iir1L9ZCFLlrtjJzqK9CsDuSGrtq6vqDNgSh3TX42Q0ZBp0v664dEbeZCjdeO78F6wlJza0u"
+const token = "EAAK36iZBViigBAFvlsAGijBMBbnkULEZAAPU3mOZAZAaslZClhV1vpCLKDdSroCdZA6dfXvkULzFyJ8VArKwo2VBg7AIWI9C21R9uXV1Iqd8l9ZButiMZC7gcqfaikC25kbZBPnrjMBjwcDd8yCGlZCopaCL1M29Xyoosrn7uSi6kRejQqlHkHd1xErUoZAlLm0qrZCerZBQpxU7kKbXtVnKKXqU7"
 const mytoken = "ConectaCargo"
 
 class whatsapp {
@@ -24,7 +24,8 @@ class whatsapp {
     }
 
     static recebeMensagem = async (req, res) => {
-        //trata mensagem recebida
+        try {
+            //trata mensagem recebida
         let body_param = req.body
         let nome = body_param.entry[0].changes[0].value.contacts[0].profile.name
         let telefone = body_param.entry[0].changes[0].value.messages[0].from
@@ -41,7 +42,11 @@ class whatsapp {
         console.log(`Encontrei nome: ${nome}, telefone: ${telefone}, id: ${telefoneId}, timestamp: ${timestamp}, texto: ${texto}`)
 
         this.verificaContato(nome, telefone, mensagem)
-        res.sendStatus(200)
+        res.status(200)
+        } catch (error) {
+            console.log(error)
+        }
+        
     }
 
     static async verificaContato(nome, telefone, mensagem) {
