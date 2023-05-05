@@ -1,16 +1,28 @@
 import SidebarChatsItem from 'components/SidebarChatsItem'
 import styles from './SidebarChats.module.css'
-import contatos from "json/contatos.json"
+//import contatosJson from "json/contatos.json"
+import axios from 'axios'
+import { useState } from 'react'
+import { useEffect } from 'react'
 
 export default function SidebarChats() {
+  const baseUrl = "http://localhost:9000/"
+  const [contatos, setContatos] = useState([])
+
+  useEffect(() => {
+    axios.get(baseUrl + "fila")
+      .then((response) => {
+        setContatos(response.data)
+      })
+  }, [])
+
   return (
     <div className={styles.container}>
       {contatos.map((contato) => {
         return <SidebarChatsItem
-          key={contato.id}
-          imagem={contato.imagem}
-          nome={contato.nome}
-          mensagem={contato.mensagem}
+          key={contato.from.nameWhatsapp}
+          imagem={"https://github.com/wesleymo22.png"}
+          nome={contato.from.nameWhatsapp}
         />
       })}
     </div>

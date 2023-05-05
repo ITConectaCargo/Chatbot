@@ -2,6 +2,7 @@ import mongoose from "mongoose"
 
 const contatoSchema = new mongoose.Schema({
     name: { type: String },
+    nameWhatsapp: { type: String },
     tel: { type: String, required: true },
     cpfCnpj: { type: String },
     address: { type: String },

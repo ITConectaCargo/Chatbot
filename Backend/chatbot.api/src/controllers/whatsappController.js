@@ -2,7 +2,7 @@ import axios from "axios"
 //import Mensagem from "../models/mensagem.js"
 import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
-const token = "EAAK36iZBViigBAOTnqwiPhPjpbeZC6er7VepppgSzdIdYTg3ZCZByYa7lZCAraOXvFZCPM6XXz3J0cnDj3ciTVZAgRu3ZAPbKfCOtiYjHBqrDscl4cQgaAKo5obk5xQpLfjWMuetzaQhVVOinYK92Y9qhZAhCOCuFf2rb5ZAeTQ8m3BB378zPcy6vO4YLFYBRiqrFpHU7JxLfkFZCPYgX36ricP"
+const token = "EAAK36iZBViigBAMiNZBbmMgKeVG3vJz2xhrQBxWW2WAEVQaPupeWw67eEQhRIfexiOnBa7ZBybXJEXWCrkEzbMKqZC7R6H72VjSqRZCZBZBBlpfwkqfXcXlLCVXvZCJegzGXV21QO2qaWkMtRyZAthUGonAiFTiia73YOqYVlb4G34y7xKgQ0XZBztnYcwzNmOttjzbifi3jHDuhzvtCBfDBwv"
 const mytoken = "ConectaCargo"
 
 class whatsapp {
@@ -40,15 +40,15 @@ class whatsapp {
         //console.log(JSON.stringify(body_param, null, 2))
         console.log(`Encontrei nome: ${nome}, telefone: ${telefone}, id: ${telefoneId}, timestamp: ${timestamp}, texto: ${texto}`)
 
-        this.verificaContato(telefone, mensagem)
+        this.verificaContato(nome, telefone, mensagem)
         res.sendStatus(200)
     }
 
-    static async verificaContato(telefone, mensagem) {
-        //verifica se telefone esta no BD
+    static async verificaContato(nome, telefone, mensagem) {
         let contato = ""
         let novaMensagem = ""
 
+        //verifica se telefone esta no BD
         try {
             let resposta = await axios.get(`http://localhost:9000/contato/${telefone}`)
             contato = resposta.data
@@ -69,6 +69,7 @@ class whatsapp {
             //cria contato no BD
             try {
                 let resposta = await axios.post(`http://localhost:9000/contato/`, {
+                    nameWhatsapp: nome,
                     tel: telefone
                 })
                 contato = resposta.data
@@ -104,8 +105,8 @@ class whatsapp {
         const telefone = req.params.telefone;
         try {
             const mensagem = await Mensagens.find({ from: telefone })
-            .populate("from")
-            .exec();
+                .populate("from")
+                .exec();
             res.status(200).json(mensagem);
         } catch (err) {
             res.status(500).json({ message: err.message });
@@ -134,7 +135,6 @@ class whatsapp {
         } catch (error) {
             console.log(error)
         }
-
     }
 }
 

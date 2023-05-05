@@ -128,7 +128,7 @@ class ura {
     static async adicionaFilaEspera (fila) {
         fila.status = "espera"
         try {
-            axios.post(`http://localhost:9000/fila/`, fila)
+            axios.put(`http://localhost:9000/fila/`, fila)
         } catch (error) {
             console.log(error)
         }
