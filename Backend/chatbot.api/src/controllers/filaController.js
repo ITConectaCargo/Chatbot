@@ -6,25 +6,25 @@ class fila {
     static consutaStatus = async (req, res) => {
         try {
             const fila = await Fila.find()
-            .populate("from")
-            .exec()
+                .populate("from")
+                .exec()
             res.status(200).send(fila)
         } catch (error) {
             res.status(404).send(error)
         }
     }
 
-    static alteraStatus = async (req, res) => {        
+    static alteraStatus = async (req, res) => {
         const _id = req.body._id
         const status = req.body.status
         try {
             const newFila = await Fila.findByIdAndUpdate(
-                _id ,
+                _id,
                 { status },
                 { new: true }
             )
-            .populate("from")
-            .exec();
+                .populate("from")
+                .exec();
 
             if (!newFila) {
                 return console.log('Fila nao encontrada');
@@ -34,7 +34,7 @@ class fila {
             console.log(err);
             return res.status(500).send('Internal Server Error');
         }
-        
+
     }
 
     static async verificaAtendimento(mensagem) {
@@ -98,12 +98,10 @@ class fila {
             if (!newFila) {
                 return console.log('Fila nao encontrada');
             }
-            console.log("Estagio alterado")
-            console.log(fila)
+            return newFila
 
         } catch (err) {
-            console.log(err);
-            return res.status(500).send('Internal Server Error');
+            return console.log(err);
         }
     }
 }

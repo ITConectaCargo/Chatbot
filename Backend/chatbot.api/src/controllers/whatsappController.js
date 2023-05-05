@@ -2,7 +2,7 @@ import axios from "axios"
 //import Mensagem from "../models/mensagem.js"
 import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
-const token = "EAAK36iZBViigBAMiNZBbmMgKeVG3vJz2xhrQBxWW2WAEVQaPupeWw67eEQhRIfexiOnBa7ZBybXJEXWCrkEzbMKqZC7R6H72VjSqRZCZBZBBlpfwkqfXcXlLCVXvZCJegzGXV21QO2qaWkMtRyZAthUGonAiFTiia73YOqYVlb4G34y7xKgQ0XZBztnYcwzNmOttjzbifi3jHDuhzvtCBfDBwv"
+const token = "EAAK36iZBViigBAONZBPE7PZBPtnnTDe9NaPQQJZBRNWBMYXk2EplF0yuIFZBpetfY0ExZCICNlUXcZCYogd98m4NfphnJUjALHZCOCBHD2F5ZBZA3FbH7Q4TiJsBQmMDcFQw8ZCBD1VZBNIeA7GU4I9iir1L9ZCFLlrtjJzqK9CsDuSGrtq6vqDNgSh3TX42Q0ZBp0v664dEbeZCjdeO78F6wlJza0u"
 const mytoken = "ConectaCargo"
 
 class whatsapp {
@@ -115,7 +115,6 @@ class whatsapp {
 
     static enviaMensagem(para, texto) {
         console.log("Enviando Mensagem")
-
         try {
             axios({
                 method: "POST",

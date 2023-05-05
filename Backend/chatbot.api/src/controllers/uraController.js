@@ -30,6 +30,7 @@ class ura {
                 + `3 - Motorista\n`
             Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
             Fila.alteraBotStage(fila, 1)
+            return texto
         }
         //Opcoes
         else if (fila.botStage == 1) {
@@ -40,6 +41,7 @@ class ura {
                     + `digite apenas numeros`
                 Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, "1.1")
+                return texto
             }
             else if (ultimaMensagem.text == "2") {
                 console.log("ura 1.2")
@@ -47,6 +49,7 @@ class ura {
                 Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, 0)
                 this.adicionaFilaEspera(fila)
+                return texto
             }
             else if (ultimaMensagem.text == "3") {
                 console.log("ura 1.3")
@@ -54,6 +57,7 @@ class ura {
                 Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, 0)
                 this.adicionaFilaEspera(fila)
+                return texto
             }
             else {
                 console.log("nao entendi")
@@ -64,6 +68,7 @@ class ura {
                     + `3 - Motorista\n`
                 Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, 1)
+                return texto
             }
         }
         //SAC confirma CPF CNPJ
@@ -85,10 +90,12 @@ class ura {
                     + `2 - Nao\n`
                 Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, "1.1.1")
+                return texto
             }
             else {
                 let texto = `O CPF ou CNPJ ${ultimaMensagem.text} esta Invalido`
                 Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
+                return texto
             }
         }
         //SAC Valida se as informações estao corretas
@@ -100,6 +107,7 @@ class ura {
                 Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, "0")
                 this.adicionaFilaEspera(fila)
+                return texto
             }
             else if (ultimaMensagem.text == "nao" || ultimaMensagem.text == 2) {
                 console.log("ura 1.1.2")
@@ -108,6 +116,7 @@ class ura {
                 Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, "0")
                 this.adicionaFilaEspera(fila)
+                return texto
             }
             else {
                 console.log("nao entendi")
@@ -121,6 +130,7 @@ class ura {
                     + `2 - Nao\n`
                 Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, "1.1.1")
+                return texto
             }
         }
     }
@@ -133,8 +143,6 @@ class ura {
             console.log(error)
         }
     }
-
-
 }
 
 export default ura
