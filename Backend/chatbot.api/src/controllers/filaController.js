@@ -2,6 +2,41 @@ import Fila from '../models/fila.js'
 import Ura from "./uraController.js"
 
 class fila {
+
+    static consutaStatus = async (req, res) => {
+        try {
+            const fila = await Fila.find()
+            .populate("from")
+            .exec()
+            res.status(200).send(fila)
+        } catch (error) {
+            res.status(404).send(error)
+        }
+    }
+
+    static alteraStatus = async (req, res) => {        
+        const _id = req.body._id
+        const status = req.body.status
+        try {
+            const newFila = await Fila.findByIdAndUpdate(
+                _id ,
+                { status },
+                { new: true }
+            )
+            .populate("from")
+            .exec();
+
+            if (!newFila) {
+                return console.log('Fila nao encontrada');
+            }
+            res.status(200).send(newFila)
+        } catch (err) {
+            console.log(err);
+            return res.status(500).send('Internal Server Error');
+        }
+        
+    }
+
     static async verificaAtendimento(mensagem) {
         console.log("verificando atendimento")
         let fila = ""
@@ -33,7 +68,7 @@ class fila {
         }
     }
 
-    static async adicionaNaFila(mensagem, botStage, status){
+    static async adicionaNaFila(mensagem, botStage, status) {
         console.log("Adicionando a Fila")
         const atendimento = new Fila({
             from: mensagem.from,
@@ -50,7 +85,7 @@ class fila {
         }
     }
 
-    static async alteraBotStage(fila, botStage){
+    static async alteraBotStage(fila, botStage) {
         console.log("Alterando BotStage")
 
         try {

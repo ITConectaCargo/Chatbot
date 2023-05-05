@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 
 const contatoSchema = new mongoose.Schema({
-    name: { type: String, required: true },
+    name: { type: String },
     tel: { type: String, required: true },
     cpfCnpj: { type: String },
     address: { type: String },

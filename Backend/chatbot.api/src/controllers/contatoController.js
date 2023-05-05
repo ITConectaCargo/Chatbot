@@ -2,14 +2,19 @@ import Contatos from "../models/contato.js"
 
 class contato {
 
-    static consultaContato = (req, res) => {
-
+    static consultaContato = async (req, res) => {
+        try {
+            const tel = await Contatos.find()
+            res.status(200).send(tel)
+        } catch (error) {
+            res.status(500).send({ message: error })
+        }
     }
 
-    static consultaContatoById = async (req, res) => {
+    static consultaContatoByTelefone = async (req, res) => {
         const telefone = req.params.telefone;
         try {
-            const contato = await Contatos.findOne({ tel: telefone });
+            const contato = await Contatos.findOne({ tel: telefone })
             res.status(200).json(contato);
         } catch (error) {
             res.status(500).json({ message: error.message });

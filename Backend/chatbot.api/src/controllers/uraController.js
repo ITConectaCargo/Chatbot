@@ -1,29 +1,23 @@
 import Mensagem from "../models/mensagem.js"
-import Contato from "../models/contato.js"
 import Fila from "./filaController.js"
 import Whatsapp from "./whatsappController.js"
+import axios from "axios"
 class ura {
 
     static async uraAtendimento(fila) {
         console.log("Ura de atendimento")
-        console.log(fila)
-
         let ultimaMensagem = ""
-        let contato = ""
 
         //Busca ultima Mensagem e contato
         try {
             ultimaMensagem = await Mensagem.findOne({ from: fila.from })
                 .sort({ date: 'desc' })
                 .select('text')
+                .populate('from')
                 .exec()
-
-            contato = await Contato.findById(fila.from)
         } catch (error) {
             console.log(error)
         }
-
-        console.log(ultimaMensagem.text)
 
         //Inicia o Bot
         if (fila.botStage == 0) {
@@ -34,7 +28,7 @@ class ura {
                 + `1 - SAC\n`
                 + `2 - Comercial\n`
                 + `3 - Motorista\n`
-            Whatsapp.enviaMensagem(contato.tel, texto)
+            Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
             Fila.alteraBotStage(fila, 1)
         }
         //Opcoes
@@ -43,21 +37,23 @@ class ura {
             if (ultimaMensagem.text == "1") {
                 console.log("ura 1.1")
                 let texto = `Para agilizar o nosso atendimento me informe o CPF ou CNPJ da NFe\n`
-                + `digite apenas numeros`
-                Whatsapp.enviaMensagem(contato.tel, texto)
+                    + `digite apenas numeros`
+                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, "1.1")
             }
             else if (ultimaMensagem.text == "2") {
                 console.log("ura 1.2")
-                let texto = `Estou te tranferindo para um dos nossos atendendentes`
-                Whatsapp.enviaMensagem(contato.tel, texto)
+                let texto = `Aguarde enquanto te tranfiro para um dos nossos atendendentes`
+                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, 0)
+                this.adicionaFilaEspera(fila)
             }
             else if (ultimaMensagem.text == "3") {
                 console.log("ura 1.3")
-                let texto = `Estou te tranferindo para um dos nossos atendendentes`
-                Whatsapp.enviaMensagem(contato.tel, texto)
+                let texto = `Aguarde enquanto te tranfiro para um dos nossos atendendentes`
+                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, 0)
+                this.adicionaFilaEspera(fila)
             }
             else {
                 console.log("nao entendi")
@@ -66,7 +62,7 @@ class ura {
                     + `1 - SAC\n`
                     + `2 - Comercial\n`
                     + `3 - Motorista\n`
-                Whatsapp.enviaMensagem(contato.tel, texto)
+                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, 1)
             }
         }
@@ -74,42 +70,44 @@ class ura {
         else if (fila.botStage == "1.1") {
             console.log("ura 1.1")
             let count = 0
-            
+
             for (let i = 0; i < ultimaMensagem.text.length; i++) {
                 count++
             }
 
-            if(count == 11 || count == 14){
+            if (count == 11 || count == 14) {
                 let texto = `Fiz uma busca em meu sistema e encontrei os seguintes dados\n\n`
-                + `NF: 0000000\n`
-                + `CPF / CNPJ\n`
-                + `Produtos: 5x Bolacha\n\n`
-                + `Voce confirma os dados acima?\n`
-                + `1 - Sim\n`
-                + `2 - Nao\n`
-            Whatsapp.enviaMensagem(contato.tel, texto)
-            Fila.alteraBotStage(fila, "1.1.1")
+                    + `NF: 0000000\n`
+                    + `CPF / CNPJ\n`
+                    + `Produtos: 5x Bolacha\n\n`
+                    + `Voce confirma os dados acima?\n`
+                    + `1 - Sim\n`
+                    + `2 - Nao\n`
+                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
+                Fila.alteraBotStage(fila, "1.1.1")
             }
-            else{
+            else {
                 let texto = `O CPF ou CNPJ ${ultimaMensagem.text} esta Invalido`
-                Whatsapp.enviaMensagem(contato.tel, texto)
+                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
             }
         }
         //SAC Valida se as informações estao corretas
         else if (fila.botStage == "1.1.1") {
             if (ultimaMensagem.text == "sim" || ultimaMensagem.text == 1) {
                 console.log("ura 1.1.1")
-                let texto =`Perfeito\n`
-                + `Estou te tranferindo para um dos nossos atendendentes\n`
-                Whatsapp.enviaMensagem(contato.tel, texto)
+                let texto = `Perfeito\n`
+                    + `Aguarde enquanto te tranfiro para um dos nossos atendendentes\n`
+                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, "0")
+                this.adicionaFilaEspera(fila)
             }
             else if (ultimaMensagem.text == "nao" || ultimaMensagem.text == 2) {
                 console.log("ura 1.1.2")
                 let texto = `Entendi!\n Pelo visto tem algo errado com sua coleta\n`
-                + `Estou te tranferindo para um dos nossos atendendentes\n`
-                Whatsapp.enviaMensagem(contato.tel, texto)
+                    + `Aguarde enquanto te tranfiro para um dos nossos atendendentes\n`
+                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, "0")
+                this.adicionaFilaEspera(fila)
             }
             else {
                 console.log("nao entendi")
@@ -121,9 +119,18 @@ class ura {
                     + `Voce confirma os dados acima?\n`
                     + `1 - Sim\n`
                     + `2 - Nao\n`
-                Whatsapp.enviaMensagem(contato.tel, texto)
+                Whatsapp.enviaMensagem(ultimaMensagem.from.tel, texto)
                 Fila.alteraBotStage(fila, "1.1.1")
             }
+        }
+    }
+
+    static async adicionaFilaEspera (fila) {
+        fila.status = "espera"
+        try {
+            axios.post(`http://localhost:9000/fila/`, fila)
+        } catch (error) {
+            console.log(error)
         }
     }
 

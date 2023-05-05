@@ -1,8 +1,8 @@
 import axios from "axios"
 //import Mensagem from "../models/mensagem.js"
 import Fila from "./filaController.js"
-import Mensagem from "../models/mensagem.js"
-const token = "EAAK36iZBViigBAIllpZB27iTLPbzzPRh1s1PGg8ivqbGMW3FSYuHtAX3h4wleValuvZCrsWIctVRi9eGC0tcB14URQro1t3Gs8wVf3tJAdFh8PstM9Qz9psjDNjIM6atQz0ilhZA8qDy4QPdHWV9egCjO0YlZAXtOTLda6xkkkjJBLDGhve04lYgkVntc8fzb39tL7HJoDw9KXzNp8gob"
+import Mensagens from "../models/mensagem.js"
+const token = "EAAK36iZBViigBAOTnqwiPhPjpbeZC6er7VepppgSzdIdYTg3ZCZByYa7lZCAraOXvFZCPM6XXz3J0cnDj3ciTVZAgRu3ZAPbKfCOtiYjHBqrDscl4cQgaAKo5obk5xQpLfjWMuetzaQhVVOinYK92Y9qhZAhCOCuFf2rb5ZAeTQ8m3BB378zPcy6vO4YLFYBRiqrFpHU7JxLfkFZCPYgX36ricP"
 const mytoken = "ConectaCargo"
 
 class whatsapp {
@@ -69,10 +69,9 @@ class whatsapp {
             //cria contato no BD
             try {
                 let resposta = await axios.post(`http://localhost:9000/contato/`, {
-                    name: nome,
                     tel: telefone
                 })
-                contato = resposta
+                contato = resposta.data
             } catch (error) {
                 console.log(error)
             }
@@ -86,8 +85,9 @@ class whatsapp {
 
     static async salvaMensagem(contato, mensagem) {
         console.log("salvando mensagem")
+        console.log(contato)
         try {
-            const msg = new Mensagem({
+            const msg = new Mensagens({
                 from: contato._id,
                 phoneId: mensagem.telefoneId,
                 timestamp: mensagem.timestamp * 1000, //transforma timestamp em milisegundos
@@ -103,7 +103,9 @@ class whatsapp {
     static listaMensagensByTelefone = async (req, res) => {
         const telefone = req.params.telefone;
         try {
-            const mensagem = await Mensagens.find({ from: telefone });
+            const mensagem = await Mensagens.find({ from: telefone })
+            .populate("from")
+            .exec();
             res.status(200).json(mensagem);
         } catch (err) {
             res.status(500).json({ message: err.message });

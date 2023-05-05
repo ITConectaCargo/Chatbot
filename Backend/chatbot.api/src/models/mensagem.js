@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const mensagemSchema = new mongoose.Schema(
     {
-        from: {type: mongoose.Schema.Types.ObjectId, ref: 'contato', required: true},
+        from: {type: mongoose.Schema.Types.ObjectId, ref: 'contatos', required: true},
         phoneId: {type: String, required: true},
         timestamp: {type: String},
         text: {type: String, required: true},
