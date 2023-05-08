@@ -18,7 +18,6 @@ class ura {
                 .populate('from')
                 .exec()
 
-            console.log(ultimaMensagem)
             //prepara mensagem do bot
             //puxa os dados da empresa no banco
             let resposta = await Contato.findOne({ tel: ultimaMensagem.to })
@@ -46,9 +45,9 @@ class ura {
             //coloca mensagem no Bot
             botMensagem.text = texto
             fila.botStage = 1
-            console.log(`assim ficou a mensagem do bot ${botMensagem}`)
             this.preparaMensagemBot(botMensagem, fila)
         }
+
         //Opcoes
         else if (fila.botStage == 1) {
             console.log(ultimaMensagem)
@@ -59,8 +58,7 @@ class ura {
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                fila.botStage = 0
-                console.log(`assim ficou a mensagem do bot ${botMensagem}`)
+                fila.botStage = "1.1"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             else if (ultimaMensagem.text == "2") {
@@ -70,9 +68,8 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 fila.botStage = 0
-                console.log(`assim ficou a mensagem do bot ${botMensagem}`)
                 this.preparaMensagemBot(botMensagem, fila)
-                //this.adicionaFilaEspera(fila)
+                this.adicionaFilaEspera(fila)
             }
             else if (ultimaMensagem.text == "3") {
                 console.log("ura 1.3")
@@ -81,9 +78,8 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 fila.botStage = 0
-                console.log(`assim ficou a mensagem do bot ${botMensagem}`)
                 this.preparaMensagemBot(botMensagem, fila)
-                //this.adicionaFilaEspera(fila)
+                this.adicionaFilaEspera(fila)
             }
             else {
                 console.log("nao entendi")
@@ -96,11 +92,10 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 fila.botStage = 0
-                console.log(`assim ficou a mensagem do bot ${botMensagem}`)
                 this.preparaMensagemBot(botMensagem, fila)
             }
         }
-        /*
+
         //SAC confirma CPF CNPJ
         else if (fila.botStage == "1.1") {
             console.log("ura 1.1")
@@ -118,30 +113,40 @@ class ura {
                     + `Voce confirma os dados acima?\n`
                     + `1 - Sim\n`
                     + `2 - Nao\n`
-                Whatsapp.enviaMensagem(ultimaMensagem)
-                Fila.alteraBotStage(fila, "1.1.1")
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                fila.botStage = "1.1.1"
+                this.preparaMensagemBot(botMensagem, fila)
             }
             else {
                 let texto = `O CPF ou CNPJ ${ultimaMensagem.text} esta Invalido`
-                Whatsapp.enviaMensagem(ultimaMensagem)
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                fila.botStage = "1.1"
+                this.preparaMensagemBot(botMensagem, fila)
             }
         }
+
         //SAC Valida se as informações estao corretas
         else if (fila.botStage == "1.1.1") {
             if (ultimaMensagem.text == "sim" || ultimaMensagem.text == 1) {
                 console.log("ura 1.1.1")
                 let texto = `Perfeito\n`
                     + `Aguarde enquanto te tranfiro para um dos nossos atendendentes\n`
-                Whatsapp.enviaMensagem(ultimaMensagem)
-                Fila.alteraBotStage(fila, "0")
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                fila.botStage = 0
+                this.preparaMensagemBot(botMensagem, fila)
                 this.adicionaFilaEspera(fila)
             }
             else if (ultimaMensagem.text == "nao" || ultimaMensagem.text == 2) {
                 console.log("ura 1.1.2")
                 let texto = `Entendi!\n Pelo visto tem algo errado com sua coleta\n`
                     + `Aguarde enquanto te tranfiro para um dos nossos atendendentes\n`
-                Whatsapp.enviaMensagem(ultimaMensagem)
-                Fila.alteraBotStage(fila, "0")
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                fila.botStage = 0
+                this.preparaMensagemBot(botMensagem, fila)
                 this.adicionaFilaEspera(fila)
             }
             else {
@@ -154,11 +159,12 @@ class ura {
                     + `Voce confirma os dados acima?\n`
                     + `1 - Sim\n`
                     + `2 - Nao\n`
-                Whatsapp.enviaMensagem(ultimaMensagem)
-                Fila.alteraBotStage(fila, "1.1.1")
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                fila.botStage = "1.1.1"
+                this.preparaMensagemBot(botMensagem, fila)
             }
         }
-        */
     }
 
     static async preparaMensagemBot(mensagem, fila) {

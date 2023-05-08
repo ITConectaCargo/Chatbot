@@ -1,5 +1,6 @@
 import SidebarChatsItem from 'components/SidebarChatsItem'
 import styles from './SidebarChats.module.css'
+import cliente from './cliente.png'
 //import contatosJson from "json/contatos.json"
 import axios from 'axios'
 import { useState } from 'react'
@@ -21,7 +22,7 @@ export default function SidebarChats() {
       {contatos.map((contato) => {
         return <SidebarChatsItem
           key={contato.from.nameWhatsapp}
-          imagem={"https://github.com/wesleymo22.png"}
+          imagem={cliente}
           nome={contato.from.nameWhatsapp}
         />
       })}

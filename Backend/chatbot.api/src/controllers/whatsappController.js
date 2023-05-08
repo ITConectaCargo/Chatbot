@@ -1,8 +1,7 @@
 import axios from "axios"
-//import Mensagem from "../models/mensagem.js"
 import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
-const token = "EAAK36iZBViigBADg38d6buI9MIUS3Q8AvUZAjZAZChX2C3ujxpQ2FJGHVESyPy3nQjx6iirnzQH2HodnSX7yk0E4luNhpmaGSWxaDTCcVnOEBI9hDCCoQuqpD8fRO2LelwuHZCekMNnCht2LzaFXIL4IscUaeZB81ybVWller0ZCpGAtYXCZAF8AnxmtqOlsUwCsZBFLOgn77vmi22orKo3lb"
+const token = "EAAK36iZBViigBALZC4o9F6bxNESAvmZCY3GMuR3spuGv9ntyOa3HGrih7iWRdZBS3SpATB5BZBEZCIzPlJbuoPAtsZBDbRKByc1yLWc3zKQliaDaqOBZBrd0ikrxhEZBs5oHXrdZBjwMIPxdDo59JsZBYnrUoVCDGOEOUm1JFzJeMmlOZBgxrSBkoT7azu9XQzH68TWPcVAalclHMEvtAamZAiDfR"
 const mytoken = "ConectaCargo"
 const baseURL = "http://localhost:9000/"
 
@@ -93,7 +92,7 @@ class whatsapp {
 
         Fila.verificaAtendimento(novaMensagem)
     }
-
+    // -------------------------------------------------------------------------------------------
     static async salvaMensagem(contato, mensagem) {
         console.log("salvando mensagem")
         try {
@@ -110,9 +109,10 @@ class whatsapp {
             console.log(error)
         }
     }
-
+    // -------------------------------------------------------------------------------------------
     static enviaMensagem(mensagem) {
         console.log("enviando mensagem")
+        console.log(mensagem)
         const para = mensagem.to
         const telefoneId = mensagem.phoneId
         const texto = mensagem.text
@@ -136,7 +136,7 @@ class whatsapp {
             console.log(error)
         }
     }
-
+    // -------------------------------------------------------------------------------------------
     static preparaMensagem = async (req, res) => {
         console.log("preparando mensagem")
         try {
@@ -147,7 +147,7 @@ class whatsapp {
             res.sendStatus(500)
         }
     }
-
+    // -------------------------------------------------------------------------------------------
     static listaMensagensByTelefone = async (req, res) => {
         const telefone = req.params.telefone;
         try {
