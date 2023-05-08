@@ -1,29 +1,17 @@
 import SidebarChatsItem from 'components/SidebarChatsItem'
 import styles from './SidebarChats.module.css'
-import cliente from './cliente.png'
-//import contatosJson from "json/contatos.json"
-import axios from 'axios'
-import { useState } from 'react'
-import { useEffect } from 'react'
+import avatar from './cliente.png'
 
-export default function SidebarChats() {
-  const baseUrl = "http://localhost:9000/"
-  const [contatos, setContatos] = useState([])
-
-  useEffect(() => {
-    axios.get(baseUrl + "fila")
-      .then((response) => {
-        setContatos(response.data)
-      })
-  }, [])
-
+export default function SidebarChats({filas, selecionaContato}) {
   return (
     <div className={styles.container}>
-      {contatos.map((contato) => {
+    {filas.map((fila) => {
         return <SidebarChatsItem
-          key={contato.from.nameWhatsapp}
-          imagem={cliente}
-          nome={contato.from.nameWhatsapp}
+          key={fila.from.nameWhatsapp}
+          telefone={fila.from.tel}
+          imagem={avatar}
+          nome={fila.from.nameWhatsapp}
+          selecionaContato={selecionaContato}
         />
       })}
     </div>
