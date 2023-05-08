@@ -25,8 +25,11 @@ class contato {
         console.log("criando")
         try {
             const contato = new Contatos({
+                name: req.body.name, 
                 nameWhatsapp: req.body.nameWhatsapp,
-                tel: req.body.tel
+                tel: req.body.tel,
+                cpfCnpj: req.body.cpfCnpj,
+                address: req.body.address                
             })
             const novoContato = await contato.save();
             res.status(201).json(novoContato);

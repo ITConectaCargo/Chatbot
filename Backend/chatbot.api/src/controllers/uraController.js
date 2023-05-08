@@ -1,7 +1,9 @@
 import Mensagem from "../models/mensagem.js"
+import Contato from "../models/contato.js"
 import Fila from "./filaController.js"
 import Whatsapp from "./whatsappController.js"
 import axios from "axios"
+const baseURL = "http://localhost:9000/"
 class ura {
 
     static async uraAtendimento(fila) {
@@ -15,8 +17,18 @@ class ura {
                 .sort({ date: 'desc' })
                 .populate('from')
                 .exec()
-            
-                botMensagem = ultimaMensagem
+
+            console.log(ultimaMensagem)
+            //prepara mensagem do bot
+            //puxa os dados da empresa no banco
+            let resposta = await Contato.findOne({ tel: ultimaMensagem.to })
+
+            //prepara padrao de mensagem
+            botMensagem = ultimaMensagem
+
+            //altera o destinatario e remetente
+            botMensagem.to = ultimaMensagem.from.tel
+            botMensagem.from = resposta
         } catch (error) {
             console.log(error)
         }
@@ -31,8 +43,11 @@ class ura {
                 + `2 - Comercial\n`
                 + `3 - Motorista\n`
 
-            Whatsapp.enviaMensagem(ultimaMensagem)
-            Fila.alteraBotStage(fila, 1)
+            //coloca mensagem no Bot
+            botMensagem.text = texto
+            fila.botStage = 1
+            console.log(`assim ficou a mensagem do bot ${botMensagem}`)
+            this.preparaMensagemBot(botMensagem, fila)
         }
         //Opcoes
         else if (fila.botStage == 1) {
@@ -41,34 +56,51 @@ class ura {
                 console.log("ura 1.1")
                 let texto = `Para agilizar o nosso atendimento me informe o CPF ou CNPJ da NFe\n`
                     + `digite apenas numeros`
-                Whatsapp.enviaMensagem(ultimaMensagem)
-                Fila.alteraBotStage(fila, "1.1")
+
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                fila.botStage = 0
+                console.log(`assim ficou a mensagem do bot ${botMensagem}`)
+                this.preparaMensagemBot(botMensagem, fila)
             }
             else if (ultimaMensagem.text == "2") {
                 console.log("ura 1.2")
                 let texto = `Aguarde enquanto te tranfiro para um dos nossos atendendentes`
-                Whatsapp.enviaMensagem(ultimaMensagem)
-                Fila.alteraBotStage(fila, 0)
-                this.adicionaFilaEspera(fila)
+
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                fila.botStage = 0
+                console.log(`assim ficou a mensagem do bot ${botMensagem}`)
+                this.preparaMensagemBot(botMensagem, fila)
+                //this.adicionaFilaEspera(fila)
             }
             else if (ultimaMensagem.text == "3") {
                 console.log("ura 1.3")
                 let texto = `Aguarde enquanto te tranfiro para um dos nossos atendendentes`
-                Whatsapp.enviaMensagem(ultimaMensagem)
-                Fila.alteraBotStage(fila, 0)
-                this.adicionaFilaEspera(fila)
+
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                fila.botStage = 0
+                console.log(`assim ficou a mensagem do bot ${botMensagem}`)
+                this.preparaMensagemBot(botMensagem, fila)
+                //this.adicionaFilaEspera(fila)
             }
             else {
                 console.log("nao entendi")
-                let texto = `Desculpe nao entendi\n\n`
+                let texto = `Desculpe nao entendi\n`
                     + `Digite a opção desejada\n`
                     + `1 - SAC\n`
                     + `2 - Comercial\n`
                     + `3 - Motorista\n`
-                Whatsapp.enviaMensagem(ultimaMensagem)
-                Fila.alteraBotStage(fila, 1)
+
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                fila.botStage = 0
+                console.log(`assim ficou a mensagem do bot ${botMensagem}`)
+                this.preparaMensagemBot(botMensagem, fila)
             }
         }
+        /*
         //SAC confirma CPF CNPJ
         else if (fila.botStage == "1.1") {
             console.log("ura 1.1")
@@ -125,6 +157,17 @@ class ura {
                 Whatsapp.enviaMensagem(ultimaMensagem)
                 Fila.alteraBotStage(fila, "1.1.1")
             }
+        }
+        */
+    }
+
+    static async preparaMensagemBot(mensagem, fila) {
+        //altera o estagio do Bot
+        Fila.alteraBotStage(fila, fila.botStage)
+        try {
+            axios.post(`${baseURL}whatsapp/mensagem`, mensagem)
+        } catch (error) {
+            console.log(error)
         }
     }
 

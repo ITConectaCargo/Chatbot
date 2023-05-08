@@ -2,8 +2,9 @@ import axios from "axios"
 //import Mensagem from "../models/mensagem.js"
 import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
-const token = "EAAK36iZBViigBAFvlsAGijBMBbnkULEZAAPU3mOZAZAaslZClhV1vpCLKDdSroCdZA6dfXvkULzFyJ8VArKwo2VBg7AIWI9C21R9uXV1Iqd8l9ZButiMZC7gcqfaikC25kbZBPnrjMBjwcDd8yCGlZCopaCL1M29Xyoosrn7uSi6kRejQqlHkHd1xErUoZAlLm0qrZCerZBQpxU7kKbXtVnKKXqU7"
+const token = "EAAK36iZBViigBADg38d6buI9MIUS3Q8AvUZAjZAZChX2C3ujxpQ2FJGHVESyPy3nQjx6iirnzQH2HodnSX7yk0E4luNhpmaGSWxaDTCcVnOEBI9hDCCoQuqpD8fRO2LelwuHZCekMNnCht2LzaFXIL4IscUaeZB81ybVWller0ZCpGAtYXCZAF8AnxmtqOlsUwCsZBFLOgn77vmi22orKo3lb"
 const mytoken = "ConectaCargo"
+const baseURL = "http://localhost:9000/"
 
 class whatsapp {
 
@@ -30,24 +31,26 @@ class whatsapp {
         try {
             if (body_param.object) {
                 if (body_param.entry[0].changes[0].value.messages[0].text.body) {
-                    let nome = body_param.entry[0].changes[0].value.contacts[0].profile.name
+                    let name = body_param.entry[0].changes[0].value.contacts[0].profile.name
                     let telefone = body_param.entry[0].changes[0].value.messages[0].from
-                    let telefoneId = body_param.entry[0].changes[0].value.metadata.phone_number_id
+                    let phoneId = body_param.entry[0].changes[0].value.metadata.phone_number_id
                     let timestamp = body_param.entry[0].changes[0].value.messages[0].timestamp
-                    let texto = body_param.entry[0].changes[0].value.messages[0].text.body
+                    let text = body_param.entry[0].changes[0].value.messages[0].text.body
                     const mensagem = {
-                        telefoneId,
+                        phoneId,
+                        to: "5511945718427",
                         timestamp,
-                        texto
+                        text
                     }
-                    console.log(`Encontrei nome: ${nome}, telefone: ${telefone}, id: ${telefoneId}, timestamp: ${timestamp}, texto: ${texto}`)
+                    console.log(`Encontrei nome: ${name}, telefone: ${telefone}, id: ${phoneId}, timestamp: ${timestamp}, texto: ${text}`)
 
-                    this.verificaContato(nome, telefone, mensagem)
-                    res.status(200)
+                    this.verificaContato(name, telefone, mensagem)
+                    res.sendStatus(200)
                 }
             }
         } catch (error) {
             console.log(JSON.stringify(body_param, null, 2))
+            res.status(500)
         }
     }
     // -------------------------------------------------------------------------------------------
@@ -57,7 +60,7 @@ class whatsapp {
 
         //verifica se telefone esta no BD
         try {
-            let resposta = await axios.get(`http://localhost:9000/contato/${telefone}`)
+            let resposta = await axios.get(`${baseURL}contato/${telefone}`)
             contato = resposta.data
             console.log(`Encontrei o contato ${contato.tel}`)
         } catch (error) {
@@ -75,7 +78,7 @@ class whatsapp {
             console.log(`contato esta vazio`)
             //cria contato no BD
             try {
-                let resposta = await axios.post(`http://localhost:9000/contato/`, {
+                let resposta = await axios.post(`${baseURL}contato/`, {
                     nameWhatsapp: nome,
                     tel: telefone
                 })
@@ -93,13 +96,13 @@ class whatsapp {
 
     static async salvaMensagem(contato, mensagem) {
         console.log("salvando mensagem")
-        console.log(contato)
         try {
             const msg = new Mensagens({
                 from: contato._id,
-                phoneId: mensagem.telefoneId,
+                to: mensagem.to,
+                phoneId: mensagem.phoneId,
                 timestamp: mensagem.timestamp * 1000, //transforma timestamp em milisegundos
-                text: mensagem.texto
+                text: mensagem.text
             });
             const novaMensagem = await msg.save();
             return novaMensagem
@@ -108,27 +111,15 @@ class whatsapp {
         }
     }
 
-    static listaMensagensByTelefone = async (req, res) => {
-        const telefone = req.params.telefone;
-        try {
-            const mensagem = await Mensagens.find({ from: telefone })
-                .populate("from")
-                .exec();
-            res.status(200).json(mensagem);
-        } catch (err) {
-            res.status(500).json({ message: err.message });
-        }
-    }
-
-    static enviaMensagem(req, res) {
-        const para = req.from.tel
-        const telefoneId = req.phoneId
-        const texto = req.text
-        console.log("Enviando Mensagem")
+    static enviaMensagem(mensagem) {
+        console.log("enviando mensagem")
+        const para = mensagem.to
+        const telefoneId = mensagem.phoneId
+        const texto = mensagem.text
         try {
             axios({
                 method: "POST",
-                url: "https://graph.facebook.com/v16.0/"+ telefoneId +"/messages?access_token=" + token,
+                url: "https://graph.facebook.com/v16.0/" + telefoneId + "/messages?access_token=" + token,
                 data: {
                     messaging_product: "whatsapp",
                     to: para,
@@ -145,6 +136,31 @@ class whatsapp {
             console.log(error)
         }
     }
+
+    static preparaMensagem = async (req, res) => {
+        console.log("preparando mensagem")
+        try {
+            this.salvaMensagem(req.body.from, req.body)
+            this.enviaMensagem(req.body)
+            res.sendStatus(200)
+        } catch (error) {
+            res.sendStatus(500)
+        }
+    }
+
+    static listaMensagensByTelefone = async (req, res) => {
+        const telefone = req.params.telefone;
+        try {
+            const mensagem = await Mensagens.find({ from: telefone })
+                .populate("from")
+                .exec();
+            res.status(200).json(mensagem);
+        } catch (err) {
+            res.status(500).json({ message: err.message });
+        }
+    }
+
+
 }
 
 export default whatsapp

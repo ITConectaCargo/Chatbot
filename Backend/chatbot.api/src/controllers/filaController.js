@@ -52,16 +52,19 @@ class fila {
         }
 
         if (fila) {
+            //recoloca na fila
             if (fila.status == "finalizado") {
                 console.log("status Finalizado")
                 botStage = "0"
                 status = "ura"
                 this.adicionaNaFila(mensagem, botStage, status)
             }
+            //envia para URA
             else if (fila.status == "ura") {
                 console.log("status URA")
                 Ura.uraAtendimento(fila)
             }
+            //Cria contato na fila
         } else {
             botStage = "0"
             status = "ura"
