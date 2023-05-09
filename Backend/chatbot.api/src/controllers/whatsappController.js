@@ -1,7 +1,8 @@
 import axios from "axios"
 import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
-const token = "EAAK36iZBViigBANU4zwa5SERZBRsm2DLiYwzFDFZAcVqe24PySir0ytdLO5peduZCfY8TZCE0ZBF68ZC1GKOD4cLr8VE9UneLnJG1oTqWKG29gksHvcZCwEc97yV25ebeViuVVSXobqpEN9g8wZBZCMshcLZBOXjwvobMdZAZAXShgfY5QdH3MkeA1P5gWgex8WZBcANr00oedK6KKmJOZAAaURitvQ"
+import Contato from "../models/contato.js"
+const token = "EAAK36iZBViigBAMRY3xuhEx8srKMgIxF2LyibSEy6sp3J43hzfEMr9PHnx41gWygC2qfn6ozQvKjTO5scdRm4zuZCF0f2qfeqkfuzKVwyNYGhoZCPUDL0I4bf0j1rponZAq9yseGGpOQrrdAskPoK5tMn0uqXJ8iMFZBDSUw38dj9DZAp5EJZAZCHgqEZAgrxiAPpeOKC1gAvSv6yZAHCcy2JZC"
 const mytoken = "ConectaCargo"
 const baseURL = "http://localhost:9000/"
 
@@ -151,16 +152,19 @@ class whatsapp {
     static listaMensagensByTelefone = async (req, res) => {
         const telefone = req.params.telefone;
         try {
-            const mensagem = await Mensagens.find({ from: telefone })
-                .populate("from")
-                .exec();
-            res.status(200).json(mensagem);
+            const contato = await Contato.findOne({ tel: telefone })
+            const filter = { $or: [{ from: contato._id }, { to: telefone }] };
+
+            const result = await Mensagens.find(filter)
+            .populate('from')
+            .sort('date')
+            .exec();
+            
+            res.status(200).json(result);
         } catch (err) {
             res.status(500).json({ message: err.message });
         }
     }
-
-
 }
 
 export default whatsapp

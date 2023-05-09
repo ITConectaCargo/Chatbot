@@ -2,7 +2,7 @@ import SidebarChatsItem from 'components/SidebarChatsItem'
 import styles from './SidebarChats.module.css'
 import avatar from './cliente.png'
 
-export default function SidebarChats({filas, selecionaContato}) {
+export default function SidebarChats({filas, selecionaContato }) {
   return (
     <div className={styles.container}>
     {filas.map((fila) => {

@@ -4,10 +4,10 @@ import Conversas from "components/Conversas"
 import { useEffect, useState } from "react"
 import axios from "axios"
 
-
 export default function Chat() {
   const baseUrl = "http://localhost:9000/"
   const [filas, setFilas] = useState([])
+  const [mensagens, setMensagens] = useState([])
   const [contato, setContato] = useState()
 
   useEffect(() => {
@@ -18,10 +18,22 @@ export default function Chat() {
   }, [])
 
   const selecionaContato = async (telefone) => {
-    await axios.get(`${baseUrl}contato/${telefone}`)
-      .then((response) => {
-        setContato(response.data)
-      })
+    try {
+      await axios.get(`${baseUrl}contato/${telefone}`)
+        .then((response) => {
+          setContato(response.data)
+        })
+    } catch (error) {
+      console.log(error)
+    }
+    try {
+      await axios.get(`${baseUrl}whatsapp/${telefone}`)
+        .then((response) => {
+          setMensagens(response.data)
+        })
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   return (
@@ -31,7 +43,7 @@ export default function Chat() {
           filas={filas}
           selecionaContato={selecionaContato}
         />
-        <Conversas contato={contato}/>
+        <Conversas contato={contato} mensagens={mensagens} />
       </section>
     </>
   )

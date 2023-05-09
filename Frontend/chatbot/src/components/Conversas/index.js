@@ -4,7 +4,7 @@ import ConversasBody from 'components/ConvesasBody'
 import catGiphy from './cat.gif'
 import styles from './Conversas.module.css'
 
-export default function Conversas({ contato }) {
+export default function Conversas({ contato, mensagens }) {
     return (
         <>
             {!contato ? 
@@ -14,7 +14,7 @@ export default function Conversas({ contato }) {
                 :
                 <div className={styles.container}>
                     <ConversasHeader contato={contato} />
-                    <ConversasBody />
+                    <ConversasBody mensagens={mensagens}/>
                     <ConversasFooter />
                 </div>
             }

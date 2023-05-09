@@ -14,7 +14,7 @@
     box-shadow: 0 1px 1px #ccc;
     flex-direction: column;
     padding: 3px;
-    max-width: 50%;
+    max-width: 60%;
     background-color: #dcf8c6;
 }
 
@@ -29,9 +29,13 @@
     background-color: #FFFFFF;
 }
 
-.conteudo p {
+.conteudo h4{
+    margin: 5px 5px 5px 5px;
+}
+
+.conteudo p{
     font-size: 14px;
-    margin: 5px 40px 5px 5px;
+    margin: 5px 40px 10px 10px;
 }
 
 .conteudo span {

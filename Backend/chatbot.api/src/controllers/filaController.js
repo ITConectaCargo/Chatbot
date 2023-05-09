@@ -14,6 +14,17 @@ class fila {
         }
     }
 
+    static consutaEspera = async (req, res) => {
+        try {
+            const fila = await Fila.find({status: "espera"})
+                .populate("from")
+                .exec()
+            res.status(200).send(fila)
+        } catch (error) {
+            res.status(404).send(error)
+        }
+    }
+
     static alteraStatus = async (req, res) => {
         const _id = req.body._id
         const status = req.body.status
