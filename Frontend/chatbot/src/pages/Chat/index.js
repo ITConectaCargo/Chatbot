@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 
 export default function Chat() {
-  const baseUrl = "http://localhost:9000/"
+  const baseUrl = "https://chatbot.wesleymoraescon.repl.co/"
   const [filas, setFilas] = useState([])
   const [mensagens, setMensagens] = useState([])
   const [contato, setContato] = useState()

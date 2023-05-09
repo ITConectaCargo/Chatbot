@@ -50,7 +50,7 @@ class whatsapp {
             }
         } catch (error) {
             console.log(JSON.stringify(body_param, null, 2))
-            res.status(500)
+            res.sendStatus(200)
         }
     }
     // -------------------------------------------------------------------------------------------
