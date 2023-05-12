@@ -1,5 +1,8 @@
 import express from "express"
+import { Server } from "socket.io";
+import http from 'http'
 import bodyParser from "body-parser"
+import cors from 'cors'
 import routes from "./routes/routes.js"
 import db from "./config/dbConfig.js"
 
@@ -9,16 +12,15 @@ db.once("open", () => {
 })
 
 const app = express();  //instância do express
-
-//habilita Cors para todas as rotas
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    next();
-  });
-  
 app.use(bodyParser.json()) //interpretação em json
-routes(app);            //chamando a rota
+app.use(cors())
+routes(app) //chamando a rota
+
+const server = http.createServer(app);
+const io = new Server(server);
+
+io.on('connection', (socket) => {
+  console.log('usuario conectado', (socket.id));
+});
 
 export default app
