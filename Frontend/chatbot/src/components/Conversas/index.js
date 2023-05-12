@@ -7,7 +7,7 @@ import axios from 'axios'
 import { useState } from 'react'
 
 export default function Conversas({ contato, mensagens }) {
-    const baseURL = "https://chatbot.wesleymoraescon.repl.co/"
+    const baseURL = "http://localhost:9000/"
     const [mensagem, setMensagem] = useState("");
 
     function enviaMensagem(mensagem) {

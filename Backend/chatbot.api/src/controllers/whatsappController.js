@@ -2,7 +2,7 @@ import axios from "axios"
 import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
 import Contato from "../models/contato.js"
-const token = "EAAK36iZBViigBAMRY3xuhEx8srKMgIxF2LyibSEy6sp3J43hzfEMr9PHnx41gWygC2qfn6ozQvKjTO5scdRm4zuZCF0f2qfeqkfuzKVwyNYGhoZCPUDL0I4bf0j1rponZAq9yseGGpOQrrdAskPoK5tMn0uqXJ8iMFZBDSUw38dj9DZAp5EJZAZCHgqEZAgrxiAPpeOKC1gAvSv6yZAHCcy2JZC"
+const token = "EAAK36iZBViigBABMNcd2Nts1pGZBDaPNBrbWDXq3hRfss8eErllWLMfJpDGGqIdoSYktH5hLcbIP6S76Ot6kPLfRONflprUKSr9RJT79sF3jqaC1MF27bfNe4KYyKEZCcGOFcubq6lfNIvs8XIiHVRccmALJlRCsyHSy4XJrUcvA2jKFkFyGPVMwBRnExNU9F8vKUaW5A9hAUmcH3nf"
 const mytoken = "ConectaCargo"
 const baseURL = "http://localhost:9000/"
 

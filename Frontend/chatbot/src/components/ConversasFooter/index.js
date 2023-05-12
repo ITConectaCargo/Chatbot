@@ -3,9 +3,15 @@ import { MdSend } from 'react-icons/md';
 import { IoMdHappy } from 'react-icons/io';
 
 export default function ConversasFooter({enviaMensagem, mensagem, atualizaMensagem}) {
+  
+  const aoSubmeter = (e) =>{
+    e.preventDefault()
+    enviaMensagem(mensagem)
+  }
+
   return (
     <div className={styles.container}>
-      <form>
+      <form onSubmit={aoSubmeter}>
         <IoMdHappy />
         <input placeholder="Mensagem"
           onChange={(e) => atualizaMensagem(e.target.value)}
