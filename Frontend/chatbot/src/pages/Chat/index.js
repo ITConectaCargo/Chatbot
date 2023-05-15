@@ -3,9 +3,11 @@ import Sidebar from "components/Sidebar"
 import Conversas from "components/Conversas"
 import { useEffect, useState } from "react"
 import axios from "axios"
+import io from "socket.io-client";
+const baseUrl = "http://localhost:9000/"
+const socket = io.connect(baseUrl);
 
 export default function Chat() {
-  const baseUrl = "http://localhost:9000/"
   const [filas, setFilas] = useState([])
   const [mensagens, setMensagens] = useState([])
   const [contato, setContato] = useState()
@@ -43,7 +45,7 @@ export default function Chat() {
           filas={filas}
           selecionaContato={selecionaContato}
         />
-        <Conversas contato={contato} mensagens={mensagens} />
+        <Conversas socket={socket} baseUrl={baseUrl} contato={contato} setMensagens={setMensagens} mensagens={mensagens} />
       </section>
     </>
   )

@@ -5,7 +5,7 @@ import Contato from "../models/contato.js"
 import io from "socket.io-client";
 
 const socket = io.connect("http://localhost:9000/");
-const token = "EAAK36iZBViigBAHrNZCrVIQ85gQJ6h1h7udQSAlsZBzO22uZC4Fp7Kbp5Pc6rbYrHDjgvd5RFOGKHWqX1sMHEE3qMTA1VXRQ8LotyEICIuKt1ohB5nBGoLHLKNyIPUScwcgf6mvb3ryffbfXVvd0Rn7dOnH8DAVqZB91iQKyqI59L5yqxk8ZCCKrSVCLppjGK1PUkOv9o2x35rwZB8vDDFq"
+const token = "EAAK36iZBViigBAPYoDvzk5T56sUVAkRZAIDOcOXxiqGHWZArHnGm6GuQXaEstHxtRica3nRMxZCBqo2mgKdDPLQTxqS8VlSZCLHJWfyBza3EOFLPiJ5hn0NvOwmjxcs7AYtQLEDS3zdvNEPLkZBVGCRnpV4Y4S48oJ6aJmdZClopZAvWb0VUS04ULLm45P3ZBWYZAg3UZAZBhqZBvwZAG3qe5ro9wi"
 const mytoken = "ConectaCargo"
 const baseURL = "http://localhost:9000/"
 

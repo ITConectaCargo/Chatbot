@@ -6,12 +6,12 @@ import styles from './Conversas.module.css'
 import axios from 'axios'
 import { useState } from 'react'
 
-export default function Conversas({ contato, mensagens }) {
-    const baseURL = "http://localhost:9000/"
+
+export default function Conversas({setMensagens, socket, baseUrl, contato, mensagens }) {
     const [mensagem, setMensagem] = useState("");
 
-    function enviaMensagem(mensagem) {
-        let layoutMsg = {
+    async function enviaMensagem (mensagem) {
+        let dadosMensagem = {
             from: {
                 _id: '64621ca197584a92b5312ec7',
                 name: 'Conecta Cargo',
@@ -30,8 +30,13 @@ export default function Conversas({ contato, mensagens }) {
         }
 
         try {
-            axios.post(`${baseURL}whatsapp/mensagem`, layoutMsg)
-            
+            const response = await axios.post(`${baseUrl}whatsapp/mensagem`, dadosMensagem)
+            const dados = response.data
+
+            socket.emit('chat.sala', dadosMensagem.to)
+            await socket.emit("chat.mensagem", dados);
+            setMensagens((msg) => [...msg, dadosMensagem]);
+            setMensagem('')
         } catch (error) {
             console.log(error)
         }
