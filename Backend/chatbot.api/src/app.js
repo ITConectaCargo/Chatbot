@@ -33,6 +33,7 @@ io.on('connect', (socket) => {
   })
 
   socket.on('chat.mensagem', (mensagem) => {
+    console.log(mensagem)
     socket.to(mensagem.room).emit('chat.mensagem', mensagem)
   })
 

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import io from "socket.io-client";
-const socket = io.connect("http://192.168.1.183:9000/");
+const baseUrl = "http://localhost:9000/"
+const socket = io.connect(baseUrl);
 
 export default function Teste() {
   const [mensagem, setMensagem] = useState('')
@@ -39,7 +40,7 @@ export default function Teste() {
       }
 
       try {
-        const resposta = await axios.post(`http://localhost:9000/whatsapp/mensagem`, dadosMensagem)
+        const resposta = await axios.post(`${baseUrl}whatsapp/mensagem`, dadosMensagem)
         const dados = resposta.data
         console.log(dados)
         

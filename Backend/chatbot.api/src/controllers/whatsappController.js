@@ -5,7 +5,7 @@ import Contato from "../models/contato.js"
 import io from "socket.io-client";
 
 const socket = io.connect("http://localhost:9000/");
-const token = "EAAK36iZBViigBAPYoDvzk5T56sUVAkRZAIDOcOXxiqGHWZArHnGm6GuQXaEstHxtRica3nRMxZCBqo2mgKdDPLQTxqS8VlSZCLHJWfyBza3EOFLPiJ5hn0NvOwmjxcs7AYtQLEDS3zdvNEPLkZBVGCRnpV4Y4S48oJ6aJmdZClopZAvWb0VUS04ULLm45P3ZBWYZAg3UZAZBhqZBvwZAG3qe5ro9wi"
+const token = "EAAK36iZBViigBANd75ZAZC1a84oGGNnEaZBsiB3JZCQywCdXZBEnLm0Q6FMzV7WJXTOUqmjj2V36eyLaG5f4fcuHIPh6gaZBtz8opShqiSQ9KOne1lBDFFPZC1oNYVfsK9syjI4U5ZBXKItabFFtvafphZA4e4ThgubbO8OVZAEotDQTZB1fFvpmJpbFrOECCjLucV3gafI08ZASnZAcyqfSkYTpTU"
 const mytoken = "ConectaCargo"
 const baseURL = "http://localhost:9000/"
 
@@ -119,12 +119,8 @@ class whatsapp {
             const novaMensagem = await msg.save();
 
             if(novaMensagem.to === '5511945718427'){
-                socket.emit("chat.sala", contato.tel);
-                socket.emit("chat.mensagem", novaMensagem);
-            }
-            else{
-                socket.emit("chat.sala", novaMensagem.to);
-                socket.emit("chat.mensagem", novaMensagem);
+                await socket.emit("chat.sala", novaMensagem.to);
+                await socket.emit("chat.mensagem", novaMensagem);
             }
 
             return novaMensagem

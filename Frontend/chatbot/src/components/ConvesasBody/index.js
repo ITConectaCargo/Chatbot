@@ -15,13 +15,13 @@ export default function ConversasBody({ mensagens }) {
   return (
     <div className={styles.container}>
       <div ref={listaRef}>
-        {mensagens.map((mensagem) => {
+        {mensagens.map((msg) => {
           return <Mensagem
-            key={mensagem._id}
-            nome={mensagem.from.nameWhatsapp}
-            remetente={mensagem.from.tel}
-            mensagem={mensagem.text}
-            hora={mensagem.date}
+            key={msg._id}
+            nome={msg.from.nameWhatsapp}
+            remetente={msg.from.tel}
+            mensagem={msg.text}
+            hora={msg.date}
           />
         })}
       </div>
