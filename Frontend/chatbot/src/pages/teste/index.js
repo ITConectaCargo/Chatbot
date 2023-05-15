@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import ScrollToBottom from "react-scroll-to-bottom";
 import io from "socket.io-client";
 const socket = io.connect("http://192.168.1.183:9000/");
 
@@ -48,7 +47,6 @@ export default function Teste() {
         await socket.emit("chat.mensagem", dados);
         setMensagens((msg) => [...msg, dadosMensagem]);
         setMensagem('')
-
       } catch (error) {
         console.log(error)
       }
@@ -63,11 +61,11 @@ export default function Teste() {
   return (
     <>
       <h1>Mensagens</h1>
-      <ScrollToBottom>
+
         {mensagens.map((msg) => {
           return <p key={msg._id}>{msg.text}</p>
         })}
-      </ScrollToBottom>
+
 
       <form onSubmit={aoSubmeter}>
         <input type='text' placeholder='mensagem' value={mensagem} onChange={(e) => setMensagem(e.target.value)} />

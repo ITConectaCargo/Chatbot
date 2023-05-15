@@ -7,10 +7,10 @@ import axios from 'axios'
 import { useState } from 'react'
 
 
-export default function Conversas({setMensagens, socket, baseUrl, contato, mensagens }) {
+export default function Conversas({ setMensagens, socket, baseUrl, contato, mensagens }) {
     const [mensagem, setMensagem] = useState("");
 
-    async function enviaMensagem (mensagem) {
+    async function enviaMensagem(mensagem) {
         let dadosMensagem = {
             from: {
                 _id: '64621ca197584a92b5312ec7',

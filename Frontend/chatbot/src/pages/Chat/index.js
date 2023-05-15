@@ -45,7 +45,13 @@ export default function Chat() {
           filas={filas}
           selecionaContato={selecionaContato}
         />
-        <Conversas socket={socket} baseUrl={baseUrl} contato={contato} setMensagens={setMensagens} mensagens={mensagens} />
+        <Conversas
+          socket={socket}
+          baseUrl={baseUrl}
+          contato={contato}
+          setMensagens={setMensagens}
+          mensagens={mensagens}
+        />
       </section>
     </>
   )
