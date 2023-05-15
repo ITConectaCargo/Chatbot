@@ -2,7 +2,10 @@ import axios from "axios"
 import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
 import Contato from "../models/contato.js"
-const token = "EAAK36iZBViigBAE0ZAJgu0mhEvU5gD4jAPUOkB8dCS2bNefLFKhToVZAFLrM2O6kVq3FaiortZCq8m7zo2YpHnqDYpVFxFzvY6Is3ICZCaGG1e58nT1gNar59UNV4s2I14HOJJOiWgF9TVd7HZCoIqqckZBx8UfgfHGmFMqXIo9nOQDmwcQiPquEidzpjzHHxf24cK8AJPraBR2EmUmuQdp"
+import io from "socket.io-client";
+
+const socket = io.connect("http://localhost:9000/");
+const token = "EAAK36iZBViigBAHrNZCrVIQ85gQJ6h1h7udQSAlsZBzO22uZC4Fp7Kbp5Pc6rbYrHDjgvd5RFOGKHWqX1sMHEE3qMTA1VXRQ8LotyEICIuKt1ohB5nBGoLHLKNyIPUScwcgf6mvb3ryffbfXVvd0Rn7dOnH8DAVqZB91iQKyqI59L5yqxk8ZCCKrSVCLppjGK1PUkOv9o2x35rwZB8vDDFq"
 const mytoken = "ConectaCargo"
 const baseURL = "http://localhost:9000/"
 
@@ -96,15 +99,34 @@ class whatsapp {
     // -------------------------------------------------------------------------------------------
     static async salvaMensagem(contato, mensagem) {
         console.log("salvando mensagem")
+        let room = ''
+        if(mensagem.to === '5511945718427'){
+            room = contato.tel
+        }
+        else{
+            room = mensagem.to
+        }
+
         try {
             const msg = new Mensagens({
                 from: contato._id,
                 to: mensagem.to,
+                room: room,
                 phoneId: mensagem.phoneId,
                 timestamp: mensagem.timestamp * 1000, //transforma timestamp em milisegundos
                 text: mensagem.text
             });
             const novaMensagem = await msg.save();
+
+            if(novaMensagem.to === '5511945718427'){
+                socket.emit("chat.sala", contato.tel);
+                socket.emit("chat.mensagem", novaMensagem);
+            }
+            else{
+                socket.emit("chat.sala", novaMensagem.to);
+                socket.emit("chat.mensagem", novaMensagem);
+            }
+
             return novaMensagem
         } catch (error) {
             console.log(error)
@@ -141,9 +163,9 @@ class whatsapp {
     static preparaMensagem = async (req, res) => {
         console.log("preparando mensagem")
         try {
-            this.salvaMensagem(req.body.from, req.body)
-            this.enviaMensagem(req.body)
-            res.sendStatus(200)
+            let resposta = await this.salvaMensagem(req.body.from, req.body)
+            this.enviaMensagem(req.body)            
+            res.status(200).json(resposta)
         } catch (error) {
             res.sendStatus(500)
         }
