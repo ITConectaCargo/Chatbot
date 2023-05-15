@@ -27,9 +27,14 @@ const io = new Server(server, {
 io.on('connect', (socket) => {
   console.log('usuario conectado', socket.id );
 
-  socket.on('chat.mensagem', (data) => {
-    console.log(data)
-    socket.emit('chat.mensagem', data)
+  socket.on('chat.sala', (sala) => {
+    socket.join(sala)
+    console.log(`usuario com o ID ${socket.id} entrou na sala ${sala}`)
+  })
+
+  socket.on('chat.mensagem', (mensagem) => {
+    console.log(mensagem)
+    socket.to(mensagem.room).emit('chat.mensagem', mensagem.message)
   })
 
   socket.on("disconnect", () => {
