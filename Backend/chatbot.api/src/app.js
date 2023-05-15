@@ -17,10 +17,24 @@ app.use(cors())
 routes(app) //chamando a rota
 
 const server = http.createServer(app);
-const io = new Server(server);
-
-io.on('connection', (socket) => {
-  console.log('usuario conectado', (socket.id));
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
 });
 
-export default app
+io.on('connect', (socket) => {
+  console.log('usuario conectado', socket.id );
+
+  socket.on('chat.mensagem', (data) => {
+    console.log(data)
+    socket.emit('chat.mensagem', data)
+  })
+
+  socket.on("disconnect", () => {
+    console.log("desconectado")
+  })
+});
+
+export default server
