@@ -11,7 +11,7 @@ export default function Conversas({ setMensagens, socket, baseUrl, contato, mens
      
     useEffect(() => {
         socket.on('chat.mensagem', (dados) => {
-          setMensagens( [...mensagens, dados])
+          setMensagens([...mensagens, dados])
         })
       })
 

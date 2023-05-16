@@ -4,7 +4,7 @@ import Conversas from "components/Conversas"
 import { useEffect, useState } from "react"
 import axios from "axios"
 import io from "socket.io-client";
-const baseUrl = "http://localhost:9000/"
+const baseUrl = "https://chatbot--wesleymoraescon.repl.co/"
 const socket = io.connect(baseUrl);
 
 export default function Chat() {

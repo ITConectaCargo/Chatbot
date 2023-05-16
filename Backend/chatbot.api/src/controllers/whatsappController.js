@@ -3,11 +3,14 @@ import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
 import Contato from "../models/contato.js"
 import io from "socket.io-client";
+import dotenv from 'dotenv'
+dotenv.config()
 
-const socket = io.connect("http://localhost:9000/");
-const token = "EAAK36iZBViigBANd75ZAZC1a84oGGNnEaZBsiB3JZCQywCdXZBEnLm0Q6FMzV7WJXTOUqmjj2V36eyLaG5f4fcuHIPh6gaZBtz8opShqiSQ9KOne1lBDFFPZC1oNYVfsK9syjI4U5ZBXKItabFFtvafphZA4e4ThgubbO8OVZAEotDQTZB1fFvpmJpbFrOECCjLucV3gafI08ZASnZAcyqfSkYTpTU"
-const mytoken = "ConectaCargo"
 const baseURL = "http://localhost:9000/"
+const socket = io.connect(baseURL);
+const token = process.env.TOKEN
+const mytoken = process.env.MYTOKEN
+
 
 class whatsapp {
 

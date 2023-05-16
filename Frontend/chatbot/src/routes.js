@@ -1,14 +1,14 @@
 import Chat from 'pages/Chat'
-import Teste from 'pages/teste'
+import Login from 'pages/Login'
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 
-export default function AppRoutes () {
+export default function AppRoutes() {
   return (
     <BrowserRouter>
-        <Routes>
-            <Route path='/' element={<Chat />}/>
-            <Route path='/teste' element={<Teste />}/>
-        </Routes>
+      <Routes>
+        <Route path='/' element={<Login />} />
+        <Route path='/chat' element={<Chat />} />
+      </Routes>
     </BrowserRouter>
   )
 }

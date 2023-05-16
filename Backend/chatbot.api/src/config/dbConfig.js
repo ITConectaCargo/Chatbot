@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
+import dotenv from 'dotenv'
+dotenv.config()
 
-mongoose.connect("mongodb+srv://wesleymoraes:Tuco0periquito@chatbot.x2hnrky.mongodb.net/ChatBot")
+const dbUser = process.env.DBUSER
+const dbPass = process.env.DBPASS
+
+mongoose.connect(`mongodb+srv://${dbUser}:${dbPass}@chatbot.x2hnrky.mongodb.net/ChatBot`)
 
 let db = mongoose.connection
 

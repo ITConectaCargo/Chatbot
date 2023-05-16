@@ -5,6 +5,8 @@ import bodyParser from "body-parser"
 import cors from 'cors'
 import routes from "./routes/routes.js"
 import db from "./config/dbConfig.js"
+import dotenv from 'dotenv'
+dotenv.config()
 
 db.on("error", console.log.bind(console, 'Erro de conexao'))
 db.once("open", () => {
@@ -13,7 +15,7 @@ db.once("open", () => {
 
 const app = express();  //instância do express
 app.use(bodyParser.json()) //interpretação em json
-app.use(cors())
+app.use(cors()) //habilita o Cors para todas as conexoes
 routes(app) //chamando a rota
 
 const server = http.createServer(app);
