@@ -2,10 +2,11 @@ import styles from "./Chat.modules.css"
 import Sidebar from "components/Sidebar"
 import Conversas from "components/Conversas"
 import { useEffect, useState } from "react"
+import { API_URL } from 'config.js'
 import axios from "axios"
 import io from "socket.io-client";
-const baseUrl = "https://chatbot--wesleymoraescon.repl.co/"
-const socket = io.connect(baseUrl);
+
+const socket = io.connect(API_URL);
 
 export default function Chat() {
   const [filas, setFilas] = useState([])
@@ -13,7 +14,7 @@ export default function Chat() {
   const [contato, setContato] = useState()
 
   useEffect(() => {
-    axios.get(baseUrl + "fila")
+    axios.get(API_URL + "fila")
       .then((response) => {
         setFilas(response.data)
       })
@@ -21,7 +22,7 @@ export default function Chat() {
 
   const selecionaContato = async (telefone) => {
     try {
-      await axios.get(`${baseUrl}contato/${telefone}`)
+      await axios.get(`${API_URL}contato/${telefone}`)
         .then((response) => {
           setContato(response.data)
         })
@@ -29,7 +30,7 @@ export default function Chat() {
       console.log(error)
     }
     try {
-      await axios.get(`${baseUrl}whatsapp/${telefone}`)
+      await axios.get(`${API_URL}whatsapp/${telefone}`)
         .then((response) => {
           setMensagens(response.data)
         })
@@ -47,7 +48,6 @@ export default function Chat() {
         />
         <Conversas
           socket={socket}
-          baseUrl={baseUrl}
           contato={contato}
           setMensagens={setMensagens}
           mensagens={mensagens}

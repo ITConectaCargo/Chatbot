@@ -6,7 +6,7 @@ const usuarioSchema = new mongoose.Schema({
     password: {type: String, required: true, select: false},
     type: {type: String},
     department: {type: String},
-    cnpj: {type: String},
+    company: {type: String},
     date: {type: Date, default: Date.now},
     isActive: {type: Boolean},
     dateDisable: {type: Date}

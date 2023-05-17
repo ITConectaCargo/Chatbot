@@ -1,12 +1,12 @@
 import Chat from 'pages/Chat'
-import Login from 'pages/Login'
+import Home from 'pages/Home'
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={<Login />} />
+        <Route path='/' element={<Home />} />
         <Route path='/chat' element={<Chat />} />
       </Routes>
     </BrowserRouter>

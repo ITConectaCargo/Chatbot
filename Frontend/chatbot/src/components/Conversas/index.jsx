@@ -4,9 +4,10 @@ import ConversasBody from 'components/ConvesasBody'
 import catGiphy from './cat.gif'
 import styles from './Conversas.module.css'
 import axios from 'axios'
+import { API_URL } from 'config.js'
 import { useEffect, useState } from 'react'
 
-export default function Conversas({ setMensagens, socket, baseUrl, contato, mensagens }) {
+export default function Conversas({ setMensagens, socket, contato, mensagens }) {
     const [mensagem, setMensagem] = useState("");
      
     useEffect(() => {
@@ -36,7 +37,7 @@ export default function Conversas({ setMensagens, socket, baseUrl, contato, mens
             }
 
             try {
-                const resposta = await axios.post(`${baseUrl}whatsapp/mensagem`, dadosMensagem)
+                const resposta = await axios.post(`${API_URL}whatsapp/mensagem`, dadosMensagem)
                 const dados = resposta.data
                 console.log(dados)
 
