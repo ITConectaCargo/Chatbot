@@ -1,7 +1,6 @@
 import Mensagem from "../models/mensagem.js"
 import Contato from "../models/contato.js"
 import Fila from "./filaController.js"
-import Whatsapp from "./whatsappController.js"
 import axios from "axios"
 const baseURL = "http://localhost:9000/"
 class ura {

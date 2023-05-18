@@ -12,7 +12,7 @@ export default function Chat() {
   const [filas, setFilas] = useState([])
   const [mensagens, setMensagens] = useState([])
   const [contato, setContato] = useState()
-
+  
   useEffect(() => {
     axios.get(API_URL + "fila")
       .then((response) => {

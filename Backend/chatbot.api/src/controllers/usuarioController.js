@@ -1,4 +1,5 @@
 import Usuario from "../models/usuario.js"
+import Autenticacao from "../models/autenticacao.js"
 import bcrypt from "bcrypt"
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
@@ -9,8 +10,17 @@ class usuario {
 
     }
 
-    static consultaUsuarioById = (req, res) => {
+    static consultaUsuarioById = async (req, res) => {
+        const id = req.params.id;
 
+        // verifica se o ususario existe
+        const user = await Usuario.findById(id);
+
+        if (!user) {
+            return res.status(404).json({ msg: "Usuário não encontrado!" });
+        }
+
+        res.status(200).json({ user })
     }
 
     static autenticaUsuario = async (req, res) => {
@@ -19,7 +29,7 @@ class usuario {
             //verifica se existe o usuario
             const user = await Usuario.findOne({ email: email })
                 .select('password')
-                .exec() 
+                .exec()
 
             //verifica se senha é valida    
             const eValida = await bcrypt.compare(password, user.password)
@@ -32,12 +42,27 @@ class usuario {
                 const secret = process.env.SECRET
 
                 const token = jwt.sign(
-                    {
-                        id: user._id
-                    },
-                    secret
+                    { id: user._id },
+                    secret,
+                    //{ expiresIn: 28800 }, //8 horas
+                    { expiresIn: 60 }, //1 min
                 )
-                return res.status(200).json(token)
+                
+                // Atualiza o campo 'token' no documento de autenticação do usuário
+                let auth = await Autenticacao.findOne({ userId: user._id });
+
+                if (auth) {
+                    auth.token = token;
+                } else {
+                    auth = new Autenticacao({
+                        userId: user._id,
+                        token
+                    });
+                }
+
+                await auth.save();
+
+                return res.status(200).json({ token: token });
 
             } catch (error) {
                 console.log(error)

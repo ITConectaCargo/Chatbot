@@ -1,0 +1,28 @@
+.formulario {
+    width: 420px;
+    background: #ffffff;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.cartao__header{
+    display: block;
+    position: relative;
+}
+
+.cartao__header h2{
+    background: #f5f5fa;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0 0 30px 0;
+    padding: 40px;
+    font-weight: 200;
+    color: #9596A2;
+    font-size: 19px;
+}

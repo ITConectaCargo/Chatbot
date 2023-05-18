@@ -1,6 +1,6 @@
 import ModalCadastroUsuario from 'components/ModalCadastroUsuario'
-import React, { useState } from 'react'
 import Login from 'components/Login'
+import React, { useState } from 'react'
 
 export default function Home() {
     const [abrirModal, setAbrirModal] = useState(false)

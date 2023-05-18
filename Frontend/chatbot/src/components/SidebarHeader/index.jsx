@@ -2,6 +2,7 @@ import styles from "./SidebarHeader.module.css"
 import { MdMoreVert, MdChat } from "react-icons/md"
 
 export default function SidebarHeader() {
+
     return (
         <div className={styles.container}>
             <div>
