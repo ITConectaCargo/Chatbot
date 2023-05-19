@@ -1,0 +1,70 @@
+.modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    border: 1px solid rgb(204, 204, 204);
+    background: rgb(255, 255, 255);
+    overflow: auto;
+    border-radius: 8px;
+    outline: none;
+}
+
+.formulario {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+
+.header h2 {
+    color: #6990e5;
+    font-size: 18px;
+    padding: 2em;
+    background-color: #f5f5fa;
+}
+
+.body {
+    display: flex;
+    padding: 2em;
+    flex-wrap: wrap;
+    flex-direction: column;
+}
+
+.body label {
+    padding: 0.5em 0;
+}
+
+.body select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    padding: 1em;
+    appearance: none;
+    background: #fff;
+    background-size: 10px;
+    transition: border-color .1s ease-in-out, box-shadow .1s ease-in-out;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-around;
+    padding: 0em 2em 2em 2em;
+}
+
+.footer button {
+    padding: 0.5em 2em;
+    color: white;
+    border: none;
+    border-radius: 8px;
+}
+
+.footer .botao_prosseguir {
+    background-color: #6990e5;
+}
+
+.footer .botao_cancelar {
+    background-color: #ff4747;
+}

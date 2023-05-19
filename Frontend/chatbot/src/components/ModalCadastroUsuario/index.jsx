@@ -2,6 +2,8 @@ import React, { useState } from 'react'
 import { API_URL } from 'config.js'
 import Modal from 'react-modal'
 import axios from 'axios'
+import styles from './ModalCadastroUsuario.module.css'
+import CampoInput from 'components/CampoInput'
 
 export default function ModalCadastroUsuario({ isOpen, abrirFecharModal }) {
     const [name, setName] = useState('')
@@ -16,19 +18,8 @@ export default function ModalCadastroUsuario({ isOpen, abrirFecharModal }) {
     const departments = [false, "SAC", "Comercial", "Motoristas"]
     const companies = [false, "Magazine Luiza", "Samsung"]
 
-    const cadastrarUsuario = async () => {
-        if (type === "Adm") {
-            setDepartment("Adm")
-            setCompany("Conecta Cargo")
-        }
-
-        if (type === "Cliente") {
-            setDepartment("Cliente")
-        }
-
-        if (type === "Funcionario") {
-            setCompany("Conecta Cargo")
-        }
+    const cadastrarUsuario = async (e) => {
+        e.preventDefault()
 
         const novoUsuario = {
             name: name,
@@ -40,88 +31,97 @@ export default function ModalCadastroUsuario({ isOpen, abrirFecharModal }) {
             company: company
         }
 
-        try {
-            const resposta = await axios.post(`${API_URL}usuario/novo`, novoUsuario)
-            const dados = resposta.data
-            alert(dados.msg)
-            abrirFecharModal()
-
-        } catch (error) {
-            alert(error.response.data.msg)
-        }
-    }
-
-    const aoSubmeter = (e) => {
-        e.preventDefault()
-        cadastrarUsuario()
+        await axios.post(`${API_URL}usuario/novo`, novoUsuario)
+            .then(resposta => {
+                alert(resposta.data.msg)
+                abrirFecharModal()
+            })
+            .catch(error => alert(error.response.data.msg))
     }
 
     return (
         <div>
-            <Modal isOpen={isOpen} ariaHideApp={false}>
-                <form onSubmit={aoSubmeter}>
-                    <div>
+            <Modal className={styles.modal} isOpen={isOpen} ariaHideApp={false}>
+                <form className={styles.formulario} onSubmit={cadastrarUsuario}>
+                    <div className={styles.header}>
                         <h2>Criar Usuario</h2>
-                        <button onClick={abrirFecharModal}>Close</button>
                     </div>
-                    <div>
-                        <input
+                    <div className={styles.body}>
+                        <CampoInput
                             required={true}
                             type='text'
                             placeholder='Nome'
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            aoAlterado={value => setName(value)}
                         />
-                        <input
+
+                        <CampoInput
                             required={true}
                             type='email'
                             placeholder='Email'
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            aoAlterado={value => setEmail(value)}
                         />
-                        <input
+
+                        <CampoInput
                             required={true}
                             type='password'
                             placeholder='Senha'
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            aoAlterado={value => setPassword(value)}
                         />
-                        <input
+                        <CampoInput
                             required={true}
                             type='password'
                             placeholder='Confirme a senha'
                             value={confirmPass}
-                            onChange={(e) => setConfirmPass(e.target.value)}
+                            aoAlterado={value => setConfirmPass(value)}
                         />
-                        <select required={true} value={type} onChange={(e) => setType(e.target.value)}>
+
+                        <label>Tipo</label>
+                        <select required={true} value={type} onChange={(e) => {
+                            setType(e.target.value)
+                            if (e.target.value === "Adm") {
+                                setDepartment("Adm");
+                                setCompany("Conecta Cargo");
+                            }
+                        }} >
                             {types.map((type) => {
                                 return <option key={type}>{type}</option>
                             })}
                         </select>
 
-                        {type === "Funcionario" ?
-                            <select value={department} onChange={(e) => setDepartment(e.target.value)}>
-                                {departments.map((department) => {
-                                    return <option key={department}>{department}</option>
-                                })}
-                            </select>
-                            :
-                            ""
+                        {type === "Funcionario" &&
+                            <>
+                                <label>Departamento</label>
+                                <select value={department} onChange={(e) => {
+                                    setDepartment(e.target.value)
+                                    setCompany("Conecta Cargo")
+                                }}>
+                                    {departments.map((department) => {
+                                        return <option key={department}>{department}</option>
+                                    })}
+                                </select>
+                            </>
                         }
 
-                        {type === "Cliente" ?
-                            <select value={company} onChange={(e) => setCompany(e.target.value)}>
-                                {companies.map((company) => {
-                                    return <option key={company}>{company}</option>
-                                })}
-                            </select>
-                            :
-                            ""
+                        {type === "Cliente" &&
+                            <>
+                                <label>Empresa</label>
+                                <select value={company} onChange={(e) => {
+                                    setDepartment("Cliente")
+                                    setCompany(e.target.value)
+                                }}>
+                                    {companies.map((company) => {
+                                        return <option key={company}>{company}</option>
+                                    })}
+                                </select>
+                            </>
                         }
                     </div>
-                    <div>
-                        <button type='submit'>Criar</button>
-                        <button type='button' onClick={abrirFecharModal}>Cancelar</button>
+                    <div className={styles.footer}>
+                        <button className={styles.botao_prosseguir} type='submit'>Criar</button>
+                        <button className={styles.botao_cancelar} type='button' onClick={abrirFecharModal}>Cancelar</button>
                     </div>
                 </form>
             </Modal>

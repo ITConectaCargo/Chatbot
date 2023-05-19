@@ -11,7 +11,7 @@ export default function ConversasFooter({enviaMensagem, mensagem, atualizaMensag
 
   return (
     <div className={styles.container}>
-      <form onSubmit={aoSubmeter}>
+      <form className={styles.envia__mensagem} onSubmit={aoSubmeter}>
         <IoMdHappy />
         <input placeholder="Mensagem"
           onChange={(e) => atualizaMensagem(e.target.value)}
