@@ -44,8 +44,8 @@ class usuario {
                 const token = jwt.sign(
                     { id: user._id },
                     secret,
-                    //{ expiresIn: 28800 }, //8 horas
-                    { expiresIn: 60 }, //1 min
+                    { expiresIn: 28800 }, //8 horas
+                    //{ expiresIn: 60 }, //1 min
                 )
                 
                 // Atualiza o campo 'token' no documento de autenticação do usuário
@@ -62,7 +62,10 @@ class usuario {
 
                 await auth.save();
 
-                return res.status(200).json({ token: token });
+                return res.status(200).json({ 
+                    token: token ,
+                    userId: auth.userId
+                });
 
             } catch (error) {
                 console.log(error)

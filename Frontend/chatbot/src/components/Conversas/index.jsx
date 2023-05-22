@@ -3,8 +3,7 @@ import ConversasHeader from 'components/ConversasHeader'
 import ConversasBody from 'components/ConvesasBody'
 import catGiphy from './cat.gif'
 import styles from './Conversas.module.css'
-import axios from 'axios'
-import { API_URL } from 'config.js'
+import api from 'config.js'
 import { useEffect, useState } from 'react'
 
 export default function Conversas({ setMensagens, socket, contato, mensagens }) {
@@ -37,9 +36,8 @@ export default function Conversas({ setMensagens, socket, contato, mensagens }) 
             }
 
             try {
-                const resposta = await axios.post(`${API_URL}whatsapp/mensagem`, dadosMensagem)
+                const resposta = await api.post(`whatsapp/mensagem`, dadosMensagem)
                 const dados = resposta.data
-                console.log(dados)
 
                 socket.emit('chat.sala', dadosMensagem.to)
                 socket.emit("chat.mensagem", dados);

@@ -5,8 +5,7 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom"
 export default function AppRoutes() {
 
   let logado = sessionStorage.getItem("token")
-  console.log(logado)
-
+  
   return (
     <BrowserRouter>
       <Routes>

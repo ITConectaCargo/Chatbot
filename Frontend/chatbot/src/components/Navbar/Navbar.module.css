@@ -1,0 +1,26 @@
+.cabecalho{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.3em 5em;
+    background-color: black;
+}
+
+.logo{
+    height: 35px;
+}
+
+.links{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+.avatar{
+    display: inline;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+

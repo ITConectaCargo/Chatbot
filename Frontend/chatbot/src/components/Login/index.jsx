@@ -21,6 +21,7 @@ export default function Login({ abrirFecharModal }) {
         try {
             const resposta = await axios.post(`${API_URL}usuario/autenticacao`, usuario)
             sessionStorage.setItem('token', resposta.data.token)
+            sessionStorage.setItem('userId', resposta.data.userId)
             setEmail('')
             setPassword('')
             navigate("/chat")

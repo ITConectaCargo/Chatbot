@@ -1,20 +1,22 @@
-import styles from "./Chat.modules.css"
+import styles from "./Chat.module.css"
 import Sidebar from "components/Sidebar"
 import Conversas from "components/Conversas"
+import Navbar from "components/Navbar"
 import { useEffect, useState } from "react"
-import { API_URL } from 'config.js'
-import axios from "axios"
+import api, { API_URL } from 'config.js'
 import io from "socket.io-client";
 
 const socket = io.connect(API_URL);
 
 export default function Chat() {
+  const token = sessionStorage.getItem('token')
+  const userId = sessionStorage.getItem('userId')
   const [filas, setFilas] = useState([])
   const [mensagens, setMensagens] = useState([])
   const [contato, setContato] = useState()
-  
+
   useEffect(() => {
-    axios.get(API_URL + "fila")
+    api.get("fila")
       .then((response) => {
         setFilas(response.data)
       })
@@ -22,15 +24,23 @@ export default function Chat() {
 
   const selecionaContato = async (telefone) => {
     try {
-      await axios.get(`${API_URL}contato/${telefone}`)
+      await api.get(`contato/${telefone}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
         .then((response) => {
           setContato(response.data)
         })
     } catch (error) {
       console.log(error)
+      alert(error.response.data.msg)
+      sessionStorage.removeItem('token')
+      sessionStorage.removeItem('userId')
+      window.location.reload()
     }
     try {
-      await axios.get(`${API_URL}whatsapp/${telefone}`)
+      await api.get(`whatsapp/${telefone}`)
         .then((response) => {
           setMensagens(response.data)
         })
@@ -41,8 +51,11 @@ export default function Chat() {
 
   return (
     <>
+      <Navbar />
       <section className={styles.container}>
         <Sidebar
+          token={token}
+          userId={userId}
           filas={filas}
           selecionaContato={selecionaContato}
         />

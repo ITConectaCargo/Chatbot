@@ -1,4 +1,5 @@
 import Contatos from "../models/contato.js"
+import Autenticacao from "../models/autenticacao.js"
 
 class contato {
 
@@ -8,6 +9,28 @@ class contato {
             res.status(200).send(tel)
         } catch (error) {
             res.status(500).send({ message: error })
+        }
+    }
+
+    static consultaContatoByToken = async (req, res) => {
+        let token = ''
+
+        try {
+            token = await Autenticacao.findById({token: req.params.token})
+            .populate('userId')
+            .exec()
+
+            console.log(token)
+        } catch (error) {
+            console.log(error)
+            res.status(500).json({ message: error.message });
+        }
+
+        try {
+            const contato = await Contatos.findOne({ tel: token.userId._id })
+            res.status(200).json(contato);
+        } catch (error) {
+            res.status(500).json({ message: error.message });
         }
     }
 
