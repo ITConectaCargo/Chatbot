@@ -4,6 +4,8 @@ import Modal from 'react-modal'
 import axios from 'axios'
 import styles from './ModalCadastroUsuario.module.css'
 import CampoInput from 'components/CampoInput'
+import Botao from 'components/Botao'
+import Select from 'components/Select'
 
 export default function ModalCadastroUsuario({ isOpen, abrirFecharModal }) {
     const [name, setName] = useState('')
@@ -78,50 +80,51 @@ export default function ModalCadastroUsuario({ isOpen, abrirFecharModal }) {
                             aoAlterado={value => setConfirmPass(value)}
                         />
 
-                        <label>Tipo</label>
-                        <select required={true} value={type} onChange={(e) => {
-                            setType(e.target.value)
-                            if (e.target.value === "Adm") {
-                                setDepartment("Adm");
-                                setCompany("Conecta Cargo");
-                            }
-                        }} >
-                            {types.map((type) => {
-                                return <option key={type}>{type}</option>
-                            })}
-                        </select>
+                        <Select
+                            required={true}
+                            label={'Tipo'}
+                            value={type}
+                            opcoes={types}
+                            aoAlterado={value => {
+                                setType(value)
+                                if (value === "Adm") {
+                                    setDepartment("Adm");
+                                    setCompany("Conecta Cargo");
+                                }
+                            }}
+                        />
 
                         {type === "Funcionario" &&
                             <>
-                                <label>Departamento</label>
-                                <select value={department} onChange={(e) => {
-                                    setDepartment(e.target.value)
-                                    setCompany("Conecta Cargo")
-                                }}>
-                                    {departments.map((department) => {
-                                        return <option key={department}>{department}</option>
-                                    })}
-                                </select>
+                                <Select
+                                    label={'Departamento'}
+                                    value={department}
+                                    opcoes={departments}
+                                    aoAlterado={value => {
+                                        setDepartment(value)
+                                        setCompany("Conecta Cargo");
+                                    }}
+                                />
                             </>
                         }
 
                         {type === "Cliente" &&
                             <>
-                                <label>Empresa</label>
-                                <select value={company} onChange={(e) => {
-                                    setDepartment("Cliente")
-                                    setCompany(e.target.value)
-                                }}>
-                                    {companies.map((company) => {
-                                        return <option key={company}>{company}</option>
-                                    })}
-                                </select>
+                                <Select
+                                    label={'Empresa'}
+                                    value={company}
+                                    opcoes={companies}
+                                    aoAlterado={value => {
+                                        setCompany(value)
+                                        setDepartment("Cliente");
+                                    }}
+                                />
                             </>
                         }
                     </div>
                     <div className={styles.footer}>
-                        <button className={styles.botao_prosseguir} type='submit'>Criar</button>
-                        <button className={styles.botao_cancelar} type='button' onClick={abrirFecharModal}>Cancelar</button>
+                        <Botao cor={'primaria'} type="submit">Criar</Botao>
+                        <Botao cor={'vermelho'} onClick={abrirFecharModal}>Cancelar</Botao>
                     </div>
                 </form>
             </Modal>

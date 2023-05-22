@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { API_URL } from 'config.js'
 import CampoInput from 'components/CampoInput';
 import { useNavigate } from 'react-router-dom';
+import Botao from 'components/Botao';
 
 export default function Login({ abrirFecharModal }) {
     const navigate = useNavigate();
@@ -56,7 +57,7 @@ export default function Login({ abrirFecharModal }) {
                     </div>
                 </div>
                 <div className={styles.cartao__footer}>
-                    <button onClick={validaUsuarioSenha}>Entrar</button>
+                    <Botao type={'submit'} cor={'primaria'}>Criar</Botao>
                     <p onClick={abrirFecharModal}>Registrar</p>
                 </div>
             </form>

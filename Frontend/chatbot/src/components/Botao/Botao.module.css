@@ -1,0 +1,15 @@
+.botao {
+    padding: 0.5em 2em;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.botao-primaria {
+    background-color: var(--cor-primaria);
+}
+
+.botao-vermelho {
+    background-color: var(--cor-vermelho);
+}
