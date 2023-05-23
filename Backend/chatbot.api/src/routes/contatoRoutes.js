@@ -6,7 +6,7 @@ const router = express.Router()
 
 router
     .get("/contato", contatoController.consultaContato)
-    .get("/contato/:telefone",autenticacao, contatoController.consultaContatoByTelefone)
+    .get("/contato/:telefone", contatoController.consultaContatoByTelefone)
     .post("/contato", contatoController.criarContato)
 
 export default router

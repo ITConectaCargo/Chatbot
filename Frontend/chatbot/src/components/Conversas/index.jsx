@@ -19,7 +19,7 @@ export default function Conversas({ setMensagens, socket, contato, mensagens }) 
         if (mensagem !== '') {
             let dadosMensagem = {
                 from: {
-                    _id: '6467c93943ef5b9ec8991d12',
+                    _id: '646d0571d6c7e9233c0cdad8',
                     name: 'Conecta Cargo',
                     nameWhatsapp: 'Conecta Cargo',
                     tel: '5511945718427',
