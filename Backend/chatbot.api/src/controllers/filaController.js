@@ -82,37 +82,37 @@ class fila {
         let fila = ""
         let botStage = ""
         let status = ""
-
-        //verifica se telefone esta na fila
+        
         try {
-            fila = await Fila.findOne({ from: mensagem.from })
+            fila = await Fila.findOne({ from: mensagem.from }) //verifica se telefone esta na fila
         } catch (error) {
             console.log(error)
         }
 
-        if (fila) {
-            //recoloca na fila
+        if (fila) { //se existir faça
+            //se status for finalizado
             if (fila.status == "finalizado") {
                 console.log("status Finalizado")
                 botStage = "0"
                 status = "ura"
-                this.adicionaNaFila(mensagem, botStage, status)
+                this.adicionaNaFila(mensagem, botStage, status) //cria o atendimento novamente
             }
-            //envia para URA
+            //se status for URA
             else if (fila.status == "ura") {
                 console.log("status URA")
-                Ura.uraAtendimento(fila)
+                Ura.uraAtendimento(fila) // envia para ura de atendimento
             }
-            //Cria contato na fila
+            //se nao existe contato na fila
         } else {
             botStage = "0"
             status = "ura"
-            this.adicionaNaFila(mensagem, botStage, status)
+            this.adicionaNaFila(mensagem, botStage, status) //Cria contato novo na fila
         }
     }
 
     static async adicionaNaFila(mensagem, botStage, status) {
         console.log("Adicionando a Fila")
+        // pegando os dados da fila
         const atendimento = new Fila({
             from: mensagem.from,
             timestamp: mensagem.timestamp,
@@ -120,9 +120,9 @@ class fila {
             status
         })
         try {
-            const newAtendimento = await atendimento.save();
+            const newAtendimento = await atendimento.save(); // salva os dados no BD
             console.log("Adicionado na fila com sucesso")
-            Ura.uraAtendimento(newAtendimento)
+            Ura.uraAtendimento(newAtendimento) // envia para a URA de atendimento
         } catch (err) {
             return console.log(err)
         }

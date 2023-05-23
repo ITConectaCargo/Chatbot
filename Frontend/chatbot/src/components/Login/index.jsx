@@ -58,7 +58,7 @@ export default function Login({ abrirFecharModal }) {
                     </div>
                 </div>
                 <div className={styles.cartao__footer}>
-                    <Botao type={'submit'} cor={'primaria'}>Criar</Botao>
+                    <Botao type={'submit'} cor={'primaria'} onClick={validaUsuarioSenha}>Criar</Botao>
                     <p onClick={abrirFecharModal}>Registrar</p>
                 </div>
             </form>

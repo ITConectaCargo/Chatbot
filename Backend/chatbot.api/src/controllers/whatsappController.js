@@ -1,7 +1,7 @@
 import axios from "axios"
 import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
-import Contato from "../models/contato.js"
+import Contatos from "../models/contato.js"
 import io from "socket.io-client";
 import dotenv from 'dotenv'
 dotenv.config()
@@ -48,10 +48,11 @@ class whatsapp {
                         timestamp,
                         text
                     }
+
                     console.log(`Encontrei nome: ${name}, telefone: ${telefone}, id: ${phoneId}, timestamp: ${timestamp}, texto: ${text}`)
 
-                    this.verificaContato(name, telefone, mensagem)
-                    res.sendStatus(200)
+                    this.verificaContato(name, telefone, mensagem) //verifica contato
+                    res.sendStatus(200) //responde para o whats que recebeu
                 }
             }
         } catch (error) {
@@ -66,8 +67,7 @@ class whatsapp {
 
         //verifica se telefone esta no BD
         try {
-            let resposta = await axios.get(`${baseURL}contato/${telefone}`)
-            contato = resposta.data
+            contato = await Contatos.findOne({ tel: telefone })
             console.log(`Encontrei o contato ${contato.tel}`)
         } catch (error) {
             console.log(error)
@@ -173,7 +173,7 @@ class whatsapp {
     static listaMensagensByTelefone = async (req, res) => {
         const telefone = req.params.telefone;
         try {
-            const contato = await Contato.findOne({ tel: telefone })
+            const contato = await Contatos.findOne({ tel: telefone })
             const filter = { $or: [{ from: contato._id }, { to: telefone }] };
 
             const result = await Mensagens.find(filter)

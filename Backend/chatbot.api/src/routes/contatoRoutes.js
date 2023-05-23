@@ -1,6 +1,6 @@
 import express from "express"
 import contatoController from "../controllers/contatoController.js"
-import autenticacao from '../middleware/atenticacao.js'
+//import autenticacao from '../middleware/atenticacao.js'
 
 const router = express.Router()
 
