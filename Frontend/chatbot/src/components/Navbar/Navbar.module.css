@@ -3,7 +3,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 1em 5em;
-    background-color: black;
+    background-color: var(--cor-primaria);
 }
 
 .logo{
@@ -19,7 +19,7 @@
 .cabecalho span {
     color: white;
     cursor: pointer;
-    padding: 0 1em;
+    padding: 0 1em 0 0;
 }
 
 .avatar{

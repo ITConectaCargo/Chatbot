@@ -1,26 +1,33 @@
 .container {
     height: 59px;
     background-color: #f0f2f5;
-    padding: 10px 16px;
+    padding: 10px 30px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     z-index: 1;
+    box-shadow: 0 0 2px 0 #0003;  
 }
 
 .usuarioInfo {
     display: flex;
     align-items: center;
-}
-    
 
-.NomeConteudo {
-    display: grid;
+}
+
+.nomeConteudo {
+    display: flex;
+}
+
+.nomeConteudo svg {
+    margin: 0 1em;
+    cursor: pointer;
 }
 
 .Nome {
     font-size: 18px;
     overflow: hidden;
     text-overflow: ellipsis;
+    
 }
 

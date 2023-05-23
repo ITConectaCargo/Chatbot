@@ -1,6 +1,7 @@
 import React from 'react'
 import styles from './Navbar.module.css'
-import logo from './logo-site.jpg'
+import avatar from './avatar.jpg'
+import logo from './logo-site.png'
 import NavbarLink from 'components/NavbarLink'
 
 export default function Navbar({ usuario }) {
@@ -13,9 +14,9 @@ export default function Navbar({ usuario }) {
                 <NavbarLink url={'/'}>Login</NavbarLink>
                 <NavbarLink url={'/chat'}>Chat</NavbarLink>
                 <NavbarLink url={'/configuracoes'}>Configuracoes</NavbarLink>
-                <span>{usuario.name}</span>
+                <span>{usuario? usuario.name : ""}</span>
                 <div>
-                    <img src="http://github.com/wesleymo22.png" className={styles.avatar} alt="Imagem de um avatar" />
+                    <img src={avatar} className={styles.avatar} alt="Imagem de um avatar" />
                 </div>
             </nav>
         </header>
