@@ -14,7 +14,29 @@ export default function Chat() {
   const [filas, setFilas] = useState([])
   const [mensagens, setMensagens] = useState([])
   const [contato, setContato] = useState()
+  const [usuario, setUsuario] = useState()
 
+  //Busca os dados do usuario
+  useEffect(() => {
+    api.get(`usuario/${userId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+      .then(resposta => {
+        setUsuario(resposta.data.user)
+      }
+      )
+      .catch(error => {
+        alert(error.response.data.msg)
+        sessionStorage.removeItem('token') // remove o token da sessao
+        sessionStorage.removeItem('userId') // remove o usuario da sessao
+        window.location.reload() // reload da pagina
+      })
+
+  }, [userId, token])
+
+  //busca usuarios que estao na fila de espera
   useEffect(() => {
     api.get("fila")
       .then((response) => {
@@ -51,11 +73,10 @@ export default function Chat() {
 
   return (
     <>
-      <Navbar />
+      <Navbar usuario={usuario} />
       <section className={styles.container}>
         <Sidebar
-          token={token}
-          userId={userId}
+          usuario={usuario}
           filas={filas}
           selecionaContato={selecionaContato}
         />
