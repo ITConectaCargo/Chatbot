@@ -24,7 +24,7 @@ export default function Chat() {
       }
     })
       .then(resposta => {
-        setUsuario(resposta.data.user)
+        setUsuario(resposta.data)
       }
       )
       .catch(error => {

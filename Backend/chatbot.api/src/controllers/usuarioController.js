@@ -20,7 +20,7 @@ class usuario {
             return res.status(404).json({ msg: "Usuário não encontrado!" });
         }
 
-        res.status(200).json({ user })
+        res.status(200).json(user)
     }
 
     static autenticaUsuario = async (req, res) => {
