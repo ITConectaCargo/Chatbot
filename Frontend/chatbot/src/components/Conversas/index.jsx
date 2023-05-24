@@ -6,7 +6,7 @@ import styles from './Conversas.module.css'
 import api from 'config.js'
 import { useEffect, useState } from 'react'
 
-export default function Conversas({ setMensagens, socket, contato, mensagens, atualizaContatosFila }) {
+export default function Conversas({ setMensagens, socket, contato, mensagens, atualizaContatosFila, setContato }) {
     const [mensagem, setMensagem] = useState("");
 
     useEffect(() => {
@@ -59,6 +59,7 @@ export default function Conversas({ setMensagens, socket, contato, mensagens, at
                 <div className={styles.container}>
                     <ConversasHeader
                         contato={contato}
+                        setContato={setContato}
                         atualizaContatosFila={atualizaContatosFila}
                     />
                     <ConversasBody mensagens={mensagens} />

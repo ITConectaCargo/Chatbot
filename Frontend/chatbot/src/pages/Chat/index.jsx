@@ -108,6 +108,7 @@ export default function Chat() {
           socket={socket}
           atualizaContatosFila={atualizaContatosFila}
           contato={contato}
+          setContato={setContato}
           setMensagens={setMensagens}
           mensagens={mensagens}
         />
