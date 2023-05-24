@@ -14,14 +14,33 @@ class fila {
         }
     }
 
-    static consutaByStatus = async (req, res) => {
-        const status = req.params.status //recebe o valor via parametro
+    static consutaByContato = async (req, res) => {
+        const contato = req.params.contato //recebe o valor via parametro
         try {
-            const fila = await Fila.find({ status: status }) //procura no banco se existe este status
+            const fila = await Fila.findOne({ from: contato }) //procura no banco se existe este status
+                .sort({ date: -1 }) //busca pela ultima data
                 .populate("from")
                 .exec()
-            res.status(200).send(fila)
+
+            res.status(200).json(fila)
         } catch (error) {
+            console.log(error)
+            res.status(404).send(error)
+        }
+    }
+
+    static consutaByStatus = async (req, res) => {
+        const status = req.params.status //recebe o valor via parametro
+        const usuario = req.body
+        try {
+            const fila = await Fila.find({ status: status }) //procura no banco se existe este status
+                .sort({ user: usuario._id })
+                .populate("from")
+                .exec()
+
+            res.status(200).json(fila)
+        } catch (error) {
+            console.log(error)
             res.status(404).send(error)
         }
     }
@@ -38,14 +57,9 @@ class fila {
             let cont = 0
             fila.forEach(async (element) => {
                 element.status = "atendimento"; // Altera o campo status para "atendimento"
-                element.user = user._id
-                console.log(fila)
-
+                element.user = user._id // adiciona usuario ao atendimento
                 await element.save()
             });
-
-            console.log(cont)
-            console.log(fila)
 
             res.status(200).json(fila) //envia resposta
         } catch (error) {
@@ -74,7 +88,6 @@ class fila {
             console.log(err);
             return res.status(500).send('Internal Server Error');
         }
-
     }
 
     static async verificaAtendimento(mensagem) {
@@ -82,14 +95,15 @@ class fila {
         let fila = ""
         let botStage = ""
         let status = ""
-        
+
         try {
             fila = await Fila.findOne({ from: mensagem.from }) //verifica se telefone esta na fila
+                .sort({ date: -1 }) //busca pela ultima data
         } catch (error) {
             console.log(error)
         }
 
-        if (fila) { //se existir faça
+        if (fila) {
             //se status for finalizado
             if (fila.status == "finalizado") {
                 console.log("status Finalizado")

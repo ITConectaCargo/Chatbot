@@ -6,14 +6,14 @@ import styles from './Conversas.module.css'
 import api from 'config.js'
 import { useEffect, useState } from 'react'
 
-export default function Conversas({ setMensagens, socket, contato, mensagens }) {
+export default function Conversas({ setMensagens, socket, contato, mensagens, atualizaContatosFila }) {
     const [mensagem, setMensagem] = useState("");
-     
+
     useEffect(() => {
         socket.on('chat.mensagem', (dados) => {
-          setMensagens([...mensagens, dados])
+            setMensagens([...mensagens, dados])
         })
-      })
+    })
 
     const enviaMensagem = async () => {
         if (mensagem !== '') {
@@ -39,8 +39,8 @@ export default function Conversas({ setMensagens, socket, contato, mensagens }) 
                 const resposta = await api.post(`whatsapp/mensagem`, dadosMensagem)
                 const dados = resposta.data
 
-                socket.emit('chat.sala', dadosMensagem.to)
-                socket.emit("chat.mensagem", dados);
+                await socket.emit('chat.sala', dadosMensagem.to)
+                await socket.emit("chat.mensagem", dados);
                 setMensagens((msg) => [...msg, dadosMensagem]);
                 setMensagem('')
             } catch (error) {
@@ -57,7 +57,10 @@ export default function Conversas({ setMensagens, socket, contato, mensagens }) 
                 </div>
                 :
                 <div className={styles.container}>
-                    <ConversasHeader contato={contato} />
+                    <ConversasHeader
+                        contato={contato}
+                        atualizaContatosFila={atualizaContatosFila}
+                    />
                     <ConversasBody mensagens={mensagens} />
                     <ConversasFooter
                         enviaMensagem={enviaMensagem}

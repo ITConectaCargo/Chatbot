@@ -38,7 +38,7 @@ io.on('connect', (socket) => {
     console.log(mensagem)
     socket.to(mensagem.room).emit('chat.mensagem', mensagem)
   })
-
+  
   socket.on("disconnect", () => {
     console.log("desconectado")
   })

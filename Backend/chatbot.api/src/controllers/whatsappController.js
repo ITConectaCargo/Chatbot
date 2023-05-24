@@ -99,7 +99,9 @@ class whatsapp {
 
         Fila.verificaAtendimento(novaMensagem)
     }
+
     // -------------------------------------------------------------------------------------------
+    
     static async salvaMensagem(contato, mensagem) {
         console.log("salvando mensagem")
         let room = ''

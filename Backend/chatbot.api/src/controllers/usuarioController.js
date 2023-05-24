@@ -6,8 +6,13 @@ import dotenv from 'dotenv'
 dotenv.config()
 class usuario {
 
-    static consultaUsuario = (req, res) => {
-
+    static consultaUsuario = async (req, res) => {
+        try {
+            const user = await Usuario.find()
+            res.status(200).json(user)
+        } catch (error) {
+            console.log(error)           
+        }
     }
 
     static consultaUsuarioById = async (req, res) => {

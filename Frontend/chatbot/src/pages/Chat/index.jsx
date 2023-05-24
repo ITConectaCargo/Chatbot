@@ -18,17 +18,17 @@ export default function Chat() {
 
   //Busca os dados do usuario
   useEffect(() => {
-    api.get(`usuario/${userId}`, {
+    api.get(`usuario/${userId}`, { // busca na api o usuario de acordo com o login
       headers: {
-        Authorization: `Bearer ${token}`
+        Authorization: `Bearer ${token}` // envia o token do login para verificar se esta valido
       }
     })
       .then(resposta => {
-        setUsuario(resposta.data)
+        setUsuario(resposta.data) // popula a variavel usuario
       }
       )
       .catch(error => {
-        alert(error.response.data.msg)
+        alert(error.response.data.msg) //exibe um alerta
         sessionStorage.removeItem('token') // remove o token da sessao
         sessionStorage.removeItem('userId') // remove o usuario da sessao
         window.location.reload() // reload da pagina
@@ -38,12 +38,34 @@ export default function Chat() {
 
   //busca usuarios que estao na fila de espera
   useEffect(() => {
-    api.get("fila")
-      .then((response) => {
-        setFilas(response.data)
+    api.get("fila/status/atendimento", usuario)
+      .then(resposta => {
+        const dados = resposta.data
+        setFilas(dados)
       })
-  }, [])
+  }, [usuario]) // se houver atualização do usuario executa novamente
 
+  //botao atualizar
+  const atualizaContatosFila = async () => {
+    await api.get("fila/status/atendimento", usuario)
+      .then(resposta => {
+        const dados = resposta.data
+        setFilas(dados)
+      })
+  }
+
+  const buscaContatoFila = async () => {
+    await api.post('/fila', usuario)
+      .then(resposta => {
+        const dados = resposta.data
+        dados.forEach(fila => {
+          setFilas([...filas, fila])
+        });
+      })
+      .catch(error => console.log(error))
+  }
+
+  // seleciona contato ao clicar
   const selecionaContato = async (telefone) => {
     try {
       await api.get(`contato/${telefone}`, {
@@ -76,12 +98,15 @@ export default function Chat() {
       <Navbar usuario={usuario} />
       <section className={styles.container}>
         <Sidebar
+          atualizaContatosFila={atualizaContatosFila}
+          buscaContatoFila={buscaContatoFila}
           usuario={usuario}
           filas={filas}
           selecionaContato={selecionaContato}
         />
         <Conversas
           socket={socket}
+          atualizaContatosFila={atualizaContatosFila}
           contato={contato}
           setMensagens={setMensagens}
           mensagens={mensagens}

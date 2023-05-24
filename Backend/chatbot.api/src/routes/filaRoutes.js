@@ -5,7 +5,8 @@ const router = express.Router()
 
 router
     .get("/fila", filaController.consutaFila)
-    .get("/fila/:status", filaController.consutaByStatus)
+    .get("/fila/:contato", filaController.consutaByContato)
+    .get("/fila/status/:status", filaController.consutaByStatus)
     .post("/fila/", filaController.consutaByEspera)
     .put("/fila/", filaController.alteraStatus)
 
