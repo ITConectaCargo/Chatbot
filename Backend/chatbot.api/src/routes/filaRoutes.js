@@ -8,7 +8,7 @@ router
     .get("/fila/:contato", filaController.consutaByContato)
     .get("/fila/status/:status", filaController.consutaByStatus)
     .post("/fila/", filaController.consutaByEspera)
-    .put("/fila/", filaController.alteraStatus)
+    .put("/fila/", filaController.alteraFila)
 
 
 export default router

@@ -6,6 +6,7 @@ const filaSchema = new mongoose.Schema({
     timestamp: {type: Date, require: true},
     botStage: {type: String},
     status: {type: String},
+    department: {type: String},
     date: {type: Date, default: Date.now}
 })
 

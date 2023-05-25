@@ -63,17 +63,20 @@ class fila {
 
             res.status(200).json(fila) //envia resposta
         } catch (error) {
-            res.status(404).send(error)
+            res.status(404).send(error) //envia erro
         }
     }
 
-    static alteraStatus = async (req, res) => {
+    static alteraFila = async (req, res) => {
         const _id = req.body._id //Pega Id da requisicao
-        const status = req.body.status //pega o status desejado
         try {
             const fila = await Fila.findByIdAndUpdate(
                 _id, //busca fila pelo Id
-                { status }, //altera status
+                {
+                    status: req.body.status,
+                    department: req.body.department,
+                    user:  req.body.user
+                }, 
                 { new: true } //retorna o valor atualizado
             )
                 .populate("from") //popula os dados do remetente
@@ -86,7 +89,7 @@ class fila {
             res.status(200).send(fila) //envia os dados da fila
         } catch (err) {
             console.log(err);
-            return res.status(500).send('Internal Server Error');
+            return res.status(500).send('Internal Server Error'); //envia Erro
         }
     }
 
@@ -131,6 +134,7 @@ class fila {
             from: mensagem.from,
             timestamp: mensagem.timestamp,
             botStage,
+            department: "",
             status
         })
         try {
@@ -149,6 +153,7 @@ class fila {
             const newFila = await Fila.findByIdAndUpdate(
                 fila._id,
                 { botStage },
+                { department: fila.department },
                 { new: true }
             );
 

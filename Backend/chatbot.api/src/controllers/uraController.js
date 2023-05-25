@@ -58,6 +58,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 fila.botStage = "1.1"
+                fila.department = "SAC"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             else if (ultimaMensagem.text == "2") {
@@ -67,6 +68,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 fila.botStage = 0
+                fila.department = "Comercial"
                 this.preparaMensagemBot(botMensagem, fila)
                 this.adicionaFilaEspera(fila)
             }
@@ -77,6 +79,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 fila.botStage = 0
+                fila.department = "Motoristas"
                 this.preparaMensagemBot(botMensagem, fila)
                 this.adicionaFilaEspera(fila)
             }

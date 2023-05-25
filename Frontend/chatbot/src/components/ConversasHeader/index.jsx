@@ -5,9 +5,11 @@ import { BsInfoCircle } from 'react-icons/bs'
 import { RiWechatPayLine } from 'react-icons/ri'
 import api from 'config'
 import { useEffect, useState } from 'react'
+import ModalTransferir from 'components/ModalTransferir'
 
 export default function ConversasHeader({ contato, atualizaContatosFila, setContato }) {
   const [contatoFila, setContatoFila] = useState()
+  const [abrirModal, setAbrirModal] = useState(false)
 
   useEffect(() => {
     api.get(`/fila/${contato._id}`)
@@ -16,7 +18,11 @@ export default function ConversasHeader({ contato, atualizaContatosFila, setCont
         setContatoFila(dados)
       })
   }, [contato])
-  
+
+  const abrirFecharModal = () => {
+    setAbrirModal(!abrirModal)
+  }
+
   const finalizarConversa = async () => {
     try {
       let dados = contatoFila
@@ -33,17 +39,25 @@ export default function ConversasHeader({ contato, atualizaContatosFila, setCont
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.usuarioInfo}>
-        <div className={styles.nomeConteudo}>
-          <h4 className={styles.nome}>{contato && contato.nameWhatsapp}</h4>
-          <BsInfoCircle />
+    <>
+      <div className={styles.container}>
+        <div className={styles.usuarioInfo}>
+          <div className={styles.nomeConteudo}>
+            <h4 className={styles.nome}>{contato && contato.nameWhatsapp}</h4>
+            <BsInfoCircle />
+          </div>
+        </div>
+        <div>
+          <BotaoChat nome={"Transferir"} onClick={abrirFecharModal}><BiTransferAlt /></BotaoChat>
+          <BotaoChat nome={"Finalizar"} onClick={finalizarConversa}><RiWechatPayLine /></BotaoChat>
         </div>
       </div>
-      <div>
-        <BotaoChat nome={"Transferir"}><BiTransferAlt /></BotaoChat>
-        <BotaoChat nome={"Finalizar"} onClick={finalizarConversa}><RiWechatPayLine /></BotaoChat>
-      </div>
-    </div>
+      <ModalTransferir
+        isOpen={abrirModal}
+        abrirFecharModal={abrirFecharModal}
+        contatoFila={contatoFila}
+        atualizaContatosFila={atualizaContatosFila}
+      />
+    </>
   )
 }
