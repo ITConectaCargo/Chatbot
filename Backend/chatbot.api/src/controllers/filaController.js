@@ -1,5 +1,5 @@
 import Fila from '../models/fila.js'
-import Ura from "./uraController.js"
+import Ura from "./uraNovaController.js"
 
 class fila {
 
@@ -75,8 +75,8 @@ class fila {
                 {
                     status: req.body.status,
                     department: req.body.department,
-                    user:  req.body.user
-                }, 
+                    user: req.body.user
+                },
                 { new: true } //retorna o valor atualizado
             )
                 .populate("from") //popula os dados do remetente
@@ -92,6 +92,8 @@ class fila {
             return res.status(500).send('Internal Server Error'); //envia Erro
         }
     }
+
+    // ----------------------------------------------------------------------------------
 
     static async verificaAtendimento(mensagem) {
         console.log("verificando atendimento")

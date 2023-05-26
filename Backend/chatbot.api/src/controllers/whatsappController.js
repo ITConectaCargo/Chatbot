@@ -4,6 +4,7 @@ import Mensagens from "../models/mensagem.js"
 import Contatos from "../models/contato.js"
 import io from "socket.io-client";
 import dotenv from 'dotenv'
+import Coleta from "./coletasController.js";
 dotenv.config()
 
 const baseURL = "http://localhost:9000/"
@@ -51,7 +52,7 @@ class whatsapp {
 
                     console.log(`Encontrei nome: ${name}, telefone: ${telefone}, id: ${phoneId}, timestamp: ${timestamp}, texto: ${text}`)
 
-                    this.verificaContato(name, telefone, mensagem) //verifica contato
+                    this.verificaContato(name, telefone, mensagem)
                     res.sendStatus(200) //responde para o whats que recebeu
                 }
             }
@@ -60,55 +61,47 @@ class whatsapp {
             res.sendStatus(200)
         }
     }
+
     // -------------------------------------------------------------------------------------------
+
     static async verificaContato(nome, telefone, mensagem) {
         let contato = ""
         let novaMensagem = ""
+        let dadosSql = ""
 
         //verifica se telefone esta no BD
         try {
-            contato = await Contatos.findOne({ tel: telefone })
-            console.log(`Encontrei o contato ${contato.tel}`)
+            dadosSql = await Coleta.consultaByTelefone(telefone)
         } catch (error) {
             console.log(error)
         }
 
-        //verifica se contato esta vazio ou nao
-        if (contato) {
-            console.log(`possui contato`)
-            //Salva a mensagem
-            let resposta = await this.salvaMensagem(contato, mensagem)
-            novaMensagem = resposta
-        }
-        else {
-            console.log(`contato esta vazio`)
-            //cria contato no BD
+        if (dadosSql) {
             try {
-                let resposta = await axios.post(`${baseURL}contato/`, {
-                    nameWhatsapp: nome,
-                    tel: telefone
-                })
-                contato = resposta.data
+                contato = await Coleta.verificaMongo(dadosSql, telefone)
             } catch (error) {
                 console.log(error)
             }
+        }
+
+        if (contato) {
             //Salva a mensagem
             let resposta = await this.salvaMensagem(contato, mensagem)
             novaMensagem = resposta
+
+            Fila.verificaAtendimento(novaMensagem) //Verifica a fila
         }
-
-        Fila.verificaAtendimento(novaMensagem)
     }
-
+   W
     // -------------------------------------------------------------------------------------------
-    
+
     static async salvaMensagem(contato, mensagem) {
         console.log("salvando mensagem")
         let room = ''
-        if(mensagem.to === '5511945718427'){
+        if (mensagem.to === '5511945718427') {
             room = contato.tel
         }
-        else{
+        else {
             room = mensagem.to
         }
 
@@ -123,7 +116,7 @@ class whatsapp {
             });
             const novaMensagem = await msg.save();
 
-            if(novaMensagem.to === '5511945718427'){
+            if (novaMensagem.to === '5511945718427') {
                 await socket.emit("chat.sala", novaMensagem.to);
                 await socket.emit("chat.mensagem", novaMensagem);
             }
@@ -165,7 +158,7 @@ class whatsapp {
         console.log("preparando mensagem")
         try {
             let resposta = await this.salvaMensagem(req.body.from, req.body)
-            this.enviaMensagem(req.body)            
+            this.enviaMensagem(req.body)
             res.status(200).json(resposta)
         } catch (error) {
             res.sendStatus(500)
@@ -179,10 +172,10 @@ class whatsapp {
             const filter = { $or: [{ from: contato._id }, { to: telefone }] };
 
             const result = await Mensagens.find(filter)
-            .populate('from')
-            .sort('date')
-            .exec();
-            
+                .populate('from')
+                .sort('date')
+                .exec();
+
             res.status(200).json(result);
         } catch (err) {
             res.status(500).json({ message: err.message });

@@ -109,8 +109,8 @@ class ura {
 
             if (count == 11 || count == 14) {
                 let texto = `Fiz uma busca em meu sistema e encontrei os seguintes dados\n\n`
-                    + `NF: 0000000\n`
                     + `CPF / CNPJ\n`
+                    + `NF: 0000000\n`
                     + `Produtos: 5x Bolacha\n\n`
                     + `Voce confirma os dados acima?\n`
                     + `1 - Sim\n`
@@ -155,8 +155,8 @@ class ura {
                 console.log("nao entendi")
                 let texto = `Desculpe nao entendi\n`
                     + `Fiz uma busca em meu sistema e encontrei os seguintes dados\n`
-                    + `NF: 0000000\n`
                     + `CPF / CNPJ\n`
+                    + `NF: 0000000\n`
                     + `Produtos: 5x Bolacha\n`
                     + `Voce confirma os dados acima?\n`
                     + `1 - Sim\n`

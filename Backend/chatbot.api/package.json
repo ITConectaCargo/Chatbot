@@ -21,6 +21,8 @@
     "jsonwebtoken": "^9.0.0",
     "moment": "^2.29.4",
     "mongoose": "^7.0.5",
+    "mysql": "^2.18.1",
+    "mysql2-promise": "^0.1.4",
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1"
   },
