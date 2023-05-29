@@ -2,7 +2,6 @@ import axios from 'axios';
 import Contatos from '../models/contato.js';
 import dbSql from '../config/dbSqlConfig.js'
 import Nfe from '../models/nfe.js';
-const baseURL = 'http://localhost:9000/'
 
 class coleta {
 

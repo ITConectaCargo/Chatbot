@@ -20,14 +20,6 @@ class nfe{
         }
     }
 
-    static cadastraNfe = async (req, res) => {
-        try {
-            
-        } catch (error) {
-            console.log(error)           
-        }
-    }
-
 }
 
 export default nfe

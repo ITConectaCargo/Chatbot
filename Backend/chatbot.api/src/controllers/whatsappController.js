@@ -34,6 +34,7 @@ class whatsapp {
     static recebeMensagem = async (req, res) => {
         //trata mensagem recebida
         let body_param = req.body
+        console.log(JSON.stringify(body_param, null, 2))
 
         try {
             if (body_param.object) {

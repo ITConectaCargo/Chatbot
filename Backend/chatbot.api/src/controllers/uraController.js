@@ -10,6 +10,7 @@ class ura {
         let ultimaMensagem = ""
         let botMensagem = ""
 
+
         //Busca ultima Mensagem e contato
         try {
             ultimaMensagem = await Mensagem.findOne({ from: fila.from })
@@ -108,7 +109,7 @@ class ura {
             }
 
             if (count == 11 || count == 14) {
-                let texto = `Fiz uma busca em meu sistema e encontrei os seguintes dados\n\n`
+                let texto = `*Fiz uma busca em meu sistema e encontrei os seguintes dados*\n\n`
                     + `CPF / CNPJ\n`
                     + `NF: 0000000\n`
                     + `Produtos: 5x Bolacha\n\n`

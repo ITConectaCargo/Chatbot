@@ -43,10 +43,10 @@ class ura {
         if (fila.botStage == 0) {
             console.log("ura 0")
             let texto =
-                `Olá ${nf.client.name}, :)\n`
-                + `Localizei aqui que voce quer devolver o(s) produto(s) ${nf.product}\n`
-                + `Nos somos transportadores autorizados ${nf.shipper}\n`
-                + `Gostaria de agendar a devolução?\n`
+                `*Olá ${nf.client.name}*, :)\n\n`
+                + `Localizei aqui que voce quer devolver o(s) produto(s) *${nf.product}*\n\n`
+                + `Nos somos transportadores autorizados \n\n*${nf.shipper}*\n\n`
+                + `Gostaria de agendar a devolução?\n\n`
                 + `1 - sim\n`
                 + `2 - nao\n`
 
