@@ -31,6 +31,7 @@ class ura {
             let resposta = await Contatos.findOne({ tel: ultimaMensagem.to })//puxa os dados da empresa no banco
 
             botMensagem = ultimaMensagem //prepara padrao de mensagem
+            botMensagem.template = ""
 
             //altera o destinatario e remetente
             botMensagem.to = ultimaMensagem.from.tel
@@ -43,9 +44,9 @@ class ura {
         if (fila.botStage == 0) {
             console.log("ura 0")
             let texto =
-                `*Olá ${nf.client.name}*, :)\n\n`
-                + `Localizei aqui que voce quer devolver o(s) produto(s) *${nf.product}*\n\n`
-                + `Nos somos transportadores autorizados \n\n*${nf.shipper}*\n\n`
+                `*Olá ${nf.client.name}*, 😊\n\n`
+                + `Localizei aqui que voce quer devolver o(s) produto(s)\n\n *${nf.product}*\n\n`
+                + `Nos somos transportadores autorizados: \n\n*${nf.shipper}*\n\n`
                 + `Gostaria de agendar a devolução?\n\n`
                 + `1 - sim\n`
                 + `2 - nao\n`

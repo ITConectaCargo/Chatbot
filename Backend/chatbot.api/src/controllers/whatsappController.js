@@ -2,6 +2,7 @@ import axios from "axios"
 import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
 import Contatos from "../models/contato.js"
+import Filas from "../models/fila.js"
 import io from "socket.io-client";
 import dotenv from 'dotenv'
 import Coleta from "./coletasController.js";
@@ -67,33 +68,58 @@ class whatsapp {
 
     static async verificaContato(nome, telefone, mensagem) {
         let contato = ""
+        let fila = ""
         let novaMensagem = ""
         let dadosSql = ""
 
-        //verifica se telefone esta no BD
+        //verifica se telefone esta no BD Mongo
         try {
-            dadosSql = await Coleta.consultaByTelefone(telefone)
+            contato = await Contatos.findOne({ tel: telefone })
         } catch (error) {
             console.log(error)
         }
 
-        if (dadosSql) {
+        //verifica se telefone esta fila
+        try {
+            fila = Filas.findOne({from: contato._id})
+        } catch (error) {
+            console.log(error)
+        }
+
+        if (!fila || fila.status === "finalizado") { //se nao existir fila ou status for finalizado
+            //verifica se telefone esta no BD SQL
             try {
-                contato = await Coleta.verificaMongo(dadosSql, telefone)
+                dadosSql = await Coleta.consultaByTelefone(telefone)
             } catch (error) {
                 console.log(error)
             }
-        }
 
-        if (contato) {
-            //Salva a mensagem
+            if (dadosSql) {
+                try {
+                    contato = await Coleta.verificaMongo(dadosSql, telefone)
+                } catch (error) {
+                    console.log(error)
+                }
+            }
+
+            if (contato) {
+                //Salva a mensagem
+                let resposta = await this.salvaMensagem(contato, mensagem)
+                novaMensagem = resposta
+
+                Fila.verificaAtendimento(novaMensagem) //Verifica a fila
+            }
+        }
+        else {
+            console.log("Esta na fila")
             let resposta = await this.salvaMensagem(contato, mensagem)
             novaMensagem = resposta
 
             Fila.verificaAtendimento(novaMensagem) //Verifica a fila
         }
     }
-   W
+
+
     // -------------------------------------------------------------------------------------------
 
     static async salvaMensagem(contato, mensagem) {
@@ -154,6 +180,40 @@ class whatsapp {
             console.log(error)
         }
     }
+    //--------------------------------------------------------------------------------------------
+
+    static enviaMensagemTemplate(mensagem) {
+        console.log("enviando mensagem")
+        console.log(mensagem)
+        const para = mensagem.to
+        const telefoneId = mensagem.phoneId
+        const texto = mensagem.text
+        try {
+            axios({
+                method: "POST",
+                url: "https://graph.facebook.com/v16.0/" + telefoneId + "/messages?access_token=" + token,
+                data: {
+                    messaging_product: "whatsapp",
+                    to: para,
+                    "type": "template",
+                    "template": {
+                        "namespace": "0784a13b_2167_46d5_b80c_2c2e89b5b240",
+                        "name": "hello_world",
+                        "language": {
+                            "code": "en_US"
+                        },
+                    }
+                },
+                headers: {
+                    "Authorization": "Bearer",
+                    "Content-Type": "application/json"
+                }
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     // -------------------------------------------------------------------------------------------
     static preparaMensagem = async (req, res) => {
         console.log("preparando mensagem")

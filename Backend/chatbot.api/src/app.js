@@ -14,19 +14,6 @@ db.once("open", () => {
     console.log("Conexao MongoDb bem-sucedida")
 })
 
-try {
-  dbSql.connect((error) => { //teste de conexao com o mySql
-    if (error) {
-        console.error('Erro ao conectar: ' + error.stack);
-        return;
-    }
-    console.log('Conexão dbSql bem-sucedida!');
-  });
-} catch (error) {
-  console.log(error)
-}
-
-
 const app = express();  //instância do express
 app.use(bodyParser.json()) //interpretação em json
 app.use(cors()) //habilita o Cors para todas as conexoes
