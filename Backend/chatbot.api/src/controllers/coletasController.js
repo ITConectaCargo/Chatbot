@@ -26,7 +26,7 @@ class coleta {
                 } else {
                     let dados = results;
                     console.log(dados);
-                    resolve(dados[0]);
+                    resolve(dados);
                 }
             });
         });
@@ -74,6 +74,16 @@ class coleta {
             }
 
             if (!existeNota || existeNota === "") {
+                let coleta = ""
+                /*
+                try {
+                    coleta = await this.consultaAgendamento(dadosSql.chaveNfe)
+                    console.log(coleta)
+                } catch (error) {
+                    console.log(error)
+                }
+                */
+
                 try {
                     console.log("criando NF")
                     const nota = {
@@ -81,6 +91,7 @@ class coleta {
                         key: dadosSql.chaveNfe,
                         product: dadosSql.descricaoProduto,
                         value: dadosSql.valorTotalNf,
+                        status: "",
                         shipper: dadosSql.nomeMkt
                     };
 
@@ -94,24 +105,22 @@ class coleta {
         return contato
     }
 
-    static consultaAgendamento = async (req, res) => {
-        const tokenEsl = "qxYaURbavegtz2sLsZjAVxsLT-a-_i2r_BE7yxzVTP_TvjsuuYWQ9w"
-        const chaveNfe = req.params.chaveNfe
+    static consultaAgendamento = async (chaveNfe) => {
+        let myHeaders = new Headers();
+        myHeaders.append("Authorization", "Bearer qxYaURbavegtz2sLsZjAVxsLT-a-_i2r_BE7yxzVTP_TvjsuuYWQ9w");
 
-        axios.get(`https://conecta.eslcloud.com.br/api/invoice_occurrences?invoice_key=${chaveNfe}`, {
-            headers: {
-                Authorization: `Bearer ${tokenEsl}`
-            }
-        })
-            .then(resposta => {
-                res.status(200).send(resposta.data)
+        let requestOptions = {
+            method: 'GET',
+            headers: myHeaders,
+            redirect: 'follow'
+        };
+
+        await fetch(`https://conecta.eslcloud.com.br/api/invoice_occurrences?invoice_key=${chaveNfe}`, requestOptions)
+            .then(response => response.json())
+            .then(result => {
+                return result.data
             })
-            .catch(error => {
-                console.log(error)
-                res.status(500).json(error)
-            })
-
-
+            .catch(error => console.log('error', error));
     }
 }
 

@@ -31,7 +31,8 @@ class ura {
             let resposta = await Contatos.findOne({ tel: ultimaMensagem.to })//puxa os dados da empresa no banco
 
             botMensagem = ultimaMensagem //prepara padrao de mensagem
-            botMensagem.template = ""
+            botMensagem.template = "" //adiciona o template para a mensagem do bot
+            botMensagem.parameters = "" //adiciona os parametros do template para a mensagem do bot
 
             //altera o destinatario e remetente
             botMensagem.to = ultimaMensagem.from.tel
@@ -53,6 +54,12 @@ class ura {
 
             //coloca mensagem no Bot
             botMensagem.text = texto
+            botMensagem.template = "agendar_devolucao"
+            botMensagem.parameters = {
+                name: nf.client.name,
+                product: nf.product,
+                shipper: nf.shipper
+            }
             console.log(botMensagem)
             //fila.botStage = 1
             this.preparaMensagemBot(botMensagem, fila)

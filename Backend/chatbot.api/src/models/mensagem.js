@@ -9,6 +9,7 @@ const mensagemSchema = new mongoose.Schema(
         phoneId: {type: String, required: true},
         timestamp: {type: String},
         template: {type: String},
+        parameters: {type: Object},
         text: {type: String, required: true},
         date: {type: Date, default: Date.now}
     }

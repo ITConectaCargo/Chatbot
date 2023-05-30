@@ -5,6 +5,7 @@ const nfeSchema = new mongoose.Schema({
     key: { type: String },
     product: { type: String },
     value: { type: Number },
+    status: {type: String},
     shipper: { type: String }
 })
 

@@ -81,24 +81,37 @@ class whatsapp {
 
         //verifica se telefone esta fila
         try {
-            fila = Filas.findOne({from: contato._id})
+            fila = await Filas.findOne({ from: contato._id })
+                .sort({ date: -1 }) // Ordena por data em ordem decrescente
+                .exec()
         } catch (error) {
             console.log(error)
         }
 
         if (!fila || fila.status === "finalizado") { //se nao existir fila ou status for finalizado
+            console.log("verificando SQL")
             //verifica se telefone esta no BD SQL
             try {
                 dadosSql = await Coleta.consultaByTelefone(telefone)
+
             } catch (error) {
                 console.log(error)
             }
 
             if (dadosSql) {
+                let contador = dadosSql.length
+
                 try {
-                    contato = await Coleta.verificaMongo(dadosSql, telefone)
+                    contato = await Coleta.verificaMongo(dadosSql[0], telefone)
                 } catch (error) {
                     console.log(error)
+                }
+
+                if (contador > 1) {
+                    console.log(`Achei ${contador} Nfs`)
+                    dadosSql.forEach(element => {
+                        Coleta.verificaMongo(element, telefone)
+                    });
                 }
             }
 
@@ -182,12 +195,14 @@ class whatsapp {
     }
     //--------------------------------------------------------------------------------------------
 
-    static enviaMensagemTemplate(mensagem) {
+    static enviaMensagemTemplate(mensagem, parametros) {
         console.log("enviando mensagem")
         console.log(mensagem)
         const para = mensagem.to
         const telefoneId = mensagem.phoneId
-        const texto = mensagem.text
+        const nome = mensagem.parameters.name
+        const product = mensagem.parameters.product
+        const shipper = mensagem.parameters.shipper
         try {
             axios({
                 method: "POST",
@@ -198,10 +213,34 @@ class whatsapp {
                     "type": "template",
                     "template": {
                         "namespace": "0784a13b_2167_46d5_b80c_2c2e89b5b240",
-                        "name": "hello_world",
+                        "name": "agendar_devolucao",
                         "language": {
-                            "code": "en_US"
+                            "code": "pt_BR"
                         },
+                        "components": [
+                            {
+                                "type": "header",
+                                "parameters": [
+                                    {
+                                        "type": "text",
+                                        "text": nome
+                                    },
+                                ]
+                            },
+                            {
+                                "type": "body",
+                                "parameters": [
+                                    {
+                                        "type": "text",
+                                        "text": product
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": shipper
+                                    },
+                                ]
+                            }
+                        ]
                     }
                 },
                 headers: {
@@ -217,13 +256,26 @@ class whatsapp {
     // -------------------------------------------------------------------------------------------
     static preparaMensagem = async (req, res) => {
         console.log("preparando mensagem")
-        try {
-            let resposta = await this.salvaMensagem(req.body.from, req.body)
-            this.enviaMensagem(req.body)
-            res.status(200).json(resposta)
-        } catch (error) {
-            res.sendStatus(500)
+        if(req.body.template){
+            console.log("possui template")
+            try {
+                let resposta = await this.salvaMensagem(req.body.from, req.body)
+                this.enviaMensagemTemplate(req.body)
+                res.status(200).json(resposta)
+            } catch (error) {
+                res.sendStatus(500)
+            }
+        }else{
+            console.log("nao possui template")
+            try {
+                let resposta = await this.salvaMensagem(req.body.from, req.body)
+                this.enviaMensagem(req.body)
+                res.status(200).json(resposta)
+            } catch (error) {
+                res.sendStatus(500)
+            }
         }
+       
     }
     // -------------------------------------------------------------------------------------------
     static listaMensagensByTelefone = async (req, res) => {
