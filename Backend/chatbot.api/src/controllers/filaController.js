@@ -119,7 +119,7 @@ class fila {
             //se status for URA
             else if (fila.status == "ura") {
                 console.log("status URA")
-                Ura.uraAtendimento(fila) // envia para ura de atendimento
+                Ura.verificaDadosUra(fila) // envia para ura de atendimento
             }
             //se nao existe contato na fila
         } else {
@@ -142,7 +142,7 @@ class fila {
         try {
             const newAtendimento = await atendimento.save(); // salva os dados no BD
             console.log("Adicionado na fila com sucesso")
-            Ura.uraAtendimento(newAtendimento) // envia para a URA de atendimento
+            Ura.verificaDadosUra(newAtendimento) // envia para a URA de atendimento
         } catch (err) {
             return console.log(err)
         }

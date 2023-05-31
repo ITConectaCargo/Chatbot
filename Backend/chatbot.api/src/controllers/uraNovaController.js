@@ -6,23 +6,15 @@ import axios from 'axios'
 const baseURL = 'http://localhost:9000/'
 
 class ura {
-    static async uraAtendimento(fila) {
-        console.log("cheguei na ura")
+    static async verificaDadosUra(fila) {
+        console.log("tratando dados para a ura")
         let ultimaMensagem = ""
         let botMensagem = ""
         let nf = ""
 
+        //Prepara a mensagem que o Bot vai enviar
         try {
-            nf = await Nfs.findOne({ client: fila.from }) //busca produtos
-                .populate("client")
-                .exec()
-
-        } catch (error) {
-            console.log(error)
-        }
-
-        try {
-            ultimaMensagem = await Mensagem.findOne({ from: fila.from }) //Busca ultima Mensagem e contato
+            ultimaMensagem = await Mensagem.findOne({ from: fila.from }) //Busca ultima Mensagem do contato
                 .sort({ date: 'desc' })
                 .populate('from')
                 .exec()
@@ -41,13 +33,38 @@ class ura {
             console.log(error)
         }
 
+        //Verifica se existe NF deste cliente
+        try {
+            nf = await Nfs.findOne({ client: fila.from }) //busca NF
+                .populate("client")
+                .exec()
+            console.log("encontrou NF na ura")
+            console.log(nf)
+
+            botMensagem.parameters = {
+                name: nf.client.name,
+                product: nf.product,
+                shipper: nf.shipper
+            }
+
+            this.uraAtendimentoNf(fila, ultimaMensagem, botMensagem, nf)
+        } catch (error) {
+            console.log(error)
+            console.log("nao encontrou NF na ura")
+            
+            this.uraAtendimento(fila, ultimaMensagem, botMensagem)
+        }
+    }
+
+    static async uraAtendimentoNf(fila, ultimaMensagem, botMensagem, nf) {
+        console.log("cheguei na ura")
         //Inicia o Bot
         if (fila.botStage == 0) {
             console.log("ura 0")
             let texto =
-                `*Olá ${nf.client.name}*, 😊\n\n`
-                + `Localizei aqui que voce quer devolver o(s) produto(s)\n\n *${nf.product}*\n\n`
-                + `Nos somos transportadores autorizados: \n\n*${nf.shipper}*\n\n`
+                `*Olá ${botMensagem.parameters.name}*, 😊\n\n`
+                + `Localizei aqui que voce quer devolver o(s) produto(s)\n\n *${botMensagem.parameters.product}*\n\n`
+                + `Nos somos transportadores autorizados: \n\n*${botMensagem.parameters.shipper}*\n\n`
                 + `Gostaria de agendar a devolução?\n\n`
                 + `1 - sim\n`
                 + `2 - nao\n`
@@ -55,12 +72,24 @@ class ura {
             //coloca mensagem no Bot
             botMensagem.text = texto
             botMensagem.template = "agendar_devolucao"
-            botMensagem.parameters = {
-                name: nf.client.name,
-                product: nf.product,
-                shipper: nf.shipper
-            }
             console.log(botMensagem)
+            //fila.botStage = 1
+            this.preparaMensagemBot(botMensagem, fila)
+
+        }
+    }
+
+    //--------------------------------------------------
+
+    static async uraAtendimento(fila, ultimaMensagem, botMensagem) {
+        console.log("ura sem NF")
+        if (fila.botStage == 0) {
+            console.log("ura 0")
+            let texto = `Olá, tudo bem?\n`
+            + `Não encontramos nenhuma coleta a agendar com base neste telefone\n`
+            + `Com qual setor você gostaria de conversar?`
+            botMensagem.text = texto
+            botMensagem.template = "setores"
             //fila.botStage = 1
             this.preparaMensagemBot(botMensagem, fila)
         }

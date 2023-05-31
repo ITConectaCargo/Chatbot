@@ -1,4 +1,3 @@
-import axios from 'axios';
 import Contatos from '../models/contato.js';
 import dbSql from '../config/dbSqlConfig.js'
 import Nfe from '../models/nfe.js';
@@ -8,14 +7,30 @@ class coleta {
     static consultaByTelefone = async (tel) => {
         const telefone = tel.slice(2); //retira o 55 do numero
         const query = `
-            SELECT DISTINCT tbl_coleta.cpfCnpj, clientes.nomeCliente, tbl_coleta.valorTotalNf, tbl_coleta.chaveNfe, tbl_coleta_produto.descricaoProduto, marketplace.nomeMkt
-            FROM tbl_coleta, clientes, mktclientesnfe, tbl_coleta_produto, marketplace
-            WHERE clientes.foneCliente = ${telefone}
-            AND tbl_coleta.cnpjCpf = marketplace.cnpjCpf
-            AND tbl_coleta.cpfCnpj = clientes.cpfCnpj
-            AND clientes.cpfCnpj = tbl_coleta.cpfCnpj
-            AND tbl_coleta.chaveNfe = mktclientesnfe.chaveNFe
-            AND mktclientesnfe.codProduto = tbl_coleta_produto.codProduto;
+            SELECT DISTINCT
+                tbl_coleta.cpfCnpj,
+                clientes.nomeCliente,
+                clientes.logradouro,
+                clientes.bairro,
+                clientes.cidade,
+                clientes.uf,
+                clientes.complemento,
+                tbl_coleta.valorTotalNf,
+                tbl_coleta.chaveNfe,
+                tbl_coleta_produto.descricaoProduto,
+                marketplace.nomeMkt
+            FROM
+                tbl_coleta
+            INNER JOIN
+                clientes ON tbl_coleta.cpfCnpj = clientes.cpfCnpj
+            INNER JOIN
+                marketplace ON tbl_coleta.cnpjCpf = marketplace.cnpjCpf
+            INNER JOIN
+                mktclientesnfe ON tbl_coleta.chaveNfe = mktclientesnfe.chaveNFe
+            INNER JOIN
+                tbl_coleta_produto ON mktclientesnfe.codProduto = tbl_coleta_produto.codProduto
+            WHERE
+                clientes.foneCliente = ${telefone};
         `;
 
         return new Promise((resolve, reject) => {
@@ -52,6 +67,15 @@ class coleta {
                     name: dadosSql.nomeCliente,
                     nameWhatsapp: dadosSql.nomeCliente,
                     cpfCnpj: dadosSql.cpfCnpj,
+                    address: {
+                        street: dadosSql.logradouro,
+                        number: dadosSql.numero,
+                        district: dadosSql.bairro,
+                        city: dadosSql.cidade,
+                        state: dadosSql.uf,
+                        cep: dadosSql.cep,
+                        complement: dadosSql.complemento
+                    }
                 })
 
                 contato = await cliente.save()
@@ -105,22 +129,22 @@ class coleta {
         return contato
     }
 
-    static consultaAgendamento = async (chaveNfe) => {
-        let myHeaders = new Headers();
-        myHeaders.append("Authorization", "Bearer qxYaURbavegtz2sLsZjAVxsLT-a-_i2r_BE7yxzVTP_TvjsuuYWQ9w");
+    static consultaAgendamento = async (req, res) => {
+        const chaveNfe = req.params.chaveNfe
 
-        let requestOptions = {
-            method: 'GET',
-            headers: myHeaders,
-            redirect: 'follow'
-        };
-
-        await fetch(`https://conecta.eslcloud.com.br/api/invoice_occurrences?invoice_key=${chaveNfe}`, requestOptions)
-            .then(response => response.json())
-            .then(result => {
-                return result.data
+        await axios.get(`https://conecta.eslcloud.com.br/api/invoice_occurrences?invoice_key=${chaveNfe}`, {
+            headers: {
+                Authorization: `Bearer qxYaURbavegtz2sLsZjAVxsLT-a-_i2r_BE7yxzVTP_TvjsuuYWQ9w`
+            }
+        })
+            .then(resposta => {
+                console.log(resposta.data)
+                res.status(200).json(resposta.data)
             })
-            .catch(error => console.log('error', error));
+            .catch(error => {
+                console.log(error)
+                res.status(500).json(error)
+            })
     }
 }
 

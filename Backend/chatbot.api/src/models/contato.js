@@ -5,6 +5,14 @@ const contatoSchema = new mongoose.Schema({
     nameWhatsapp: { type: String },
     tel: { type: String, required: true },
     cpfCnpj: { type: String },
+    address: {
+        street: {type: String},
+        district: {type: String},
+        city: {type: String},
+        state: {type: String},
+        cep: {type: String},
+        complement: {type: String}
+    },
     date: { type: Date, default: Date.now }
 })
 

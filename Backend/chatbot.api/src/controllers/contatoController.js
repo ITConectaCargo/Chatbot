@@ -16,9 +16,9 @@ class contato {
         let token = ''
 
         try {
-            token = await Autenticacao.findById({token: req.params.token})
-            .populate('userId')
-            .exec()
+            token = await Autenticacao.findById({ token: req.params.token })
+                .populate('userId')
+                .exec()
 
             console.log(token)
         } catch (error) {
@@ -46,13 +46,14 @@ class contato {
 
     static criarContato = async (req, res) => {
         console.log("criando")
+        const dados = req.body
         try {
             const contato = new Contatos({
-                name: req.body.name, 
-                nameWhatsapp: req.body.nameWhatsapp,
-                tel: req.body.tel,
-                cpfCnpj: req.body.cpfCnpj,
-                address: req.body.address                
+                name: dados.name,
+                nameWhatsapp: dados.nameWhatsapp,
+                tel: dados.tel,
+                cpfCnpj: dados.cpfCnpj,
+                address: dados.address
             })
             const novoContato = await contato.save();
             res.status(201).json(novoContato);
