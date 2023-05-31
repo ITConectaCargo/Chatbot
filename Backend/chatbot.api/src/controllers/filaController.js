@@ -154,8 +154,11 @@ class fila {
         try {
             const newFila = await Fila.findByIdAndUpdate(
                 fila._id,
-                { botStage },
-                { department: fila.department },
+                {
+                    botStage,
+                    department: fila.department,
+                    status: fila.status
+                },
                 { new: true }
             );
 

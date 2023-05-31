@@ -56,11 +56,13 @@ class ura {
         }
     }
 
+    //---------------------------------------------------------------------
+
     static async uraAtendimentoNf(fila, ultimaMensagem, botMensagem, nf) {
         console.log("cheguei na ura")
         //Inicia o Bot
         if (fila.botStage == 0) {
-            console.log("ura NF 0")
+            console.log("ura NF Inicio")
             let texto =
                 `*Olá ${botMensagem.parameters.name}*, 😊\n\n`
                 + `Localizei aqui que voce quer devolver o(s) produto(s)\n\n *${botMensagem.parameters.product}*\n\n`
@@ -73,12 +75,13 @@ class ura {
             botMensagem.text = texto
             botMensagem.template = "agendar_devolucao"
             console.log(botMensagem)
-            fila.botStage = "NF 1"
+            fila.botStage = "NF confirmaEndereco"
             this.preparaMensagemBot(botMensagem, fila)
         }
-        if (fila.botStage == "NF 1") {
-            if (ultimaMensagem.text == "1") {
-                console.log("ura NF 1")
+        if (fila.botStage == "NF confirmaEndereco") {
+            //caso Inicio positivo
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "sim") {
+                console.log("ura NF confirmaEndereco")
                 let texto = `Encontrei este endereço em meu banco de dados:\n\n`
                     + `Rua: ${nf.client.address.street}\n`
                     + `Bairro: ${nf.client.address.district}\n`
@@ -91,51 +94,196 @@ class ura {
                 botMensagem.text = texto
                 botMensagem.template = "botao"
                 console.log(botMensagem)
-                fila.botStage = "NF 1.1"
+                fila.botStage = "NF produtoDesmontado"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //caso Inicio negativo
+            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "nao") {
+                console.log("ura NF Inicio negativo")
+                let texto = `Ok, sem problemas\n`
+                    + `Com qual setor você gostaria de conversar?`
+
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = "botao"
+                botMensagem.parameters = {
+                    opcao1: "SAC",
+                    opcao2: "Comercial",
+                    opcao3: "Motorista"
+                }
+                console.log(botMensagem)
+                fila.botStage = "NF departamentos"
                 this.preparaMensagemBot(botMensagem, fila)
             }
         }
-        if (fila.botStage == "NF 1.1") {
+        if (fila.botStage == "NF produtoDesmontado") {
+            //Caso Confirma endereço positivo
             if (ultimaMensagem.text == "1") {
-                console.log("ura NF 1.1")
+                console.log("ura NF produtoDesmontado")
                 let texto = `O produto que você está devolvendo está desmontado?`
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
                 console.log(botMensagem)
-                fila.botStage = "NF 1.1.1"
+                fila.botStage = "NF apartamento"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //Caso Confirma endereço negativo
+            if (ultimaMensagem.text == "2") {
+                console.log("ura NF confirmaEndereco negativo")
+                let texto = `Entendi\n`
+                    + `Vou te transferir para um de nossos atendentes\n`
+                    + `Aguarde que em breve voce sera atendido`
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = ""
+                console.log(botMensagem)
+                fila.botStage = "0"
+                fila.status = "espera"
                 this.preparaMensagemBot(botMensagem, fila)
             }
         }
-        if (fila.botStage == "NF 1.1.1") {
+        if (fila.botStage == "NF apartamento") {
+            //Caso produto desmontado positivo
             if (ultimaMensagem.text == "1") {
-                console.log("ura NF 1.1.1")
+                console.log("ura NF apartamento")
                 let texto = `Você mora em apartamento?`
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
                 console.log(botMensagem)
-                fila.botStage = "NF 1.1.1.1"
+                fila.botStage = "NF andar"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //Caso produto desmontado negativo
+            if (ultimaMensagem.text == "2") {
+                console.log("ura NF produtoDesmontado negativo")
+                let texto = `Entendi\n`
+                    + `Vou te transferir para um de nossos atendentes\n`
+                    + `Aguarde que em breve voce sera atendido`
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = ""
+                console.log(botMensagem)
+                fila.botStage = "0"
+                fila.status = "espera"
                 this.preparaMensagemBot(botMensagem, fila)
             }
         }
-        if (fila.botStage == "NF 1.1.1.1") {
+        if (fila.botStage == "NF andar") {
+            //Caso mora em apartamento positivo
             if (ultimaMensagem.text == "1") {
-                console.log("ura NF 1.1.1.1")
+                console.log("ura NF andar")
                 let texto = `Em qual andar você mora?`
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "opcoes"
-                botMensagem.parameters ={ 
+                botMensagem.parameters = {
                     opcao1: "Até o 3º Andar",
                     opcao2: "Entre 4º e 10º Andar",
                     opcao3: "Acima do 10º"
                 }
                 console.log(botMensagem)
-                fila.botStage = "0"
+                fila.botStage = "NF elevador"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //Caso mora em apartamento negativo
+            if (ultimaMensagem.text == "2") {
+                console.log("ura NF apartamento negativo")
+                let texto = `Aceita Data?`
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = "botao"
+
+                console.log(botMensagem)
+                fila.botStage = "NF confirmaData"
                 this.preparaMensagemBot(botMensagem, fila)
             }
         }
+        if (fila.botStage == "NF elevador") {
+            //Caso andar acima do 4 andar positivo
+            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "3") {
+                console.log("ura NF elevador")
+                let texto = `Possui elevador de serviço e é permitido o seu uso?`
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = "botao"
+                console.log(botMensagem)
+                fila.botStage = "NF aceitaData"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //Caso ate 3º andar
+            if (ultimaMensagem.text == "1") {
+                console.log("ura NF Até o 3º Andar")
+                let texto = `Aceita Data?`
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = "botao"
+
+                console.log(botMensagem)
+                fila.botStage = "NF confirmaData"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+        }
+
+        if (fila.botStage == "NF aceitaData") {
+            //Caso confirma data positivo
+            if (ultimaMensagem.text == "1") {
+                console.log("ura NF aceitaData")
+                let texto = `aceita data?`
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = ""
+                console.log(botMensagem)
+                fila.botStage = "0"
+                fila.status = "NF confirmaData"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //Caso confirma data negativo
+            if (ultimaMensagem.text == "2") {
+                console.log("ura NF confimaData Negativo")
+                let texto = `Entendi\n`
+                    + `Vou te transferir para um de nossos atendentes\n`
+                    + `Aguarde que em breve voce sera atendido`
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = ""
+                console.log(botMensagem)
+                fila.botStage = "0"
+                fila.status = "espera"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+        }
+
+        if (fila.botStage == "NF confirmaData") {
+            //Caso confirma data positivo
+            if (ultimaMensagem.text == "1") {
+                console.log("ura NF Enviando pra o ESL")
+                let texto = `Enviando para a quipe de agendamento`
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = ""
+                console.log(botMensagem)
+                fila.botStage = "0"
+                fila.status = "finalizado"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //Caso confirma data negativo
+            if (ultimaMensagem.text == "2") {
+                console.log("ura NF confimaData Negativo")
+                let texto = `Entendi\n`
+                    + `Vou te transferir para um de nossos atendentes\n`
+                    + `Aguarde que em breve voce sera atendido`
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = ""
+                console.log(botMensagem)
+                fila.botStage = "0"
+                fila.status = "espera"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+        }
+
     }
 
     //--------------------------------------------------
@@ -149,7 +297,7 @@ class ura {
                 + `Com qual setor você gostaria de conversar?`
             botMensagem.text = texto
             botMensagem.template = "opcoes"
-            botMensagem.parameters ={ 
+            botMensagem.parameters = {
                 opcao1: "SAC",
                 opcao2: "Comercial",
                 opcao3: "Motorista"
@@ -166,17 +314,6 @@ class ura {
         Fila.alteraBotStage(fila, fila.botStage)
         try {
             axios.post(`${baseURL}whatsapp/mensagem`, mensagem)
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    //------------------------------------------------
-
-    static async adicionaFilaEspera(fila) {
-        fila.status = "espera"
-        try {
-            axios.put(`http://localhost:9000/fila/`, fila)
         } catch (error) {
             console.log(error)
         }

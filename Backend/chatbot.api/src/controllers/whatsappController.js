@@ -87,6 +87,28 @@ class whatsapp {
         } catch (error) {
             console.log(JSON.stringify(body_param, null, 2))
         }
+         //verifica se é um botao
+         try {
+            //template respondido
+            if(body_param.entry[0].changes[0].value.messages[0].button.payload){
+                console.log("botao encontrado")
+                let name = body_param.entry[0].changes[0].value.contacts[0].profile.name
+                let telefone = body_param.entry[0].changes[0].value.messages[0].from
+                let phoneId = body_param.entry[0].changes[0].value.metadata.phone_number_id
+                let timestamp = body_param.entry[0].changes[0].value.messages[0].timestamp
+                let text = body_param.entry[0].changes[0].value.messages[0].button.text
+                const mensagem = {
+                    phoneId,
+                    to: "5511945718427",
+                    timestamp,
+                    text
+                }
+                console.log(`Cliente respondeu nome: ${name}, telefone: ${telefone}, id: ${phoneId}, timestamp: ${timestamp}, texto: ${text}`)
+                this.verificaContato(name, telefone, mensagem)
+            }
+        } catch (error) {
+            console.log(JSON.stringify(body_param, null, 2))
+        }
     }
 
     // -------------------------------------------------------------------------------------------
