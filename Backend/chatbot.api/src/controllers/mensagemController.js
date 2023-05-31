@@ -14,11 +14,11 @@ class mensagem {
         }
         else if(mensagem.template === "agendar_devolucao"){
             console.log("mensagem com template")
-            //this.enviaMensagemTemplate(mensagem)
+            this.enviaMensagemTemplate(mensagem)
         }
-        else if(mensagem.template === "setores"){
-            console.log("mensagem com template")
-            this.enviaMensagemSetores(mensagem)
+        else if(mensagem.template === "opcoes"){
+            console.log("mensagem com opcoes")
+            this.enviaMensagemOpcoes(mensagem)
         }
         else{
             console.log("mensagem normal")
@@ -106,12 +106,15 @@ class mensagem {
 
     //--------------------------------------------------------------------------------------------
 
-    static enviaMensagemSetores(mensagem) {
+    static enviaMensagemOpcoes(mensagem) {
         console.log("enviando mensagem")
         console.log(mensagem)
         const para = mensagem.to
         const telefoneId = mensagem.phoneId
         const texto = mensagem.text
+        const opcao1 = mensagem.parameters.opcao1
+        const opcao2 = mensagem.parameters.opcao2
+        const opcao3 = mensagem.parameters.opcao3
         try {
             axios({
                 method: "POST",
@@ -131,21 +134,21 @@ class mensagem {
                                     "type": "reply",
                                     "reply": {
                                         "id": "1",
-                                        "title": "SAC"
+                                        "title": opcao1
                                     }
                                 },
                                 {
                                     "type": "reply",
                                     "reply": {
                                         "id": "2",
-                                        "title": "Comercial"
+                                        "title": opcao2
                                     }
                                 },
                                 {
                                     "type": "reply",
                                     "reply": {
                                         "id": "3",
-                                        "title": "Motorista"
+                                        "title": opcao3
                                     }
                                 }
                             ]

@@ -34,12 +34,14 @@ class whatsapp {
     }
 
     static recebeMensagem = async (req, res) => {
-        //trata mensagem recebida
         let body_param = req.body
-        console.log(JSON.stringify(body_param, null, 2))
-
+        //console.log(JSON.stringify(body_param, null, 2))
+        
+        //trata mensagem recebida
+        //verifica se é uma mensagem normal
         try {
             if (body_param.object) {
+                //Texto normal
                 if (body_param.entry[0].changes[0].value.messages[0].text.body) {
                     let name = body_param.entry[0].changes[0].value.contacts[0].profile.name
                     let telefone = body_param.entry[0].changes[0].value.messages[0].from
@@ -62,6 +64,28 @@ class whatsapp {
         } catch (error) {
             console.log(JSON.stringify(body_param, null, 2))
             res.sendStatus(200)
+        }
+        //verifica se é um botao
+        try {
+            //Botao respondido
+            if(body_param.entry[0].changes[0].value.messages[0].interactive.button_reply.id){
+                console.log("botao encontrado")
+                let name = body_param.entry[0].changes[0].value.contacts[0].profile.name
+                let telefone = body_param.entry[0].changes[0].value.messages[0].from
+                let phoneId = body_param.entry[0].changes[0].value.metadata.phone_number_id
+                let timestamp = body_param.entry[0].changes[0].value.messages[0].timestamp
+                let text = body_param.entry[0].changes[0].value.messages[0].interactive.button_reply.id
+                const mensagem = {
+                    phoneId,
+                    to: "5511945718427",
+                    timestamp,
+                    text
+                }
+                console.log(`Cliente respondeu nome: ${name}, telefone: ${telefone}, id: ${phoneId}, timestamp: ${timestamp}, texto: ${text}`)
+                this.verificaContato(name, telefone, mensagem)
+            }
+        } catch (error) {
+            console.log(JSON.stringify(body_param, null, 2))
         }
     }
 
@@ -145,7 +169,6 @@ class whatsapp {
         }
     }
 
-
     // -------------------------------------------------------------------------------------------
 
     static async salvaMensagem(contato, mensagem) {
@@ -193,6 +216,7 @@ class whatsapp {
         }
     }
     // -------------------------------------------------------------------------------------------
+
     static listaMensagensByTelefone = async (req, res) => {
         const telefone = req.params.telefone;
         try {
