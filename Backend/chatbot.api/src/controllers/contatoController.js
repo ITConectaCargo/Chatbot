@@ -61,10 +61,6 @@ class contato {
             res.status(500).json({ message: error.message })
         }
     }
-
-    static atualizaContato = (req, res) => {
-
-    }
 }
 
 export default contato

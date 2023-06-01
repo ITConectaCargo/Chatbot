@@ -3,9 +3,11 @@ import mongoose from 'mongoose'
 const nfeSchema = new mongoose.Schema({
     client: { type: mongoose.Schema.Types.ObjectId, ref: 'contatos', require: true },
     key: { type: String },
+    freightDate: { type: Date },
+    appointmentDate: { type: Date },
     product: { type: String },
     value: { type: Number },
-    status: {type: String},
+    status: { type: String },
     shipper: { type: String }
 })
 

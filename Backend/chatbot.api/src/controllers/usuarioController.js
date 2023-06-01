@@ -146,10 +146,6 @@ class usuario {
             console.log(error)
         }
     }
-
-    static atualizaUsuario = (req, res) => {
-
-    }
 }
 
 export default usuario

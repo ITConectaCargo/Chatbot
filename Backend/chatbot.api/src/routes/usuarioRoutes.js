@@ -9,6 +9,5 @@ router
     .get("/usuario/:id", autenticacao, usuarioController.consultaUsuarioById)
     .post("/usuario/novo", usuarioController.criarUsuario)
     .post("/usuario/autenticacao", usuarioController.autenticaUsuario)
-    .put("/usuario", autenticacao, usuarioController.atualizaUsuario)
 
 export default router

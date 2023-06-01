@@ -80,14 +80,14 @@ class mensagem {
                                     "type": "reply",
                                     "reply": {
                                         "id": "1",
-                                        "title": "sim"
+                                        "title": "Sim"
                                     }
                                 },
                                 {
                                     "type": "reply",
                                     "reply": {
                                         "id": "2",
-                                        "title": "nao"
+                                        "title": "Não"
                                     }
                                 }
                             ]

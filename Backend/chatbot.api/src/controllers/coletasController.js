@@ -1,6 +1,8 @@
 import Contatos from '../models/contato.js';
 import dbSql from '../config/dbSqlConfig.js'
 import Nfe from '../models/nfe.js';
+import moment from 'moment'
+import axios from 'axios';
 
 class coleta {
 
@@ -89,35 +91,41 @@ class coleta {
 
         if (contato || contato !== "") { //se contato nao esta vazio
             console.log("contato preenchido")
-            console.log(contato)
             let existeNota = ""
             try {
                 existeNota = await Nfe.findOne({ key: dadosSql.chaveNfe });
-                console.log("existe nota?")
-                console.log(existeNota)
+                console.log("existe nota")
             } catch (error) {
                 console.log("Nf nao localizada")
             }
 
             if (!existeNota || existeNota === "") {
-                let coleta = ""
-                /*
+                let coletaStatus = ""
+                let dataFrete = ""
+
                 try {
-                    coleta = await this.consultaAgendamento(dadosSql.chaveNfe)
-                    console.log(coleta)
+                    console.log("consultando ESL")
+                    await axios.get(`http://localhost:9000/coleta/agendamento/${dadosSql.chaveNfe}`)
+                        .then(resposta => {
+                            const ultimoObjeto = resposta.data.pop();
+                            const primeiroObjeto = resposta.data[0]
+                            coletaStatus = ultimoObjeto.occurrence.code //pega o codigo do status
+                            dataFrete = primeiroObjeto.created_at
+                        })
+                        .catch(error => console.log(error))
                 } catch (error) {
                     console.log(error)
                 }
-                */
 
                 try {
                     console.log("criando NF")
                     const nota = {
                         client: contato._id,
                         key: dadosSql.chaveNfe,
+                        freightDate: dataFrete,
                         product: dadosSql.descricaoProduto,
                         value: dadosSql.valorTotalNf,
-                        status: "",
+                        status: coletaStatus,
                         shipper: dadosSql.nomeMkt
                     };
 
@@ -131,22 +139,44 @@ class coleta {
         return contato
     }
 
-    static consultaAgendamento = async (req, res) => {
-        const chaveNfe = req.params.chaveNfe
-
-        await axios.get(`https://conecta.eslcloud.com.br/api/invoice_occurrences?invoice_key=${chaveNfe}`, {
-            headers: {
-                Authorization: `Bearer qxYaURbavegtz2sLsZjAVxsLT-a-_i2r_BE7yxzVTP_TvjsuuYWQ9w`
+    static calculaDataAgendamento = (dataNf) => {
+        try {
+            let data = moment(dataNf, 'YYYY-MM-DD')
+            let diasAdicionados = 0;
+            while (diasAdicionados < 3) {
+                data.add(1, 'days');
+                if (data.isoWeekday() < 6) {
+                    // Adiciona apenas se não for sábado ou domingo
+                    diasAdicionados++;
+                }
             }
-        })
-            .then(resposta => {
-                console.log(resposta.data)
-                res.status(200).json(resposta.data)
+
+            const dataAgendamento = data
+
+            res.status(200).json({
+                dataAgendamento: dataAgendamento.format('DD/MM/YYYY'),
             })
-            .catch(error => {
-                console.log(error)
-                res.status(500).json(error)
-            })
+        } catch (error) {
+            res.status(500).json(error)
+        }
+    }
+
+    static consultaAgendamento = async (req, res) => {
+        const chaveNfe = req.params.chaveNfe;
+
+        try {
+            const response = await fetch(`https://conecta.eslcloud.com.br/api/invoice_occurrences?invoice_key=${chaveNfe}`, {
+                headers: {
+                    Authorization: `Bearer qxYaURbavegtz2sLsZjAVxsLT-a-_i2r_BE7yxzVTP_TvjsuuYWQ9w`
+                }
+            });
+
+            const dados = await response.json();
+            res.status(200).json(dados.data);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json(error);
+        }
     }
 }
 
