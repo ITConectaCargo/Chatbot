@@ -50,9 +50,7 @@ class coleta {
             });
         });
     }
-
-    //---------------------------------------------------------------
-
+    
     static verificaMongo = async (dadosSql, telefone) => {
         let contato = ""
 

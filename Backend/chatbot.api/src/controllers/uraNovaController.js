@@ -81,7 +81,7 @@ class ura {
                 console.log("ura NF aceitaTermos")
                 let instrucoes = 
                 "*Instruções*\n\n" 
-                + "Nosso horário de coleta é das 08:00 às 18:00, de segunda à sexta.\n" 
+                + "Nosso horário de coleta é das 08h às 18h, de segunda à sexta.\n" 
                 + "Seu produto deve estar desmontado.\n" 
                 + "Se possível, embalado, caso contrário faremos a coleta de forma que seu produto esteja protegido.\n\n" 
                 + "Os produtos a serem coletados serão conferidos pelo responsável da coleta:\n" 
@@ -95,10 +95,9 @@ class ura {
                 + "Para sua segurança:\n" 
                 + "Você receberá um documento assinado pelo responsável da coleta, comprovando a realização da mesma.\n" 
                 + "Você deverá assinar uma via do comprovante, precisamos de seu nome completo e documento (RG ou CPF).\n"
-                + "\n*Voce aceita os termos citados acima?*";
 
                 botMensagem.text = instrucoes;
-                botMensagem.template = "botao";
+                botMensagem.template = "concordo";
                 fila.botStage = "NF confirmaEndereco"
                 await this.preparaMensagemBot(botMensagem, fila);
             }
@@ -124,7 +123,7 @@ class ura {
 
         if (fila.botStage == "NF confirmaEndereco") {
             //caso Inicio positivo
-            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Concordo") {
                 console.log("ura NF confirmaEndereco");
                 let texto =
                     "Encontrei este endereço em meu banco de dados:\n\n" +
@@ -142,7 +141,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila);
             }
             //caso Inicio negativo
-            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "nao") {
+            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Discordo") {
                 console.log("ura NF aceitaTermos negativo")
                 let texto = `Ok, sem problemas\n`
                     + `Vou te transferir para um de nossos atendentes\n`

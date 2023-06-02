@@ -93,8 +93,6 @@ class fila {
         }
     }
 
-    // ----------------------------------------------------------------------------------
-
     static async verificaAtendimento(mensagem) {
         console.log("verificando atendimento")
         let fila = ""

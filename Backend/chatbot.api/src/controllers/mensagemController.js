@@ -7,7 +7,6 @@ const token = process.env.TOKEN
 class mensagem {
 
     static identificaMensagem = (mensagem) => {
-        console.log(mensagem)
         if(mensagem.template === 'botao'){
             console.log("mensagem com botao")
             this.enviaMensagemBotao(mensagem)
@@ -19,6 +18,10 @@ class mensagem {
         else if(mensagem.template === "opcoes"){
             console.log("mensagem com opcoes")
             this.enviaMensagemOpcoes(mensagem)
+        }
+        else if(mensagem.template === "concordo"){
+            console.log("mensagem com opcoes")
+            this.enviaMensagemConcordo(mensagem)
         }
         else{
             console.log("mensagem normal")
@@ -52,8 +55,6 @@ class mensagem {
             console.log(error)
         }
     }
-
-    //-----------------------------------------------------------------------
 
     static enviaMensagemBotao(mensagem) {
         console.log("enviando mensagem")
@@ -104,7 +105,54 @@ class mensagem {
         }
     }
 
-    //--------------------------------------------------------------------------------------------
+    static enviaMensagemConcordo(mensagem) {
+        console.log("enviando mensagem")
+        console.log(mensagem)
+        const para = mensagem.to
+        const telefoneId = mensagem.phoneId
+        const texto = mensagem.text
+        try {
+            axios({
+                method: "POST",
+                url: "https://graph.facebook.com/v16.0/" + telefoneId + "/messages?access_token=" + token,
+                data: {
+                    messaging_product: "whatsapp",
+                    to: para,
+                    "type": "interactive",
+                    "interactive": {
+                        "type": "button",
+                        "body": {
+                            "text": texto
+                        },
+                        "action": {
+                            "buttons": [
+                                {
+                                    "type": "reply",
+                                    "reply": {
+                                        "id": "1",
+                                        "title": "Concordo"
+                                    }
+                                },
+                                {
+                                    "type": "reply",
+                                    "reply": {
+                                        "id": "2",
+                                        "title": "Discordo"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    headers: {
+                        "Authorization": "Bearer",
+                        "Content-Type": "application/json"
+                    }
+                }
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     static enviaMensagemOpcoes(mensagem) {
         console.log("enviando mensagem")
@@ -164,8 +212,6 @@ class mensagem {
             console.log(error)
         }
     }
-
-    //--------------------------------------------------------------------------------------------
 
     static enviaMensagemTemplate(mensagem) {
         console.log("enviando mensagem")

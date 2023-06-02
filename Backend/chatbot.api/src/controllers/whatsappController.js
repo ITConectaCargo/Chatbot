@@ -1,4 +1,3 @@
-import axios from "axios"
 import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
 import Contatos from "../models/contato.js"
@@ -11,7 +10,6 @@ dotenv.config()
 
 const baseURL = "http://localhost:9000/"
 const socket = io.connect(baseURL);
-const token = process.env.TOKEN
 const mytoken = process.env.MYTOKEN
 
 
@@ -62,7 +60,7 @@ class whatsapp {
                 }
             }
         } catch (error) {
-            console.log(JSON.stringify(body_param, null, 2))
+            //console.log(JSON.stringify(body_param, null, 2))
             res.sendStatus(200)
         }
         //verifica se é um botao
@@ -85,7 +83,6 @@ class whatsapp {
                 this.verificaContato(name, telefone, mensagem)
             }
         } catch (error) {
-            console.log(JSON.stringify(body_param, null, 2))
         }
          //verifica se é um botao
          try {
@@ -107,11 +104,8 @@ class whatsapp {
                 this.verificaContato(name, telefone, mensagem)
             }
         } catch (error) {
-            console.log(JSON.stringify(body_param, null, 2))
         }
     }
-
-    // -------------------------------------------------------------------------------------------
 
     static async verificaContato(nome, telefone, mensagem) {
         let contato = ""
@@ -191,8 +185,6 @@ class whatsapp {
         }
     }
 
-    // -------------------------------------------------------------------------------------------
-
     static async salvaMensagem(contato, mensagem) {
         console.log("salvando mensagem")
         let room = ''
@@ -224,8 +216,6 @@ class whatsapp {
             console.log(error)
         }
     }
-
-    // -------------------------------------------------------------------------------------------
     
     static preparaMensagem = async (req, res) => {
         console.log("preparando mensagem")
@@ -237,7 +227,6 @@ class whatsapp {
             res.sendStatus(500)
         }
     }
-    // -------------------------------------------------------------------------------------------
 
     static listaMensagensByTelefone = async (req, res) => {
         const telefone = req.params.telefone;
