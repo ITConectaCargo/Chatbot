@@ -150,14 +150,10 @@ class coleta {
                     diasAdicionados++;
                 }
             }
-
             const dataAgendamento = data
-
-            res.status(200).json({
-                dataAgendamento: dataAgendamento.format('DD/MM/YYYY'),
-            })
+            return dataAgendamento
         } catch (error) {
-            res.status(500).json(error)
+             console.log(error)
         }
     }
 

@@ -1,4 +1,4 @@
-import Nfe from '../models/nfe'
+import Nfe from '../models/nfe.js'
 
 class nfe {
 
@@ -21,10 +21,11 @@ class nfe {
     }
 
     static atualizaNfById = async (req, res) => {
+        const id = req.params.id
         const dados = req.body
         try {
             const nf = await Nfe.findByIdAndUpdate(
-                dados._id,
+                id,
                 {
                     appointmentDate: dados.appointmentDate,
                     status: dados.status
