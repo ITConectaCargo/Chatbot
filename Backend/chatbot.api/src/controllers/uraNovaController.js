@@ -1,8 +1,10 @@
 import Contatos from "../models/contato.js"
 import Mensagem from "../models/mensagem.js"
 import Nfs from '../models/nfe.js'
+import Nfe from '../controllers/nfeController.js'
 import Coleta from "./coletasController.js"
 import Fila from './filaController.js'
+import Contato from "../controllers/contatoController.js"
 import axios from 'axios'
 const baseURL = 'http://localhost:9000/'
 
@@ -36,7 +38,7 @@ class ura {
 
         //Verifica se existe NF deste cliente
         try {
-            nf = await Nfs.findOne({ client: fila.from, status: { $in: ['300', '114', '308'] } }) //busca NF status 300 ou 114
+            nf = await Nfs.findOne({ client: fila.from, status: { $in: ['114', '308', "112"] } }) //busca NF status114(a Agendar) ou 308(reagendar)
                 .populate("client")
                 .exec()
             console.log("encontrou NF na ura")
@@ -48,22 +50,20 @@ class ura {
                 shipper: nf.shipper
             }
 
-            this.uraAtendimentoNf(fila, ultimaMensagem, botMensagem, nf)
+            this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf)
         } catch (error) {
-            console.log(error)
             console.log("nao encontrou NF na ura")
-
             this.uraAtendimento(fila, ultimaMensagem, botMensagem)
         }
     }
 
-    static async uraAtendimentoNf(fila, ultimaMensagem, botMensagem, nf) {
-        console.log("cheguei na ura")
+    static async uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf) {
+        console.log("cheguei na ura Agendamento")
         //Inicia o Bot
         if (fila.botStage == 0) {
             console.log("ura NF Inicio")
             let texto =
-                `*Olá ${botMensagem.parameters.name}*, tudo bem?\n\n`
+                `*Olá ${botMensagem.parameters.name}, tudo bem?*\n\n`
                 + `Localizei aqui que voce quer devolver o(s) produto(s)\n\n *${botMensagem.parameters.product}*\n\n`
                 + `Nos somos transportadores autorizados: \n\n*${botMensagem.parameters.shipper}*\n\n`
                 + `Gostaria de agendar a devolução?\n\n`
@@ -75,26 +75,26 @@ class ura {
             this.preparaMensagemBot(botMensagem, fila)
         }
 
-        if (fila.botStage == "NF aceitaTermos") {
+        else if (fila.botStage == "NF aceitaTermos") {
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 // Instruções
                 console.log("ura NF aceitaTermos")
-                let instrucoes = 
-                "*Instruções*\n\n" 
-                + "Nosso horário de coleta é das 08h às 18h, de segunda à sexta.\n" 
-                + "Seu produto deve estar desmontado.\n" 
-                + "Se possível, embalado, caso contrário faremos a coleta de forma que seu produto esteja protegido.\n\n" 
-                + "Os produtos a serem coletados serão conferidos pelo responsável da coleta:\n" 
-                + " - Modelo;\n" 
-                + " - Marca;\n" 
-                + " - Número de série;\n" 
-                + " - IMEI, em caso de celulares e smartwatches;\n" 
-                + " - Tamanho;\n" 
-                + " - Outros detalhes de acordo com cada produto;\n" 
-                + "A coleta só poderá ser realizada se um responsável maior de 18 anos estiver presente.\n\n" 
-                + "Para sua segurança:\n" 
-                + "Você receberá um documento assinado pelo responsável da coleta, comprovando a realização da mesma.\n" 
-                + "Você deverá assinar uma via do comprovante, precisamos de seu nome completo e documento (RG ou CPF).\n"
+                let instrucoes =
+                    "*Instruções*\n\n"
+                    + "Nosso horário de coleta é das 08h às 18h, de segunda à sexta.\n"
+                    + "Seu produto deve estar desmontado.\n"
+                    + "Se possível, embalado, caso contrário faremos a coleta de forma que seu produto esteja protegido.\n\n"
+                    + "Os produtos a serem coletados serão conferidos pelo responsável da coleta:\n"
+                    + " - Modelo;\n"
+                    + " - Marca;\n"
+                    + " - Número de série;\n"
+                    + " - IMEI, em caso de celulares e smartwatches;\n"
+                    + " - Tamanho;\n"
+                    + " - Outros detalhes de acordo com cada produto;\n"
+                    + "A coleta só poderá ser realizada se um responsável maior de 18 anos estiver presente.\n\n"
+                    + "Para sua segurança:\n"
+                    + "Você receberá um documento assinado pelo responsável da coleta, comprovando a realização da mesma.\n"
+                    + "Você deverá assinar uma via do comprovante, precisamos de seu nome completo e documento (RG ou CPF).\n"
 
                 botMensagem.text = instrucoes;
                 botMensagem.template = "concordo";
@@ -102,7 +102,7 @@ class ura {
                 await this.preparaMensagemBot(botMensagem, fila);
             }
             //caso Inicio negativo
-            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "nao") {
+            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF Inicio negativo")
                 let texto = `Ok, sem problemas\n`
                     + `Com qual setor você gostaria de conversar?`
@@ -121,7 +121,7 @@ class ura {
             }
         }
 
-        if (fila.botStage == "NF confirmaEndereco") {
+        else if (fila.botStage == "NF confirmaEndereco") {
             //caso Inicio positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Concordo") {
                 console.log("ura NF confirmaEndereco");
@@ -156,9 +156,9 @@ class ura {
             }
         }
 
-        if (fila.botStage == "NF produtoDesmontado") {
+        else if (fila.botStage == "NF produtoDesmontado") {
             //Caso Confirma endereço positivo
-            if (ultimaMensagem.text == "1") {
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF produtoDesmontado")
                 let texto = `O produto que você está devolvendo está desmontado?`
                 //coloca mensagem no Bot
@@ -168,7 +168,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso Confirma endereço negativo
-            if (ultimaMensagem.text == "2") {
+            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF confirmaEndereco negativo")
                 let texto = `Entendi\n`
                     + `Vou te transferir para um de nossos atendentes\n`
@@ -182,9 +182,9 @@ class ura {
             }
         }
 
-        if (fila.botStage == "NF apartamento") {
+        else if (fila.botStage == "NF apartamento") {
             //Caso produto desmontado positivo
-            if (ultimaMensagem.text == "1") {
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF apartamento")
                 let texto = `Você mora em apartamento?`
                 //coloca mensagem no Bot
@@ -194,7 +194,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso produto desmontado negativo
-            if (ultimaMensagem.text == "2") {
+            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF produtoDesmontado negativo")
                 let texto = `Entendi\n`
                     + `Vou te transferir para um de nossos atendentes\n`
@@ -208,9 +208,9 @@ class ura {
             }
         }
 
-        if (fila.botStage == "NF andar") {
+        else if (fila.botStage == "NF andar") {
             //Caso mora em apartamento positivo
-            if (ultimaMensagem.text == "1") {
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF andar")
                 let texto = `Em qual andar você mora?`
                 //coloca mensagem no Bot
@@ -225,7 +225,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso mora em apartamento negativo
-            if (ultimaMensagem.text == "2") {
+            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 let dataAgendamento = Coleta.calculaDataAgendamento(nf.freightDate) //Calcula data de agendamento
                 axios.put(`${baseURL}nfe/${nf._id}`, { //salva data no banco
                     appointmentDate: dataAgendamento
@@ -247,7 +247,7 @@ class ura {
             }
         }
 
-        if (fila.botStage == "NF elevador") {
+        else if (fila.botStage == "NF elevador") {
             //Caso andar acima do 4 andar positivo
             if (ultimaMensagem.text == "2" || ultimaMensagem.text == "3") {
                 console.log("ura NF elevador")
@@ -281,9 +281,9 @@ class ura {
             }
         }
 
-        if (fila.botStage == "NF aceitaData") {
+        else if (fila.botStage == "NF aceitaData") {
             //Caso confirma data positivo
-            if (ultimaMensagem.text == "1") {
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 let dataAgendamento = Coleta.calculaDataAgendamento(nf.freightDate) //Calcula data de agendamento
                 axios.put(`${baseURL} nfe / ${nf._id} `, { // salva data no banco
                     appointmentDate: dataAgendamento
@@ -304,7 +304,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso confirma data negativo
-            if (ultimaMensagem.text == "2") {
+            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF confimaData Negativo")
                 let texto = `Entendi\n`
                     + `Vou te transferir para um de nossos atendentes\n`
@@ -318,9 +318,9 @@ class ura {
             }
         }
 
-        if (fila.botStage == "NF confirmaData") {
+        else if (fila.botStage == "NF confirmaData") {
             //Caso confirma data positivo
-            if (ultimaMensagem.text == "1") {
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF Enviando pra o ESL")
                 let texto = `Agendado com sucesso`
                 //coloca mensagem no Bot
@@ -331,7 +331,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso confirma data negativo
-            if (ultimaMensagem.text == "2") {
+            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 axios.put(`${baseURL}nfe/${nf._id}`, { //salva data no banco
                     appointmentDate: ""
                 })
@@ -350,25 +350,68 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
         }
+
+        else if (fila.botStage == "confirmaCpfCnpj") {
+            //consulta CPF CNPJ positivo
+            if(ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim"){
+                fila.botStage = 0
+                this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf)
+            }
+
+            else if(ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
+
+            }
+        }
     }
 
-    static async uraAtendimento(fila, ultimaMensagem, botMensagem) {
+    static async uraAtendimento(fila, ultimaMensagem, botMensagem, nf) {
         console.log("ura sem NF")
         if (fila.botStage == 0) {
             console.log("ura 0")
-            let texto = `Olá, tudo bem ?\n`
-                + `Não encontramos nenhuma coleta a agendar em nosso banco de dados com base deste telefone\n`
-                + `Com qual setor você gostaria de conversar ? `
+            let texto = `Olá, tudo bem?\n`
+                + `Fiz uma breve busca em nossos sistemas com base em seu telefone, e infelizmente nao encontramos nenhum devolucao em seu nome\n`
+                + `Poderia digitar o seu numero CPF ou CNPJ, para eu realizar mais uma consulta`
+
             botMensagem.text = texto
-            botMensagem.template = "opcoes"
-            botMensagem.parameters = {
-                opcao1: "SAC",
-                opcao2: "Comercial",
-                opcao3: "Motorista"
-            }
-            fila.botStage = 0
-            fila.status = "finalizado"
+            botMensagem.template = ""
+            fila.botStage = "consultaCpfCnpj"
             this.preparaMensagemBot(botMensagem, fila)
+        }
+
+        else if (fila.botStage == "consultaCpfCnpj") {
+            console.log("ura consultaCpfCnpj")
+            let dadosSql = ""
+            let contato = ""
+            try {
+                dadosSql = await Coleta.consultaByCpfCnpj(ultimaMensagem.text)
+            } catch (error) {
+                console.log("Nao encontrou dados")
+            }
+
+            if (dadosSql.length !== 0) {
+                //atualiza dados do contato
+                contato = await Contato.atualizaDadosContatoBySql(dadosSql[0], fila.from._id)
+                await Nfe.criaNfBySql(dadosSql, fila.from._id)
+
+                let texto =
+                    `Encontrei este nome no CPF/CNPJ digitado\n\n`
+                    + `*${contato.name}*\n\n`
+                    + `voce confirma os dados acima?`
+
+                botMensagem.text = texto
+                botMensagem.template = "botao"
+                fila.botStage = "confirmaCpfCnpj"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            else {
+                let texto = `Desculpe, Nao Localizei este CPF/CNPJ em nosso banco de dados\n`
+                    + `\nPoderia me passar o numero da NF?`
+
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = 0
+                this.preparaMensagemBot(botMensagem, fila)
+            }
         }
     }
 

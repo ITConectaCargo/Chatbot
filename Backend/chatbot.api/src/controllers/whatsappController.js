@@ -1,6 +1,7 @@
 import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
 import Contatos from "../models/contato.js"
+import Contato from "../controllers/contatoController.js"
 import Filas from "../models/fila.js"
 import io from "socket.io-client";
 import dotenv from 'dotenv'
@@ -140,16 +141,17 @@ class whatsapp {
 
             console.log(`itens em dados ${dadosSql.length}`)
 
+            //se existir dados no Sql
             if (dadosSql.length !== 0) {
                 console.log("encontrou dados no SQL")
                 let contador = dadosSql.length
-
+                
                 try {
-                    contato = await Coleta.verificaMongo(dadosSql[0], telefone)
+                    contato = await Coleta.verificaMongo(dadosSql[0], telefone) //verifica se existe os dados no mongo
                 } catch (error) {
                     console.log(error)
                 }
-
+    
                 if (contador > 1) {
                     console.log(`Achei ${contador} Nfs`)
                     dadosSql.forEach(element => {
@@ -158,13 +160,14 @@ class whatsapp {
                 }
             }
             else{
+                //adiciona o contato no mongo com os dados do whatsapp
                 console.log("nao encontrou nada no BD")
                 let newContato =  new Contatos({
                     "name": nome,
                     "nameWhatsapp": nome,
                     "tel": telefone,
                 })
-
+    
                 contato = await newContato.save()
             }
 

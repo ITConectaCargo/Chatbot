@@ -61,6 +61,28 @@ class contato {
             res.status(500).json({ message: error.message })
         }
     }
+
+    static atualizaDadosContatoBySql = async (dadosSql, contatoId) => {
+        const contato = await Contatos.findByIdAndUpdate(
+            contatoId, //busca contato pelo Id
+            {
+                name: dadosSql.nomeCliente,
+                nameWhatsapp: dadosSql.nomeCliente,
+                cpfCnpj: dadosSql.cpfCnpj,
+                address: {
+                    street: dadosSql.logradouro,
+                    district: dadosSql.bairro,
+                    city: dadosSql.cidade,
+                    state: dadosSql.uf,
+                    cep: dadosSql.cep,
+                    complement: dadosSql.complemento,
+                }
+            },
+            { new: true } //retorna o valor atualizado
+        )  
+
+        return contato
+    }
 }
 
 export default contato
