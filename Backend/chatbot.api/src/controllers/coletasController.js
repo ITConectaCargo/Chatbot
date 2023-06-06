@@ -104,45 +104,47 @@ class coleta {
         }
     }
 
-    static consultaByNf = async (nf) => {
-        try {
-            const query = `
-            SELECT DISTINCT
-                tbl_coleta.cpfCnpj,
-                clientes.nomeCliente,
-                clientes.logradouro,
-                clientes.numero,
-                clientes.bairro,
-                clientes.cidade,
-                clientes.uf,
-                clientes.cep,
-                clientes.complemento,
-                tbl_coleta.valorTotalNf,
-                tbl_coleta.chaveNfe,
-                tbl_coleta_produto.descricaoProduto,
-                marketplace.nomeMkt
-            FROM
-                tbl_coleta
-            INNER JOIN
-                clientes ON tbl_coleta.cpfCnpj = clientes.cpfCnpj
-            INNER JOIN
-                marketplace ON tbl_coleta.cnpjCpf = marketplace.cnpjCpf
-            INNER JOIN
-                mktclientesnfe ON tbl_coleta.chaveNfe = mktclientesnfe.chaveNFe
-            INNER JOIN
-                tbl_coleta_produto ON mktclientesnfe.codProduto = tbl_coleta_produto.codProduto
-            WHERE
-                tbl_coleta.chaveNfe LIKE '%${nf}%';
-        `;
+    static consultaByNf = async (nota) => {
 
-            return new Promise((resolve, reject) => {
-                dbSql.query(query, [nf], (error, results) => {
+        if (nota.length !== 9) {
+            nota = String(nota).padStart(9, '0') //adiciona zeros a esquerda ate dar 9 digitos
+        }
+
+        try {
+            const query = `SELECT DISTINCT
+            tbl_coleta.cpfCnpj,
+            clientes.nomeCliente,
+            clientes.logradouro,
+            clientes.numero,
+            clientes.bairro,
+            clientes.cidade,
+            clientes.uf,
+            clientes.cep,
+            clientes.complemento,
+            tbl_coleta.valorTotalNf,
+            tbl_coleta.chaveNfe,
+            tbl_coleta_produto.descricaoProduto,
+            marketplace.nomeMkt
+        FROM
+            tbl_coleta
+        INNER JOIN
+            clientes ON tbl_coleta.cpfCnpj = clientes.cpfCnpj
+        INNER JOIN
+            marketplace ON tbl_coleta.cnpjCpf = marketplace.cnpjCpf
+        INNER JOIN
+            mktclientesnfe ON tbl_coleta.chaveNfe = mktclientesnfe.chaveNFe
+        INNER JOIN
+            tbl_coleta_produto ON mktclientesnfe.codProduto = tbl_coleta_produto.codProduto
+        WHERE
+            RIGHT(tbl_coleta.chaveNfe, 25) LIKE '%${nota}%';`;
+
+            return await new Promise((resolve, reject) => {
+                dbSql.query(query, [nota], (error, results) => {
                     if (error) {
                         console.error('Erro ao executar a consulta: ' + error.stack);
                         reject({ message: 'Erro ao buscar dados.' });
                     } else {
                         let dados = results;
-                        console.log(dados);
                         resolve(dados);
                     }
                 });
