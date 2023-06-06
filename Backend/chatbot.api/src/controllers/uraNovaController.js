@@ -408,8 +408,8 @@ class ura {
         console.log("ura sem NF")
         if (fila.botStage == 0) {
             console.log("ura 0")
-            let texto = `Olá, tudo bem?\n`
-                + `Fiz uma breve busca em nossos sistemas com base no seu telefone, e infelizmente não encontramos nenhuma devolução em seu nome.\n`
+            let texto = `Olá, tudo bem? 🙂\n`
+                + `Fiz uma breve busca em nosso banco de dados, e infelizmente não encontramos devolução em seu nome.\n`
                 + `Poderia digitar o seu número de CPF ou CNPJ para eu realizar mais uma consulta?`;
 
             botMensagem.text = texto

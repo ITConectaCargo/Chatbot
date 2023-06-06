@@ -1,7 +1,6 @@
 import Fila from "./filaController.js"
 import Mensagens from "../models/mensagem.js"
 import Contatos from "../models/contato.js"
-import Contato from "../controllers/contatoController.js"
 import Filas from "../models/fila.js"
 import io from "socket.io-client";
 import dotenv from 'dotenv'
@@ -136,6 +135,14 @@ class whatsapp {
                 dadosSql = await Coleta.consultaByTelefone(telefone)
             } catch (error) {
                 console.log(error)
+            }
+
+            if(dadosSql.length === 0) {
+                try {
+                    dadosSql = await Coleta.consultaByCpfCnpj(contato.cpfCnpj)
+                } catch (error) {
+                    console.log(error)
+                }
             }
 
             console.log(`itens em dados ${dadosSql.length}`)
