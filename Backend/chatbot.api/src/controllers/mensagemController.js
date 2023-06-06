@@ -19,9 +19,9 @@ class mensagem {
             console.log("mensagem com opcoes")
             this.enviaMensagemOpcoes(mensagem)
         }
-        else if(mensagem.template === "concordo"){
+        else if(mensagem.template === "BotaoEditavel"){
             console.log("mensagem com opcoes")
-            this.enviaMensagemConcordo(mensagem)
+            this.enviaMensagemBotaoEditavel(mensagem)
         }
         else{
             console.log("mensagem normal")
@@ -105,12 +105,14 @@ class mensagem {
         }
     }
 
-    static enviaMensagemConcordo(mensagem) {
+    static enviaMensagemBotaoEditavel(mensagem) {
         console.log("enviando mensagem")
         console.log(mensagem)
         const para = mensagem.to
         const telefoneId = mensagem.phoneId
         const texto = mensagem.text
+        const opcao1 = mensagem.parameters.opcao1
+        const opcao2 = mensagem.parameters.opcao2
         try {
             axios({
                 method: "POST",
@@ -130,14 +132,14 @@ class mensagem {
                                     "type": "reply",
                                     "reply": {
                                         "id": "1",
-                                        "title": "Concordo"
+                                        "title": opcao1
                                     }
                                 },
                                 {
                                     "type": "reply",
                                     "reply": {
                                         "id": "2",
-                                        "title": "Discordo"
+                                        "title": opcao2
                                     }
                                 }
                             ]

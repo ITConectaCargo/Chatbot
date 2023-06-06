@@ -5,8 +5,8 @@ class contato {
 
     static consultaContato = async (req, res) => {
         try {
-            const tel = await Contatos.find()
-            res.status(200).send(tel)
+            const contato = await Contatos.find()
+            res.status(200).send(contato)
         } catch (error) {
             res.status(500).send({ message: error })
         }
@@ -60,6 +60,35 @@ class contato {
         } catch (error) {
             res.status(500).json({ message: error.message })
         }
+    }
+
+    static atualizaContato = async (req, res) => {
+        const dados = req.body
+        try {
+            const contato = await Contatos.findByIdAndUpdate(
+                {tel: dados.tel},
+                {
+                    name: dados.name,
+                    nameWhatsapp: dados.nameWhatsapp,
+                    cpfCnpj: dados.cpfCnpj,
+                    address: {
+                        street: dados.street,
+                        district: dados.district,
+                        city: dados.city,
+                        state: dados.state,
+                        cep: dados.cep,
+                        complement: dados.complement,
+                    }
+                },
+                { new: true } //retorna o valor atualizado
+            )
+            res.status(200).json(contato)
+        } catch (error) {
+            res.status(500).json(error)
+        }
+
+        
+        
     }
 
     static atualizaDadosContatoBySql = async (dadosSql, contatoId) => {

@@ -9,8 +9,7 @@ import Coleta from "./coletasController.js";
 import Mensagem from "./mensagemController.js"
 dotenv.config()
 
-const baseURL = "http://localhost:9000/"
-const socket = io.connect(baseURL);
+const socket = io.connect(process.env.BASEURL);
 const mytoken = process.env.MYTOKEN
 
 

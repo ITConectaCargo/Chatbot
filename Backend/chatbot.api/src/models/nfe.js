@@ -8,7 +8,8 @@ const nfeSchema = new mongoose.Schema({
     product: { type: String },
     value: { type: Number },
     status: { type: String },
-    shipper: { type: String }
+    shipper: { type: String },
+    date: { type: Date, default: Date.now }
 })
 
 const nfe = mongoose.model("nfes", nfeSchema)

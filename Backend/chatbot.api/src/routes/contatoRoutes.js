@@ -8,5 +8,6 @@ router
     .get("/contato", contatoController.consultaContato)
     .get("/contato/:telefone", autenticacao, contatoController.consultaContatoByTelefone)
     .post("/contato", contatoController.criarContato)
+    .put("/contato", contatoController.atualizaContato)
 
 export default router

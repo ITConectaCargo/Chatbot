@@ -42,7 +42,7 @@ class nfe {
     static criaNfBySql = async (dadosSql, contatoId) => {
         if (dadosSql.length >= 1) {
             console.log(`Achei ${dadosSql.length} Nfs`)
-            for (let contador = 0; contador <= dadosSql.length; contador++) {
+            for (let contador = 0; contador < dadosSql.length; contador++) {
                 let element = dadosSql[contador]
                 let existeNota = ""
                 try {
@@ -89,6 +89,95 @@ class nfe {
                     }
                 }
             }
+        }
+    }
+
+    static deletaNfeHoje = async (clienteId) => {
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+
+        Nfe.deleteMany({ client: clienteId, date: hoje }, (err) => {
+            if (err) {
+              console.error('Ocorreu um erro ao excluir as NFes:', err);
+            } else {
+              console.log('NFes excluídas com sucesso.');
+            }
+        })
+    }
+
+    static validacaoCpfCnpj = (cpfCnpj) => {
+        // Função para validar CPF
+        cpfCnpj = cpfCnpj.replace(/[^\d]+/g, ''); // Remove caracteres não numéricos
+
+        // Verifica se o CPF possui 11 dígitos
+        if (cpfCnpj.length === 11) {
+            // Calcula o primeiro dígito verificador
+            let soma = 0;
+            for (let i = 0; i < 9; i++) {
+                soma += parseInt(cpfCnpj.charAt(i)) * (10 - i);
+            }
+            let primeiroDigito = 11 - (soma % 11);
+            if (primeiroDigito > 9) {
+                primeiroDigito = 0;
+            }
+
+            // Calcula o segundo dígito verificador
+            soma = 0;
+            for (let i = 0; i < 10; i++) {
+                soma += parseInt(cpfCnpj.charAt(i)) * (11 - i);
+            }
+            let segundoDigito = 11 - (soma % 11);
+            if (segundoDigito > 9) {
+                segundoDigito = 0;
+            }
+
+            // Verifica se os dígitos verificadores são iguais aos últimos dígitos do CPF
+            if (primeiroDigito.toString() === cpfCnpj.charAt(9) && segundoDigito.toString() === cpfCnpj.charAt(10)) {
+                return true;
+            }
+
+            return false;
+
+        }
+        // Verifica se o CNPJ possui 14 dígitos
+        else if (cpfCnpj.length === 14) {
+            // Verifica se o CNPJ possui 14 dígitos
+            if (cpfCnpj.length !== 14) {
+                return false;
+            }
+
+            // Calcula o primeiro dígito verificador
+            let soma = 0;
+            let peso = 2;
+            for (let i = 11; i >= 0; i--) {
+                soma += parseInt(cpfCnpj.charAt(i)) * peso;
+                peso = peso === 9 ? 2 : peso + 1;
+            }
+            let primeiroDigito = 11 - (soma % 11);
+            if (primeiroDigito > 9) {
+                primeiroDigito = 0;
+            }
+
+            // Calcula o segundo dígito verificador
+            soma = 0;
+            peso = 2;
+            for (let i = 12; i >= 0; i--) {
+                soma += parseInt(cpfCnpj.charAt(i)) * peso;
+                peso = peso === 9 ? 2 : peso + 1;
+            }
+            let segundoDigito = 11 - (soma % 11);
+            if (segundoDigito > 9) {
+                segundoDigito = 0;
+            }
+            // Verifica se os dígitos verificadores são iguais aos últimos dígitos do CNPJ
+            if (primeiroDigito.toString() === cpfCnpj.charAt(12) && segundoDigito.toString() === cpfCnpj.charAt(13)) {
+                return true;
+            }
+
+            return false;
+        }
+        else {
+            return false
         }
     }
 

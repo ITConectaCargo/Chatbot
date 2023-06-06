@@ -2,7 +2,12 @@ import Contatos from '../models/contato.js';
 import dbSql from '../config/dbSqlConfig.js'
 import Nfe from '../models/nfe.js';
 import moment from 'moment'
+import dotenv from 'dotenv'
+dotenv.config()
+
+const baseURL = process.env.BASEURL
 import axios from 'axios';
+import fetch from 'node-fetch';
 
 class coleta {
 
@@ -151,7 +156,7 @@ class coleta {
 
                 try {
                     console.log("consultando ESL")
-                    await axios.get(`http://localhost:9000/coleta/agendamento/${dadosSql.chaveNfe}`)
+                    await axios.get(`${baseURL}coleta/agendamento/${dadosSql.chaveNfe}`)
                         .then(resposta => {
                             const ultimoObjeto = resposta.data.pop();
                             const primeiroObjeto = resposta.data[0]
