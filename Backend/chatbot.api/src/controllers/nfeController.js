@@ -93,16 +93,16 @@ class nfe {
     }
 
     static deletaNfeHoje = async (clienteId) => {
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
-
-        Nfe.deleteMany({ client: clienteId, date: hoje }, (err) => {
-            if (err) {
-              console.error('Ocorreu um erro ao excluir as NFes:', err);
-            } else {
-              console.log('NFes excluídas com sucesso.');
-            }
-        })
+        try {
+            const hoje = new Date();
+            hoje.setUTCHours(0, 0, 0, 0);
+        
+            // Excluindo os documentos do cliente criados na data de hoje
+            await Nfe.deleteMany({ client: clienteId, date: { $gte: hoje } });
+            console.log('NFes do cliente excluídas com sucesso.');
+          } catch (err) {
+            console.error('Ocorreu um erro ao excluir as NFes do cliente:', err);
+          }
     }
 
     static validacaoCpfCnpj = (cpfCnpj) => {

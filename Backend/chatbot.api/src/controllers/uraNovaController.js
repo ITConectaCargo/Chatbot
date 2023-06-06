@@ -45,7 +45,6 @@ class ura {
                 .populate("client")
                 .exec()
             console.log("encontrou NF na ura")
-            console.log(nf)
 
             botMensagem.parameters = {
                 name: nf.client.name,
@@ -366,11 +365,17 @@ class ura {
             }
 
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                //apaga dados do contato
                 let contato = ""
+                let dados = ""
+                //apaga dados do contato
+                try {
+                    dados = await Contatos.findOne({tel: botMensagem.to})
+                } catch (error) {
+                    console.log(error)
+                }
                 try {
                     contato = await Contatos.findByIdAndUpdate(
-                        {tel: dados.tel},
+                        dados.id,
                         {
                             name: "",
                             nameWhatsapp: "",
@@ -394,10 +399,10 @@ class ura {
                 await Nfe.deletaNfeHoje(contato._id)
 
                 let texto = `Me Desculpe, as vezes eu me confundo 😕\n\n`
-                    + `\nGostaria de tentar novamente?`
+                    + `Gostaria de tentar novamente?`
 
                 botMensagem.text = texto
-                botMensagem.template = "Botao"
+                botMensagem.template = "botao"
                 fila.botStage = "invalidoCpfCnpj"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
@@ -407,6 +412,7 @@ class ura {
     static async uraAtendimento(fila, ultimaMensagem, botMensagem, nf) {
         console.log("ura sem NF")
         if (fila.botStage == 0) {
+            //inicio
             console.log("ura 0")
             let texto = `Olá, tudo bem? 🙂\n`
                 + `Fiz uma breve busca em nosso banco de dados, e infelizmente não encontramos devolução em seu nome.\n`
@@ -425,6 +431,7 @@ class ura {
 
             let cpfCnpjValido = Nfe.validacaoCpfCnpj(ultimaMensagem.text) //veriica se o CPF ou CNPJ esta valido
 
+            //cpf é valido
             if (cpfCnpjValido === true) {
                 try {
                     dadosSql = await Coleta.consultaByCpfCnpj(ultimaMensagem.text) //Busca CPF ou CNPJ no banco SQL
@@ -432,6 +439,7 @@ class ura {
                     console.log("Nao encontrou dados")
                 }
 
+                //se existir dados do Sql
                 if (dadosSql.length !== 0) {
                     //atualiza dados do contato
                     contato = await Contato.atualizaDadosContatoBySql(dadosSql[0], fila.from._id) //Atualiza contato com os dados vindo do SQL
