@@ -66,7 +66,7 @@ class ura {
             console.log("ura NF Inicio")
             let texto =
                 `*Olá ${botMensagem.parameters.name}, tudo bem?*\n\n`
-                + `Localizei aqui que voce quer devolver o(s) produto(s)\n\n *${botMensagem.parameters.product}*\n\n`
+                + `Localizei aqui que você quer devolver o(s) produto(s)\n\n *${botMensagem.parameters.product}*\n\n`
                 + `Nos somos transportadores autorizados: \n\n*${botMensagem.parameters.shipper}*\n\n`
                 + `Gostaria de agendar a devolução?\n\n`
 
@@ -137,8 +137,8 @@ class ura {
                     "Bairro: " + nf.client.address.district + "\n" +
                     "Cidade: " + nf.client.address.city + " - " + nf.client.address.state + "\n" +
                     "Cep: " + nf.client.address.cep + "\n" +
-                    "Complemento: " + nf.client.address.complement + "\n" +
-                    "\nAs informações acima estão corretas?";
+                    "Complemento: " + nf.client.address.complement + "\n\n" +
+                    "As informações acima estão corretas?";
 
                 // Coloca mensagem no Bot
                 botMensagem.text = texto;
@@ -151,7 +151,7 @@ class ura {
                 console.log("ura NF aceitaTermos negativo")
                 let texto = `Ok, sem problemas\n`
                     + `Vou te transferir para um de nossos atendentes\n`
-                    + `Aguarde que em breve voce sera atendido`
+                    + `Aguarde que em breve você será atendido`
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -178,7 +178,7 @@ class ura {
                 console.log("ura NF confirmaEndereco negativo")
                 let texto = `Entendi\n`
                     + `Vou te transferir para um de nossos atendentes\n`
-                    + `Aguarde que em breve voce sera atendido`
+                    + `Aguarde que em breve você será atendido`
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -204,7 +204,7 @@ class ura {
                 console.log("ura NF produtoDesmontado negativo")
                 let texto = `Entendi\n`
                     + `Vou te transferir para um de nossos atendentes\n`
-                    + `Aguarde que em breve voce sera atendido`
+                    + `Aguarde que em breve você será atendido`
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -314,7 +314,7 @@ class ura {
                 console.log("ura NF confimaData Negativo")
                 let texto = `Entendi\n`
                     + `Vou te transferir para um de nossos atendentes\n`
-                    + `Aguarde que em breve voce sera atendido`
+                    + `Aguarde que em breve você será atendido`
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -347,7 +347,7 @@ class ura {
                 console.log("ura NF confimaData Negativo")
                 let texto = `Entendi\n`
                     + `Vou te transferir para um de nossos atendentes\n`
-                    + `Aguarde que em breve voce sera atendido`
+                    + `Aguarde que em breve você será atendido`
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -361,6 +361,7 @@ class ura {
             //consulta CPF CNPJ positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 fila.botStage = 0
+                //refaz os passos do bot
                 this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf)
             }
 
@@ -414,9 +415,9 @@ class ura {
         if (fila.botStage == 0) {
             //inicio
             console.log("ura 0")
-            let texto = `Olá, tudo bem? 🙂\n`
-                + `Fiz uma breve busca em nosso banco de dados, e infelizmente não encontramos devolução em seu nome.\n`
-                + `Poderia digitar o seu número de CPF ou CNPJ para eu realizar mais uma consulta?`;
+            let texto = `Olá, tudo bem? 🙂\n\n`
+                + `Fiz uma breve busca em nosso banco de dados e infelizmente não encontramos devolução em seu nome.\n`
+                + `\nPoderia digitar o seu número de CPF ou CNPJ para eu realizar mais uma consulta? *(digite apenas números)*`;
 
             botMensagem.text = texto
             botMensagem.template = ""
@@ -456,6 +457,7 @@ class ura {
                     return this.preparaMensagemBot(botMensagem, fila)
                 }
                 else {
+
                     let texto = `Desculpe 😕\n\n`
                         + `Mas não consegui localizar este CPF/CNPJ em nosso Sistema\n`
                         + `\nPosso tentar localizar via Nota Fiscal ou preferir eu posso te transferir para um de nossos atendentes?`
@@ -471,15 +473,36 @@ class ura {
                 }
             }
             else {
-                let texto = `Poxa 😕\n\n`
-                    + `Parece que tem algo errado com este CPF ou CNPJ\n\n`
-                    + `*${ultimaMensagem.text}*\n\n`
-                    + `Gostaria de tentar novamente?`
+                let mensagem = parseInt(ultimaMensagem.text) //converte mensagem para numero
 
-                botMensagem.text = texto
-                botMensagem.template = "botao"
-                fila.botStage = "invalidoCpfCnpj"
-                return this.preparaMensagemBot(botMensagem, fila)
+                if (isNaN(mensagem)) {
+                    console.log("A string não é um número.");
+                    let texto = `Desculpe\n\n`
+                        + `Aparentemente você não digitou nenhum número\n\n`
+                        + `Vale lembrar que:\n`
+                        + `*CPF:* possui *11* dígitos\n`
+                        + `*CNPJ:* possui *14* dígitos\n\n`
+                        + `Vamos tentar novamente?`
+
+                    botMensagem.text = texto
+                    botMensagem.template = "botao"
+                    fila.botStage = "invalidoCpfCnpj"
+                    return this.preparaMensagemBot(botMensagem, fila)
+                } else {
+                    console.log("A string é um número.");
+                    let texto = `Poxa 😕\n\n`
+                        + `Parece que tem algo errado com este CPF ou CNPJ\n\n`
+                        + `*${ultimaMensagem.text}*\n\n`
+                        + `Vale lembrar que:\n`
+                        + `*CPF:* possui *11* dígitos\n`
+                        + `*CNPJ:* possui *14* dígitos\n\n`
+                        + `Vamos tentar novamente?`
+
+                    botMensagem.text = texto
+                    botMensagem.template = "botao"
+                    fila.botStage = "invalidoCpfCnpj"
+                    return this.preparaMensagemBot(botMensagem, fila)
+                }
             }
         }
 
@@ -487,7 +510,7 @@ class ura {
             console.log("ura invalidoCpfCnpj")
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 let texto = `Legal!\n\n`
-                    + `Digite novamente o CPF ou CNPJ`
+                    + `Digite novamente o CPF ou CNPJ (apenas números)`
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -513,7 +536,7 @@ class ura {
             console.log("ura buscaNotaFiscal")
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Nota Fiscal") {
                 let texto = `Certo\n\n`
-                    + `Consegue me passar o numero da Nota fiscal que eu vou dou uma olhada aqui para você`
+                    + `Consegue me passar o número  da Nota fiscal para eu fazer uma busca aqui para você`
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -523,7 +546,7 @@ class ura {
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Atendente") {
                 let texto = `Sem problemas\n\n`
                     + `Estou te transferindo para um dos nossos atendentes\n`
-                    + `Em breve voce sera atendido`
+                    + `Em breve você será atendido`
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -549,8 +572,8 @@ class ura {
 
                 let texto = `Encontrei essa Nf\n\n`
                     + `${dadosSql[0].nomeCliente}\n`
-                    + `${dadosSql[0].descricaoProduto}\n`
-                    + `\nOs dados acima estao corretos?`
+                    + `${dadosSql[0].descricaoProduto}\n\n`
+                    + `Os dados acima estão corretos?`
 
                 botMensagem.text = texto
                 botMensagem.template = "botao"
@@ -558,9 +581,9 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             else {
-                let texto = `Xiii, Nao encontrei 😣\n\n`
+                let texto = `Xiii, Não encontrei 😣\n\n`
                     + `Bom... neste caso podemos tentar novamente pelo CPF/CNPJ ou pela Nota fiscal, mas se preferir eu posso te transferir para um dos nossos atendentes`
-                    + `\n\nO que voce prefere?`
+                    + `\n\nO que você prefere?`
 
                 botMensagem.text = texto
                 botMensagem.template = "opcoes"
@@ -586,7 +609,7 @@ class ura {
             }
             if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Nota Fiscal") {
                 let texto = `Perfeito! 😊\n\n`
-                    + `Poderia digitar o numero da Nota Fiscal?`
+                    + `Poderia digitar o número da Nota Fiscal?`
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -595,8 +618,8 @@ class ura {
             }
             if (ultimaMensagem.text == "3" || ultimaMensagem.text == "Atendente") {
                 let texto = `Sem problemas\n\n`
-                + `Estou te transferindo para um dos nossos atendentes\n`
-                + `Em breve voce sera atendido`
+                    + `Estou te transferindo para um dos nossos atendentes\n\n`
+                    + `Em breve você será atendido`
 
                 botMensagem.text = texto
                 botMensagem.template = ""

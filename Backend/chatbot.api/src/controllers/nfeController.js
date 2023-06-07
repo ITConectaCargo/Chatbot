@@ -55,7 +55,7 @@ class nfe {
                 if (!existeNota || existeNota === "") {
                     let coletaStatus = 114
                     let dataFrete = new Date()
-                    
+
                     /*
                     let coletaStatus = ""
                     let dataFrete = ""
@@ -101,13 +101,13 @@ class nfe {
         try {
             const hoje = new Date();
             hoje.setUTCHours(0, 0, 0, 0);
-        
+
             // Excluindo os documentos do cliente criados na data de hoje
             await Nfe.deleteMany({ client: clienteId, date: { $gte: hoje } });
             console.log('NFes do cliente excluídas com sucesso.');
-          } catch (err) {
+        } catch (err) {
             console.error('Ocorreu um erro ao excluir as NFes do cliente:', err);
-          }
+        }
     }
 
     static validacaoCpfCnpj = (cpfCnpj) => {
@@ -121,6 +121,7 @@ class nfe {
             for (let i = 0; i < 9; i++) {
                 soma += parseInt(cpfCnpj.charAt(i)) * (10 - i);
             }
+            
             let primeiroDigito = 11 - (soma % 11);
             if (primeiroDigito > 9) {
                 primeiroDigito = 0;
