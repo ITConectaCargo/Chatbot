@@ -53,6 +53,10 @@ class nfe {
                 }
 
                 if (!existeNota || existeNota === "") {
+                    let coletaStatus = 114
+                    let dataFrete = new Date()
+                    
+                    /*
                     let coletaStatus = ""
                     let dataFrete = ""
 
@@ -69,6 +73,7 @@ class nfe {
                     } catch (error) {
                         console.log(error)
                     }
+                    */
 
                     try {
                         console.log("criando NF")

@@ -357,7 +357,7 @@ class ura {
             }
         }
 
-        else if (fila.botStage == "confirmaCpfCnpj") {
+        else if (fila.botStage == "confirmaCpfCnpjNf") {
             //consulta CPF CNPJ positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 fila.botStage = 0
@@ -369,7 +369,7 @@ class ura {
                 let dados = ""
                 //apaga dados do contato
                 try {
-                    dados = await Contatos.findOne({tel: botMensagem.to})
+                    dados = await Contatos.findOne({ tel: botMensagem.to })
                 } catch (error) {
                     console.log(error)
                 }
@@ -409,7 +409,7 @@ class ura {
         }
     }
 
-    static async uraAtendimento(fila, ultimaMensagem, botMensagem, nf) {
+    static async uraAtendimento(fila, ultimaMensagem, botMensagem) {
         console.log("ura sem NF")
         if (fila.botStage == 0) {
             //inicio
@@ -452,7 +452,7 @@ class ura {
 
                     botMensagem.text = texto
                     botMensagem.template = "botao"
-                    fila.botStage = "confirmaCpfCnpj"
+                    fila.botStage = "confirmaCpfCnpjNf"
                     return this.preparaMensagemBot(botMensagem, fila)
                 }
                 else {
@@ -466,7 +466,7 @@ class ura {
                         opcao1: "Nota Fiscal",
                         opcao2: "Atendente"
                     }
-                    fila.botStage = 0
+                    fila.botStage = "buscaNotaFiscal"
                     return this.preparaMensagemBot(botMensagem, fila)
                 }
             }
@@ -504,6 +504,102 @@ class ura {
                     opcao1: "Nota Fiscal",
                     opcao2: "Atendente"
                 }
+                fila.botStage = "buscaNotaFiscal"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+        }
+
+        else if (fila.botStage == "buscaNotaFiscal") {
+            console.log("ura buscaNotaFiscal")
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Nota Fiscal") {
+                let texto = `Certo\n\n`
+                    + `Consegue me passar o numero da Nota fiscal que eu vou dou uma olhada aqui para você`
+
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "consultaNotaFiscal"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Atendente") {
+                let texto = `Sem problemas\n\n`
+                    + `Estou te transferindo para um dos nossos atendentes\n`
+                    + `Em breve voce sera atendido`
+
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "0"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+        }
+
+        else if (fila.botStage == "consultaNotaFiscal") {
+            let dadosSql = ""
+            let contato = ""
+            console.log("ura consultaNotaFiscal")
+            try {
+                dadosSql = await Coleta.consultaByNf(ultimaMensagem.text)
+            } catch (error) {
+                console.log("NF nao encontrada")
+            }
+
+            if (dadosSql.length !== 0) {
+                //atualiza dados do contato
+                let contato = await Contato.atualizaDadosContatoBySql(dadosSql[0], fila.from._id) //Atualiza contato com os dados vindo do SQL
+                await Nfe.criaNfBySql(dadosSql, fila.from._id) //Cria as NFs no banco Mongo
+
+                let texto = `Encontrei essa Nf\n\n`
+                    + `${dadosSql[0].nomeCliente}\n`
+                    + `${dadosSql[0].descricaoProduto}\n`
+                    + `\nOs dados acima estao corretos?`
+
+                botMensagem.text = texto
+                botMensagem.template = "botao"
+                fila.botStage = "confirmaCpfCnpjNf"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+            else {
+                let texto = `Xiii, Nao encontrei 😣\n\n`
+                    + `Bom... neste caso podemos tentar novamente pelo CPF/CNPJ ou pela Nota fiscal, mas se preferir eu posso te transferir para um dos nossos atendentes`
+                    + `\n\nO que voce prefere?`
+
+                botMensagem.text = texto
+                botMensagem.template = "opcoes"
+                botMensagem.parameters = {
+                    opcao1: "CPF/CNPJ",
+                    opcao2: "Nota Fiscal",
+                    opcao3: "Atendente"
+                }
+                fila.botStage = "invalidoNotaFiscal"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+        }
+
+        else if (fila.botStage == "invalidoNotaFiscal") {
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "CPF/CNPJ") {
+                let texto = `Perfeito! 😊\n\n`
+                    + `Poderia digitar o CPF ou CNPJ`
+
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "consultaCpfCnpj"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Nota Fiscal") {
+                let texto = `Perfeito! 😊\n\n`
+                    + `Poderia digitar o numero da Nota Fiscal?`
+
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "consultaNotaFiscal"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+            if (ultimaMensagem.text == "3" || ultimaMensagem.text == "Atendente") {
+                let texto = `Sem problemas\n\n`
+                + `Estou te transferindo para um dos nossos atendentes\n`
+                + `Em breve voce sera atendido`
+
+                botMensagem.text = texto
+                botMensagem.template = ""
                 fila.botStage = "0"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
