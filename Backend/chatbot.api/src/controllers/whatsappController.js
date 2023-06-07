@@ -193,7 +193,8 @@ class whatsapp {
             novaMensagem = resposta
 
             if (novaMensagem == "respostaDuplicada") {
-                return "vazio"
+                // Pessoa clicou em mais de uma opcao
+                return ""
             } else {
                 Fila.verificaAtendimento(novaMensagem) //Verifica a fila
             }

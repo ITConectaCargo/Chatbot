@@ -23,6 +23,10 @@ class mensagem {
             console.log("mensagem com opcoes")
             this.enviaMensagemBotaoEditavel(mensagem)
         }
+        else if(mensagem.template === "naoApertouBotao"){
+            console.log("mensagem naoApertouBotao")
+            this.enviaMensagemNaoApertouBotao(mensagem)
+        }
         else{
             console.log("mensagem normal")
             this.enviaMensagem(mensagem)
@@ -261,6 +265,35 @@ class mensagem {
                                 ]
                             }
                         ]
+                    }
+                },
+                headers: {
+                    "Authorization": "Bearer",
+                    "Content-Type": "application/json"
+                }
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    static enviaMensagemNaoApertouBotao(mensagem) {
+        console.log("enviando mensagem")
+        console.log(mensagem)
+        const para = mensagem.to
+        const telefoneId = mensagem.phoneId
+        const texto = `Xiii, algo de errado não esta certo 😬\n\n`
+        + `Não consegui compreender o que você me disse\n\n`
+        + `Clique em um dos botoes da ultima mensagem`
+        
+        try {
+            axios({
+                method: "POST",
+                url: "https://graph.facebook.com/v16.0/" + telefoneId + "/messages?access_token=" + token,
+                data: {
+                    messaging_product: "whatsapp",
+                    to: para,
+                    text: {
+                        body: texto
                     }
                 },
                 headers: {

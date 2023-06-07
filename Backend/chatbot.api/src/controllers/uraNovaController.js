@@ -108,7 +108,7 @@ class ura {
                 await this.preparaMensagemBot(botMensagem, fila);
             }
             //caso Inicio negativo
-            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF Inicio negativo")
                 let texto = `Ok, sem problemas\n`
                     + `Com qual setor você gostaria de conversar?`
@@ -124,6 +124,12 @@ class ura {
                 fila.botStage = "0"
                 fila.status = "finalizado"
                 this.preparaMensagemBot(botMensagem, fila)
+            }
+            //caso nao aperte botao
+            else{
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "NF aceitaTermos"
+                return this.preparaMensagemBot(botMensagem, fila)
             }
         }
 
@@ -160,6 +166,12 @@ class ura {
                 fila.status = "espera"
                 this.preparaMensagemBot(botMensagem, fila)
             }
+            //caso nao aperte botao
+            else{
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "NF confirmaEndereco"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
         }
 
         else if (fila.botStage == "NF produtoDesmontado") {
@@ -186,6 +198,12 @@ class ura {
                 fila.status = "espera"
                 this.preparaMensagemBot(botMensagem, fila)
             }
+            //caso nao aperte botao
+            else{
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "NF produtoDesmontado"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
         }
 
         else if (fila.botStage == "NF apartamento") {
@@ -211,6 +229,12 @@ class ura {
                 fila.botStage = "0"
                 fila.status = "espera"
                 this.preparaMensagemBot(botMensagem, fila)
+            }
+            //caso nao aperte botao
+            else{
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "NF apartamento"
+                return this.preparaMensagemBot(botMensagem, fila)
             }
         }
 
@@ -251,6 +275,12 @@ class ura {
                 fila.botStage = "NF confirmaData"
                 this.preparaMensagemBot(botMensagem, fila)
             }
+            //caso nao aperte botao
+            else{
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "NF andar"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
         }
 
         else if (fila.botStage == "NF elevador") {
@@ -284,6 +314,12 @@ class ura {
                 botMensagem.template = "botao"
                 fila.botStage = "NF confirmaData"
                 this.preparaMensagemBot(botMensagem, fila)
+            }
+            //caso nao aperte botao
+            else{
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "NF elevador"
+                return this.preparaMensagemBot(botMensagem, fila)
             }
         }
 
@@ -322,6 +358,12 @@ class ura {
                 fila.status = "espera"
                 this.preparaMensagemBot(botMensagem, fila)
             }
+            //caso nao aperte botao
+            else{
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "NF aceitaData"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
         }
 
         else if (fila.botStage == "NF confirmaData") {
@@ -354,6 +396,12 @@ class ura {
                 fila.botStage = "0"
                 fila.status = "espera"
                 this.preparaMensagemBot(botMensagem, fila)
+            }
+            //caso nao aperte botao
+            else{
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "NF confirmaData"
+                return this.preparaMensagemBot(botMensagem, fila)
             }
         }
 
@@ -407,6 +455,12 @@ class ura {
                 fila.botStage = "invalidoCpfCnpj"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
+            //caso nao aperte botao
+            else{
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "confirmaCpfCnpjNf"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
         }
     }
 
@@ -457,7 +511,6 @@ class ura {
                     return this.preparaMensagemBot(botMensagem, fila)
                 }
                 else {
-
                     let texto = `Poxa, desculpe 😕\n\n`
                         + `Não consegui localizar este CPF/CNPJ em nosso Sistema.\n`
                         + `\nPosso tentar localizar pelo número da Nota Fiscal ou se preferir, transfiro você para um de nossos atendentes.`
@@ -530,6 +583,12 @@ class ura {
                 fila.botStage = "buscaNotaFiscal"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
+            //caso nao aperte botao
+            else{
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "invalidoCpfCnpj"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
         }
 
         else if (fila.botStage == "buscaNotaFiscal") {
@@ -551,6 +610,12 @@ class ura {
                 botMensagem.text = texto
                 botMensagem.template = ""
                 fila.botStage = "0"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+            //caso nao aperte botao
+            else{
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "buscaNotaFiscal"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
@@ -606,7 +671,7 @@ class ura {
                 fila.botStage = "consultaCpfCnpj"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
-            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Nota Fiscal") {
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Nota Fiscal") {
                 let texto = `Perfeito! 😊\n\n`
                     + `Poderia digitar o número da Nota Fiscal?`
 
@@ -615,7 +680,7 @@ class ura {
                 fila.botStage = "consultaNotaFiscal"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
-            if (ultimaMensagem.text == "3" || ultimaMensagem.text == "Atendente") {
+            else if (ultimaMensagem.text == "3" || ultimaMensagem.text == "Atendente") {
                 let texto = `Sem problemas\n\n`
                     + `Estou te transferindo para um dos nossos atendentes\n\n`
                     + `Em breve você será atendido`
@@ -623,6 +688,12 @@ class ura {
                 botMensagem.text = texto
                 botMensagem.template = ""
                 fila.botStage = "0"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+            //caso nao aperte botao
+            else{
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "invalidoNotaFiscal"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
