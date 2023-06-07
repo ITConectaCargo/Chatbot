@@ -203,22 +203,24 @@ class whatsapp {
     static async salvaMensagem(contato, mensagem) {
         console.log("salvando mensagem")
         let room = ''
-        let existeContexto = ''
+        let ultimaMensagem = null
         if (mensagem.to === '5511945718427') {
-            room = contato.tel
+            room = contato.tel //define a sala para enviar a mensagem
+            //busca ultima mensagem
             try {
-                existeContexto = await Mensagens.findOne({ from: contato._id, context: mensagem.context })
-                    .sort("date" - 1)
+                ultimaMensagem = await Mensagens.findOne({ from: contato._id })
+                    .sort({ date: -1 })
                     .exec()
             } catch (error) {
 
             }
         }
         else {
-            room = mensagem.to
+            room = mensagem.to //define a sala para enviar a mensagem
         }
 
-        if (!existeContexto) {
+        if (ultimaMensagem === null || ultimaMensagem.context == undefined || ultimaMensagem.context != mensagem.context) {
+            //salva mensagem
             try {
                 const msg = new Mensagens({
                     from: contato._id,
@@ -231,6 +233,7 @@ class whatsapp {
                 });
                 const novaMensagem = await msg.save();
 
+                //envia mensagem via socket.io
                 if (novaMensagem.to === '5511945718427') {
                     await socket.emit("chat.sala", novaMensagem.to);
                     await socket.emit("chat.mensagem", novaMensagem);
