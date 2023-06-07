@@ -33,7 +33,7 @@ class whatsapp {
     static recebeMensagem = async (req, res) => {
         let body_param = req.body
         //console.log(JSON.stringify(body_param, null, 2))
-        
+
         //trata mensagem recebida
         //verifica se é uma mensagem normal
         try {
@@ -65,16 +65,18 @@ class whatsapp {
         //verifica se é um botao
         try {
             //Botao respondido
-            if(body_param.entry[0].changes[0].value.messages[0].interactive.button_reply.id){
+            if (body_param.entry[0].changes[0].value.messages[0].interactive.button_reply.id) {
                 console.log("botao encontrado")
                 let name = body_param.entry[0].changes[0].value.contacts[0].profile.name
                 let telefone = body_param.entry[0].changes[0].value.messages[0].from
                 let phoneId = body_param.entry[0].changes[0].value.metadata.phone_number_id
                 let timestamp = body_param.entry[0].changes[0].value.messages[0].timestamp
                 let text = body_param.entry[0].changes[0].value.messages[0].interactive.button_reply.id
+                let context = body_param.entry[0].changes[0].value.messages[0].context.id
                 const mensagem = {
                     phoneId,
                     to: "5511945718427",
+                    context,
                     timestamp,
                     text
                 }
@@ -83,10 +85,10 @@ class whatsapp {
             }
         } catch (error) {
         }
-         //verifica se é um botao
-         try {
+        //verifica se é um botao
+        try {
             //template respondido
-            if(body_param.entry[0].changes[0].value.messages[0].button.payload){
+            if (body_param.entry[0].changes[0].value.messages[0].button.payload) {
                 console.log("botao encontrado")
                 let name = body_param.entry[0].changes[0].value.contacts[0].profile.name
                 let telefone = body_param.entry[0].changes[0].value.messages[0].from
@@ -137,7 +139,7 @@ class whatsapp {
                 console.log(error)
             }
 
-            if(dadosSql.length === 0) {
+            if (dadosSql.length === 0) {
                 try {
                     dadosSql = await Coleta.consultaByCpfCnpj(contato.cpfCnpj)
                 } catch (error) {
@@ -151,13 +153,13 @@ class whatsapp {
             if (dadosSql.length !== 0) {
                 console.log("encontrou dados no SQL")
                 let contador = dadosSql.length
-                
+
                 try {
                     contato = await Coleta.verificaMongo(dadosSql[0], telefone) //verifica se existe os dados no mongo
                 } catch (error) {
                     console.log(error)
                 }
-    
+
                 if (contador > 1) {
                     console.log(`Achei ${contador} Nfs`)
                     dadosSql.forEach(element => {
@@ -165,15 +167,15 @@ class whatsapp {
                     });
                 }
             }
-            else{
+            else {
                 //adiciona o contato no mongo com os dados do whatsapp
                 console.log("nao encontrou nada no BD")
-                let newContato =  new Contatos({
+                let newContato = new Contatos({
                     "name": nome,
                     "nameWhatsapp": nome,
                     "tel": telefone,
                 })
-    
+
                 contato = await newContato.save()
             }
 
@@ -190,42 +192,60 @@ class whatsapp {
             let resposta = await this.salvaMensagem(contato, mensagem)
             novaMensagem = resposta
 
-            Fila.verificaAtendimento(novaMensagem) //Verifica a fila
+            if (novaMensagem == "respostaDuplicada") {
+                return "vazio"
+            } else {
+                Fila.verificaAtendimento(novaMensagem) //Verifica a fila
+            }
         }
     }
 
     static async salvaMensagem(contato, mensagem) {
         console.log("salvando mensagem")
         let room = ''
+        let existeContexto = ''
         if (mensagem.to === '5511945718427') {
             room = contato.tel
+            try {
+                existeContexto = await Mensagens.findOne({ from: contato._id, context: mensagem.context })
+                    .sort("date" - 1)
+                    .exec()
+            } catch (error) {
+
+            }
         }
         else {
             room = mensagem.to
         }
 
-        try {
-            const msg = new Mensagens({
-                from: contato._id,
-                to: mensagem.to,
-                room: room,
-                phoneId: mensagem.phoneId,
-                timestamp: mensagem.timestamp * 1000, //transforma timestamp em milisegundos
-                text: mensagem.text
-            });
-            const novaMensagem = await msg.save();
+        if (!existeContexto) {
+            try {
+                const msg = new Mensagens({
+                    from: contato._id,
+                    to: mensagem.to,
+                    room: room,
+                    phoneId: mensagem.phoneId,
+                    timestamp: mensagem.timestamp * 1000, //transforma timestamp em milisegundos
+                    context: mensagem.context,
+                    text: mensagem.text
+                });
+                const novaMensagem = await msg.save();
 
-            if (novaMensagem.to === '5511945718427') {
-                await socket.emit("chat.sala", novaMensagem.to);
-                await socket.emit("chat.mensagem", novaMensagem);
+                if (novaMensagem.to === '5511945718427') {
+                    await socket.emit("chat.sala", novaMensagem.to);
+                    await socket.emit("chat.mensagem", novaMensagem);
+                }
+
+                return novaMensagem
+            } catch (error) {
+                console.log(error)
             }
-
-            return novaMensagem
-        } catch (error) {
-            console.log(error)
+        }
+        else {
+            return "respostaDuplicada"
         }
     }
-    
+
     static preparaMensagem = async (req, res) => {
         console.log("preparando mensagem")
         try {

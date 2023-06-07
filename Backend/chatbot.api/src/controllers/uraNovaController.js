@@ -458,9 +458,9 @@ class ura {
                 }
                 else {
 
-                    let texto = `Desculpe 😕\n\n`
-                        + `Mas não consegui localizar este CPF/CNPJ em nosso Sistema\n`
-                        + `\nPosso tentar localizar via Nota Fiscal ou preferir eu posso te transferir para um de nossos atendentes?`
+                    let texto = `Poxa, desculpe 😕\n\n`
+                        + `Não consegui localizar este CPF/CNPJ em nosso Sistema.\n`
+                        + `\nPosso tentar localizar pelo número da Nota Fiscal ou se preferir, transfiro você para um de nossos atendentes.`
 
                     botMensagem.text = texto
                     botMensagem.template = "BotaoEditavel"
@@ -557,7 +557,6 @@ class ura {
 
         else if (fila.botStage == "consultaNotaFiscal") {
             let dadosSql = ""
-            let contato = ""
             console.log("ura consultaNotaFiscal")
             try {
                 dadosSql = await Coleta.consultaByNf(ultimaMensagem.text)

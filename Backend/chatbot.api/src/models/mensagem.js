@@ -8,6 +8,7 @@ const mensagemSchema = new mongoose.Schema(
         room: {type: String},
         phoneId: {type: String, required: true},
         timestamp: {type: String},
+        context: {type: String},
         template: {type: String},
         parameters: {type: Object},
         text: {type: String, required: true},
