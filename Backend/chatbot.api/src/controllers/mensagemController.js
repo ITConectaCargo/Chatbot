@@ -276,6 +276,7 @@ class mensagem {
             console.log(error)
         }
     }
+    
     static enviaMensagemNaoApertouBotao(mensagem) {
         console.log("enviando mensagem")
         console.log(mensagem)
@@ -284,7 +285,7 @@ class mensagem {
         const texto = `Xiii, algo de errado não esta certo 😬\n\n`
         + `Não consegui compreender o que você me disse\n\n`
         + `Clique em um dos botoes da ultima mensagem`
-        
+
         try {
             axios({
                 method: "POST",

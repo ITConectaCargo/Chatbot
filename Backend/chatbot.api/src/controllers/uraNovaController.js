@@ -72,7 +72,7 @@ class ura {
 
             //coloca mensagem no Bot
             botMensagem.text = texto
-            botMensagem.template = "agendar_devolucao"
+            botMensagem.template = "botao"
             fila.botStage = "NF aceitaTermos"
             this.preparaMensagemBot(botMensagem, fila)
         }
@@ -153,7 +153,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila);
             }
             //caso Inicio negativo
-            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Discordo") {
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Discordo") {
                 console.log("ura NF aceitaTermos negativo")
                 let texto = `Ok, sem problemas\n`
                     + `Vou te transferir para um de nossos atendentes\n`
@@ -186,7 +186,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso Confirma endereço negativo
-            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF confirmaEndereco negativo")
                 let texto = `Entendi\n`
                     + `Vou te transferir para um de nossos atendentes\n`
@@ -218,7 +218,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso produto desmontado negativo
-            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF produtoDesmontado negativo")
                 let texto = `Entendi\n`
                     + `Vou te transferir para um de nossos atendentes\n`
@@ -255,7 +255,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso mora em apartamento negativo
-            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 let dataAgendamento = Coleta.calculaDataAgendamento(nf.freightDate) //Calcula data de agendamento
                 axios.put(`${baseURL}nfe/${nf._id}`, { //salva data no banco
                     appointmentDate: dataAgendamento
@@ -295,7 +295,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso ate 3º andar
-            if (ultimaMensagem.text == "1") {
+            else if (ultimaMensagem.text == "1") {
                 let dataAgendamento = Coleta.calculaDataAgendamento(nf.freightDate) //Calcula data de agendamento
                 axios.put(`${baseURL}nfe/${nf._id}`, { //salva data no banco
                     appointmentDate: dataAgendamento
@@ -346,7 +346,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso confirma data negativo
-            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF confimaData Negativo")
                 let texto = `Entendi\n`
                     + `Vou te transferir para um de nossos atendentes\n`
@@ -379,7 +379,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso confirma data negativo
-            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 axios.put(`${baseURL}nfe/${nf._id}`, { //salva data no banco
                     appointmentDate: ""
                 })
