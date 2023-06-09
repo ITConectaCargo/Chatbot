@@ -67,8 +67,8 @@ class ura {
             console.log("ura NF Inicio")
             let texto =
                 `*Olá ${botMensagem.parameters.name}, tudo bem?*\n\n`
-                + `Localizei aqui que você quer devolver o(s) produto(s)\n\n *${botMensagem.parameters.product}*\n\n`
-                + `Nos somos transportadores autorizados: \n\n*${botMensagem.parameters.shipper}*\n\n`
+                + `Localizei aqui que você quer devolver:\n\n *${botMensagem.parameters.product}*\n\n`
+                + `Nós somos transportadores autorizados: \n\n*${botMensagem.parameters.shipper}*\n\n`
                 + `Gostaria de agendar a devolução?\n\n`
 
             //coloca mensagem no Bot
@@ -587,7 +587,7 @@ class ura {
                     return this.preparaMensagemBot(botMensagem, fila)
                 }
                 else {
-                    let texto = `Poxa, desculpe 😕\n\n`
+                    let texto = `Poxa... Me desculpe 😕\n\n`
                         + `Não consegui localizar este CPF/CNPJ em nosso Sistema.\n`
                         + `\nPosso tentar localizar pelo número da Nota Fiscal ou se preferir, transfiro você para um de nossos atendentes.`
 
@@ -607,7 +607,7 @@ class ura {
                 if (isNaN(mensagem)) {
                     console.log("A string não é um número.");
                     let texto = `Desculpe\n\n`
-                        + `Aparentemente você não digitou nenhum número\n\n`
+                        + `Aparentemente você não digitou número\n\n`
                         + `Vale lembrar que:\n`
                         + `*CPF:* possui *11* dígitos\n`
                         + `*CNPJ:* possui *14* dígitos\n\n`
@@ -623,8 +623,8 @@ class ura {
                         + `Parece que tem algo errado com este CPF ou CNPJ\n\n`
                         + `*${ultimaMensagem.text}*\n\n`
                         + `Vale lembrar que:\n`
-                        + `*CPF:* possui *11* dígitos\n`
-                        + `*CNPJ:* possui *14* dígitos\n\n`
+                        + `*CPF:* possui *11 dígitos*\n`
+                        + `*CNPJ:* possui *14 dígitos*\n\n`
                         + `Vamos tentar novamente?`
 
                     botMensagem.text = texto
@@ -648,7 +648,7 @@ class ura {
             }
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Nâo") {
                 let texto = `Sem problemas!\n\n`
-                    + `Posso tentar localizar via *Nota Fiscal* ou se preferir eu posso te transferir para um de nossos atendentes?`
+                    + `Posso tentar localizar pelo *Número da Nota Fiscal* ou se preferir posso te transferir para um de nossos atendentes?`
 
                 botMensagem.text = texto
                 botMensagem.template = "BotaoEditavel"
@@ -671,7 +671,7 @@ class ura {
             console.log("ura buscaNotaFiscal")
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Nota Fiscal") {
                 let texto = `Certo!\n\n`
-                    + `Consegue me passar o *número da Nota fiscal* para eu fazer uma busca aqui para você`
+                    + `Consegue me passar o *Número da Nota fiscal* para eu fazer uma busca aqui para você`
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -725,7 +725,7 @@ class ura {
             }
             else {
                 let texto = `Xiii, Não encontrei 😣\n\n`
-                    + `Bom... neste caso podemos tentar novamente pelo CPF/CNPJ ou pela Nota fiscal, mas se preferir eu posso te transferir para um dos nossos atendentes`
+                    + `Bom... neste caso podemos tentar novamente pelo *CPF/CNPJ* ou pela *Nota fiscal*, mas se preferir eu posso te transferir para um dos nossos atendentes`
                     + `\n\nO que você prefere?`
 
                 botMensagem.text = texto
