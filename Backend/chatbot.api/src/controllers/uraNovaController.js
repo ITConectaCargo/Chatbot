@@ -481,7 +481,7 @@ class ura {
 
         else if (fila.botStage == "consultaCpfCnpj") {
             console.log("ura consultaCpfCnpj")
-            let dadosSql = ""
+            let dadosSql = []
             let contato = ""
 
             let cpfCnpjValido = Nfe.validacaoCpfCnpj(ultimaMensagem.text) //veriica se o CPF ou CNPJ esta valido
@@ -621,7 +621,7 @@ class ura {
         }
 
         else if (fila.botStage == "consultaNotaFiscal") {
-            let dadosSql = ""
+            let dadosSql = []
             console.log("ura consultaNotaFiscal")
             try {
                 dadosSql = await Coleta.consultaByNf(ultimaMensagem.text)

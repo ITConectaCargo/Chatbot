@@ -105,7 +105,6 @@ class coleta {
     }
 
     static consultaByNf = async (nota) => {
-
         if (nota.length !== 9) {
             nota = String(nota).padStart(9, '0') //adiciona zeros a esquerda ate dar 9 digitos
         }
@@ -151,6 +150,7 @@ class coleta {
             });
         } catch (error) {
             console.log(error)
+            return []
         }
     }
 
