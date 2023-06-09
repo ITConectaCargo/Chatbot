@@ -7,6 +7,7 @@ import Fila from './filaController.js'
 import Contato from "../controllers/contatoController.js"
 import axios from 'axios'
 import dotenv from 'dotenv'
+import mensagem from "../models/mensagem.js"
 dotenv.config()
 
 const baseURL = process.env.BASEURL
@@ -126,7 +127,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
-            else{
+            else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "NF aceitaTermos"
                 return this.preparaMensagemBot(botMensagem, fila)
@@ -167,7 +168,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
-            else{
+            else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "NF confirmaEndereco"
                 return this.preparaMensagemBot(botMensagem, fila)
@@ -199,7 +200,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
-            else{
+            else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "NF produtoDesmontado"
                 return this.preparaMensagemBot(botMensagem, fila)
@@ -231,7 +232,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
-            else{
+            else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "NF apartamento"
                 return this.preparaMensagemBot(botMensagem, fila)
@@ -276,7 +277,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
-            else{
+            else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "NF andar"
                 return this.preparaMensagemBot(botMensagem, fila)
@@ -316,7 +317,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
-            else{
+            else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "NF elevador"
                 return this.preparaMensagemBot(botMensagem, fila)
@@ -359,7 +360,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
-            else{
+            else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "NF aceitaData"
                 return this.preparaMensagemBot(botMensagem, fila)
@@ -398,7 +399,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
-            else{
+            else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "NF confirmaData"
                 return this.preparaMensagemBot(botMensagem, fila)
@@ -427,7 +428,7 @@ class ura {
                         dados.id,
                         {
                             name: "",
-                            nameWhatsapp: "",
+                            nameWhatsapp: "Desconhecido",
                             cpfCnpj: "",
                             address: {
                                 street: "",
@@ -456,9 +457,85 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
-            else{
+            else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "confirmaCpfCnpjNf"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+        }
+
+        else if (fila.botStage == "validaTitular") {
+            let eValido = true //
+
+            if (isNaN(ultimaMensagem.text)) { //se for texto
+                let nomeContato = nf.client.name
+                let nome = ultimaMensagem.text
+
+                for (let i = 0; i < nome.length; i++) {
+                    if (nomeContato[i].toLowerCase() !== nome[i].toLowerCase()) { //se for diferente altera para false
+                        eValido = false
+                        break
+                    }
+                }
+            }
+            else {
+                let cpfCnpjContato = nf.client.cpfCnpj
+                for (let i = 0; i < 4; i++) {
+                    if (cpfCnpjContato[i] !== ultimaMensagem.text[i]) { //se for diferente altera para false
+                        eValido = false
+                        break
+                    }
+                }
+            }
+
+            if (eValido === true) {
+                console.log("valido")
+
+                botMensagem.template = ""
+                fila.botStage = "0"
+                return this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf) // devolve para o inicio da fila
+            }
+            else {
+                console.log("invalido")
+                let contato = ""
+                try {
+                    contato = await Contatos.findByIdAndUpdate(
+                        nf.client._id,
+                        {
+                            name: "",
+                            nameWhatsapp: "Desconhecido",
+                            cpfCnpj: "",
+                            address: {
+                                street: "",
+                                district: "",
+                                city: "",
+                                state: "",
+                                cep: "",
+                                complement: "",
+                            }
+                        },
+                        { new: true } //retorna o valor atualizado
+                    )
+                } catch (error) {
+                    console.log(error)
+                }
+
+                //apaga Nfs geradas na data de hoje 
+                await Nfe.deletaNfeHoje(contato._id)
+
+                let texto = `Poxaa... os dados nao conferem 😕\n\n`
+                    + `Bom... neste caso podemos tentar novamente pelo CPF/CNPJ ou pela Nota fiscal, mas se preferir eu posso te transferir para um dos nossos atendentes`
+                    + `\n\nO que você prefere?`
+
+                botMensagem.text = texto
+                botMensagem.template = "opcoes"
+                botMensagem.parameters = {
+                    opcao1: "CPF/CNPJ",
+                    opcao2: "Nota Fiscal",
+                    opcao3: "Atendente"
+                }
+
+                fila.botStage = "invalidoNotaFiscal"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
@@ -470,8 +547,8 @@ class ura {
             //inicio
             console.log("ura 0")
             let texto = `Olá, tudo bem? 🙂\n\n`
-                + `Fiz uma breve busca em nosso banco de dados e infelizmente não encontramos devolução em seu nome.\n`
-                + `\nPoderia digitar o seu número de CPF ou CNPJ para eu realizar mais uma consulta? *(digite apenas números)*`;
+                + `Fiz uma breve busca em nosso banco de dados e infelizmente não encontramos devolução em seu nome.\n\n`
+                + `Poderia digitar o seu número de CPF ou CNPJ para eu realizar mais uma consulta? *(digite apenas números)*`;
 
             botMensagem.text = texto
             botMensagem.template = ""
@@ -584,7 +661,7 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
-            else{
+            else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "invalidoCpfCnpj"
                 return this.preparaMensagemBot(botMensagem, fila)
@@ -595,7 +672,7 @@ class ura {
             console.log("ura buscaNotaFiscal")
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Nota Fiscal") {
                 let texto = `Certo\n\n`
-                    + `Consegue me passar o número  da Nota fiscal para eu fazer uma busca aqui para você`
+                    + `Consegue me passar o número da Nota fiscal para eu fazer uma busca aqui para você`
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -613,7 +690,7 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
-            else{
+            else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "buscaNotaFiscal"
                 return this.preparaMensagemBot(botMensagem, fila)
@@ -621,12 +698,16 @@ class ura {
         }
 
         else if (fila.botStage == "consultaNotaFiscal") {
-            let dadosSql = []
             console.log("ura consultaNotaFiscal")
-            try {
-                dadosSql = await Coleta.consultaByNf(ultimaMensagem.text)
-            } catch (error) {
-                console.log("NF nao encontrada")
+            let dadosSql = []
+            let mensagem = parseInt(ultimaMensagem.text) //converte mensagem para numero
+
+            if (!isNaN(mensagem)) { //se for um numero
+                try {
+                    dadosSql = await Coleta.consultaByNf(ultimaMensagem.text)
+                } catch (error) {
+                    console.log("NF nao encontrada")
+                }
             }
 
             if (dadosSql.length !== 0) {
@@ -634,14 +715,13 @@ class ura {
                 let contato = await Contato.atualizaDadosContatoBySql(dadosSql[0], fila.from._id) //Atualiza contato com os dados vindo do SQL
                 await Nfe.criaNfBySql(dadosSql, fila.from._id) //Cria as NFs no banco Mongo
 
-                let texto = `Encontrei essa Nf\n\n`
-                    + `${dadosSql[0].nomeCliente}\n`
-                    + `${dadosSql[0].descricaoProduto}\n\n`
-                    + `Os dados acima estão corretos?`
+                let texto = `Boaa! 😎\n\n`
+                    + `Encontrei uma Nota Fiscal aqui!\n\n`
+                    + `Por motivos de segurança, poderia me informar o primeiro nome ou os 4 primeiros digitos do CPF/CNPJ do titular desta Nota Fiscal?`
 
                 botMensagem.text = texto
-                botMensagem.template = "botao"
-                fila.botStage = "confirmaCpfCnpjNf"
+                botMensagem.template = ""
+                fila.botStage = "validaTitular"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             else {
@@ -691,7 +771,7 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
-            else{
+            else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "invalidoNotaFiscal"
                 return this.preparaMensagemBot(botMensagem, fila)
