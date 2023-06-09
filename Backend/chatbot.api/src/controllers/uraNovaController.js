@@ -5,9 +5,9 @@ import Nfe from '../controllers/nfeController.js'
 import Coleta from "./coletasController.js"
 import Fila from './filaController.js'
 import Contato from "../controllers/contatoController.js"
+import diacritics from 'diacritics'
 import axios from 'axios'
 import dotenv from 'dotenv'
-import mensagem from "../models/mensagem.js"
 dotenv.config()
 
 const baseURL = process.env.BASEURL
@@ -84,7 +84,7 @@ class ura {
                 console.log("ura NF aceitaTermos")
                 let instrucoes =
                     "*Instruções*\n\n"
-                    + "Nosso horário de coleta é das 08h às 18h, de segunda à sexta.\n"
+                    + "Nosso horário de coleta é das *08h* às *18h*, de segunda à sexta.\n"
                     + "Seu produto deve estar desmontado.\n"
                     + "Se possível, embalado, caso contrário faremos a coleta de forma que seu produto esteja protegido.\n\n"
                     + "Os produtos a serem coletados serão conferidos pelo responsável da coleta:\n"
@@ -140,11 +140,11 @@ class ura {
                 console.log("ura NF confirmaEndereco");
                 let texto =
                     "Encontrei este endereço em meu banco de dados:\n\n" +
-                    "Rua: " + nf.client.address.street + "\n" +
-                    "Bairro: " + nf.client.address.district + "\n" +
-                    "Cidade: " + nf.client.address.city + " - " + nf.client.address.state + "\n" +
-                    "Cep: " + nf.client.address.cep + "\n" +
-                    "Complemento: " + nf.client.address.complement + "\n\n" +
+                    "Rua: *" + nf.client.address.street + "*\n" +
+                    "Bairro: *" + nf.client.address.district + "*\n" +
+                    "Cidade: *" + nf.client.address.city + "* - *" + nf.client.address.state + "*\n" +
+                    "Cep: *" + nf.client.address.cep + "*\n" +
+                    "Complemento: *" + nf.client.address.complement + "*\n\n" +
                     "As informações acima estão corretas?";
 
                 // Coloca mensagem no Bot
@@ -468,14 +468,13 @@ class ura {
             let eValido = true //
 
             if (isNaN(ultimaMensagem.text)) { //se for texto
-                let nomeContato = nf.client.name
-                let nome = ultimaMensagem.text
+                let nomeContatoNF = diacritics.remove(nf.client.name.trim()) //remove os caracteres especiais
+                let [primeiroNome] = nomeContatoNF.split(' ') //salva a primeira palavra
 
-                for (let i = 0; i < nome.length; i++) {
-                    if (nomeContato[i].toLowerCase() !== nome[i].toLowerCase()) { //se for diferente altera para false
-                        eValido = false
-                        break
-                    }
+                let nome = diacritics.remove(ultimaMensagem.text.trim()) //remove caracters especiais
+
+                if (primeiroNome.toLowerCase() !== nome.toLowerCase()) { //se for diferente altera para false
+                    eValido = false
                 }
             }
             else {
@@ -524,7 +523,7 @@ class ura {
                 await Nfe.deletaNfeHoje(contato._id)
 
                 let texto = `Poxaa... os dados nao conferem 😕\n\n`
-                    + `Bom... neste caso podemos tentar novamente pelo CPF/CNPJ ou pela Nota fiscal, mas se preferir eu posso te transferir para um dos nossos atendentes`
+                    + `Bom... neste caso podemos tentar novamente pelo *CPF/CNPJ* ou pela *Nota fiscal*, mas se preferir eu posso te transferir para um dos nossos atendentes`
                     + `\n\nO que você prefere?`
 
                 botMensagem.text = texto
@@ -548,7 +547,7 @@ class ura {
             console.log("ura 0")
             let texto = `Olá, tudo bem? 🙂\n\n`
                 + `Fiz uma breve busca em nosso banco de dados e infelizmente não encontramos devolução em seu nome.\n\n`
-                + `Poderia digitar o seu número de CPF ou CNPJ para eu realizar mais uma consulta? *(digite apenas números)*`;
+                + `Poderia digitar o seu número de *CPF* ou *CNPJ* para eu realizar mais uma consulta? *(digite apenas números)*`;
 
             botMensagem.text = texto
             botMensagem.template = ""
@@ -640,7 +639,7 @@ class ura {
             console.log("ura invalidoCpfCnpj")
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 let texto = `Legal!\n\n`
-                    + `Digite novamente o CPF ou CNPJ (apenas números)`
+                    + `Digite novamente o *CPF* ou *CNPJ* *(apenas números)*`
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -649,7 +648,7 @@ class ura {
             }
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Nâo") {
                 let texto = `Sem problemas!\n\n`
-                    + `Posso tentar localizar via Nota Fiscal ou se preferir eu posso te transferir para um de nossos atendentes?`
+                    + `Posso tentar localizar via *Nota Fiscal* ou se preferir eu posso te transferir para um de nossos atendentes?`
 
                 botMensagem.text = texto
                 botMensagem.template = "BotaoEditavel"
@@ -671,8 +670,8 @@ class ura {
         else if (fila.botStage == "buscaNotaFiscal") {
             console.log("ura buscaNotaFiscal")
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Nota Fiscal") {
-                let texto = `Certo\n\n`
-                    + `Consegue me passar o número da Nota fiscal para eu fazer uma busca aqui para você`
+                let texto = `Certo!\n\n`
+                    + `Consegue me passar o *número da Nota fiscal* para eu fazer uma busca aqui para você`
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -717,7 +716,7 @@ class ura {
 
                 let texto = `Boaa! 😎\n\n`
                     + `Encontrei uma Nota Fiscal aqui!\n\n`
-                    + `Por motivos de segurança, poderia me informar o primeiro nome ou os 4 primeiros digitos do CPF/CNPJ do titular desta Nota Fiscal?`
+                    + `Por motivos de segurança, poderia me informar o *primeiro nome* ou os *4 primeiros digitos* do *CPF/CNPJ* do titular desta Nota Fiscal?`
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -744,7 +743,7 @@ class ura {
         else if (fila.botStage == "invalidoNotaFiscal") {
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "CPF/CNPJ") {
                 let texto = `Perfeito! 😊\n\n`
-                    + `Poderia digitar o CPF ou CNPJ`
+                    + `Poderia digitar o *CPF* ou *CNPJ*`
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -753,7 +752,7 @@ class ura {
             }
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Nota Fiscal") {
                 let texto = `Perfeito! 😊\n\n`
-                    + `Poderia digitar o número da Nota Fiscal?`
+                    + `Poderia digitar o *número da Nota Fiscal*?`
 
                 botMensagem.text = texto
                 botMensagem.template = ""
