@@ -112,16 +112,11 @@ class ura {
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF Inicio negativo")
                 let texto = `Ok, sem problemas\n`
-                    + `Com qual setor você gostaria de conversar?`
+                    + `Com qual setor você gostaria de conversarEstou te tranferindo para um de nossos atendentes?`
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                botMensagem.template = "opcoes"
-                botMensagem.parameters = {
-                    opcao1: "SAC",
-                    opcao2: "Comercial",
-                    opcao3: "Motorista"
-                }
+                botMensagem.template = ""
                 fila.botStage = "0"
                 fila.status = "finalizado"
                 this.preparaMensagemBot(botMensagem, fila)
@@ -448,12 +443,12 @@ class ura {
                 //apaga Nfs geradas na data de hoje 
                 await Nfe.deletaNfeHoje(contato._id)
 
-                let texto = `Me Desculpe, as vezes eu me confundo 😕\n\n`
-                    + `Gostaria de tentar novamente?`
+                let texto = `Me Desculpe, 😕\n\n`
+                    + `Estou te tranferindo para um de nossos atendentes`
 
                 botMensagem.text = texto
-                botMensagem.template = "botao"
-                fila.botStage = "invalidoCpfCnpj"
+                botMensagem.template = ""
+                fila.botStage = "0"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -577,9 +572,9 @@ class ura {
                     await Nfe.criaNfBySql(dadosSql, fila.from._id) //Cria as NFs no banco Mongo
 
                     let texto =
-                        `Olha o que eu encontrei com este CPF/CNPJ\n\n`
+                        `Legal, Encontrei 😊\n\n`
                         + `*${contato.name}*\n\n`
-                        + `Seria você ou a pessoa/empresa que gostaria de tratar sobre algum assunto?`
+                        + `Seria você ou a pessoa/empresa que gostaria de agendar a devolução?`
 
                     botMensagem.text = texto
                     botMensagem.template = "botao"
@@ -606,9 +601,9 @@ class ura {
 
                 if (isNaN(mensagem)) {
                     console.log("A string não é um número.");
-                    let texto = `Desculpe\n\n`
+                    let texto = `*Desculpe*\n\n`
                         + `Aparentemente você não digitou número\n\n`
-                        + `Vale lembrar que:\n`
+                        + `Vale lembrar:\n`
                         + `*CPF:* possui *11* dígitos\n`
                         + `*CNPJ:* possui *14* dígitos\n\n`
                         + `Vamos tentar novamente?`
@@ -679,9 +674,9 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Atendente") {
-                let texto = `Sem problemas\n\n`
-                    + `Estou te transferindo para um dos nossos atendentes\n`
-                    + `Em breve você será atendido`
+                let texto = `*Sem problemas.*\n\n`
+                    + `Estou te transferindo para um dos nossos atendentes,\n`
+                    + `Em breve você será atendido.`
 
                 botMensagem.text = texto
                 botMensagem.template = ""
