@@ -218,7 +218,7 @@ class coleta {
 
     static calculaDataAgendamento = async (dataNf, embarcador) => {
         let datasDisponiveis = []
-        if (embarcador) {
+        if (embarcador.appointmentLimit) {
             try {
                 let data = moment(dataNf, 'YYYY-MM-DD')
                 let diasAdicionados = 0;

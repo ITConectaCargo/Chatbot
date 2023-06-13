@@ -1,7 +1,7 @@
 import Contatos from "../models/contato.js"
 import Mensagem from "../models/mensagem.js"
 import Nfs from '../models/nfe.js'
-import Embarcador from '../models/embarcador.js'
+import Embarcador from '../controllers/embarcadorController.js'
 import Nfe from '../controllers/nfeController.js'
 import Coleta from "./coletasController.js"
 import Fila from './filaController.js'
@@ -699,7 +699,7 @@ class ura {
             if (dadosSql.length !== 0) {
                 //atualiza dados do contato
                 let contato = await Contato.atualizaDadosContatoBySql(dadosSql[0], fila.from._id) //Atualiza contato com os dados vindo do SQL
-                let embarcador = await Embarcador.criaEmbarcadorSql(dadosSql)
+                let embarcador = await Embarcador.criaEmbarcadorSql(dadosSql[0])
                 await Nfe.criaNfBySql(dadosSql, fila.from._id, embarcador) //Cria as NFs no banco Mongo
 
                 let texto = `Boaa! 😎\n\n`
