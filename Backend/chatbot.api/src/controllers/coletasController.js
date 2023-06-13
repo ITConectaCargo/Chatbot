@@ -1,11 +1,12 @@
 import Contatos from '../models/contato.js';
 import Feriados from '../models/feriado.js';
-import Embarcadores from '../models/embarcador.js';
 import dbSql from '../config/dbSqlConfig.js'
 import Nfe from '../models/nfe.js';
 import Nf from './nfeController.js';
 import Contato from './contatoController.js';
 import Embarcador from './embarcadorController.js';
+import fs from 'fs';
+import pdfjs from 'pdfjs-dist';
 import moment from 'moment'
 import dotenv from 'dotenv'
 dotenv.config()
@@ -227,25 +228,49 @@ class coleta {
                     let feriado = await this.feriados(data)
                     if (data.isoWeekday() < 6 && feriado != "Feriado") {
                         // Adiciona apenas se não for sábado ou domingo
-                        if (embarcador.daysWeek.includes(data.isoWeekday())) { //verifica se o dia esta presente no array
-                            console.log("O número está presente no array.");
+                        diasAdicionados++;
+                        if (embarcador.daysWeek.includes(data.isoWeekday()) && diasAdicionados !== 1) { //verifica se o dia esta presente no array
                             datasDisponiveis.push(moment(data))
-                            diasAdicionados++;
-                        } else {
-                            console.log("O número não está presente no array.");
                         }
                     }
                 }
-                let melhorData = datasDisponiveis[datasDisponiveis.length - 2];
+                let melhorData = datasDisponiveis[0];
                 return melhorData;
             } catch (error) {
                 console.log(error)
             }
         }
-        else{
+        else {
             return "Sem Embarcador"
         }
 
+    }
+
+    static consultaChecklist = async (req, res) => {
+        const chaveNFe = req.params.nf;
+        const urlPDF = `http://inectar.com.br/modulos/Checklists_Magazine/35230647960950089785550510001634191072263707.pdf`;
+        try {
+            const response = await axios.get(urlPDF);
+            const buffer = Buffer.from(response.data);
+
+            const documento = await pdfjs.getDocument(buffer).promise;
+            const numPaginas = documento.numPages;
+
+            let conteudoPDF = '';
+
+            for (let i = 1; i <= numPaginas; i++) {
+                const pagina = await documento.getPage(i);
+                const conteudoPagina = await pagina.getTextContent();
+
+                const linhas = conteudoPagina.items.map(item => item.str);
+                const conteudo = linhas.join('\n');
+
+                conteudoPDF += conteudo;
+            }
+            res.status(200).send(conteudoPDF);
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     static feriados = async (data) => {

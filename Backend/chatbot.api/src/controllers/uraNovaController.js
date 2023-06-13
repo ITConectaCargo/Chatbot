@@ -43,7 +43,7 @@ class ura {
 
         //Verifica se existe NF deste cliente
         try {
-            nf = await Nfs.findOne({ client: fila.from, status: { $in: ['114', '308', "112"] } }) //busca NF status114(a Agendar) ou 308(reagendar)
+            nf = await Nfs.findOne({ client: fila.from, status: { $in: ['114', '308'] } }) //busca NF status 114 (a Agendar) ou 308(reagendar)
                 .populate("client")
                 .populate("shipper")
                 .exec()
@@ -289,7 +289,7 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
-        
+
         else if (fila.botStage == "NF aceitaData") {
             //Caso confirma data positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
@@ -561,7 +561,8 @@ class ura {
                 if (dadosSql.length !== 0) {
                     //atualiza dados do contato
                     contato = await Contato.atualizaDadosContatoBySql(dadosSql[0], fila.from._id) //Atualiza contato com os dados vindo do SQL
-                    await Nfe.criaNfBySql(dadosSql, fila.from._id) //Cria as NFs no banco Mongo
+                    let embarcador = await Embarcador.criaEmbarcadorSql(dadosSql[0])
+                    await Nfe.criaNfBySql(dadosSql, fila.from._id, embarcador) //Cria as NFs no banco Mongo
 
                     let texto =
                         `Legal, encontrei 😊\n\n`
@@ -620,6 +621,21 @@ class ura {
                     return this.preparaMensagemBot(botMensagem, fila)
                 }
             }
+        }
+
+        else if (fila.botStage == "confirmaCpfCnpjNf") {
+            console.log("ura confirmaCpfCnpjNf")
+            let texto =
+                `Certo... 🤔\n\n`
+                + `Pelo visto você não possui agendamento a realizar\n\n`
+                + `Vou te transferir para um de nossos atendentes para poder auxilia-lo melhor\n\n`
+                + `Aguarde e em breve você será atendido`
+
+            botMensagem.text = texto
+            botMensagem.template = ""
+            fila.botStage = "0"
+            return this.preparaMensagemBot(botMensagem, fila)
+
         }
 
         else if (fila.botStage == "invalidoCpfCnpj") {

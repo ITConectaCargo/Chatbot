@@ -3,9 +3,9 @@ import Mensagens from "../models/mensagem.js"
 import Contatos from "../models/contato.js"
 import Filas from "../models/fila.js"
 import io from "socket.io-client";
-import dotenv from 'dotenv'
-import Coleta from "./coletasController.js";
 import Mensagem from "./mensagemController.js"
+import Coleta from "./coletasController.js";
+import dotenv from 'dotenv'
 dotenv.config()
 
 const socket = io.connect(process.env.BASEURL);

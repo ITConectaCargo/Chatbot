@@ -1,5 +1,9 @@
 import axios from 'axios'
 import Nfe from '../models/nfe.js'
+import dotenv from 'dotenv'
+dotenv.config()
+
+const baseURL = process.env.BASEURL
 
 class nfe {
 
@@ -53,28 +57,22 @@ class nfe {
                     console.log("Nf nao localizada")
                 }
 
-                if (!existeNota || existeNota === "") {
-                    let coletaStatus = 114
-                    let dataFrete = new Date()
-
-                    /*
+                if (!existeNota || existeNota === "") {                    
                     let coletaStatus = ""
                     let dataFrete = ""
 
                     try {
                         console.log("consultando ESL")
-                        await axios.get(`http://localhost:9000/coleta/agendamento/${element.chaveNfe}`)
+                        await axios.get(`${baseURL}coleta/agendamento/${element.chaveNfe}`)
                             .then(resposta => {
                                 const ultimoObjeto = resposta.data.pop();
-                                const primeiroObjeto = resposta.data[0]
                                 coletaStatus = ultimoObjeto.occurrence.code //pega o codigo do status
-                                dataFrete = primeiroObjeto.created_at //pega data do frete
+                                dataFrete = ultimoObjeto.created_at //pega data do frete
                             })
                             .catch(error => console.log(error))
                     } catch (error) {
                         console.log(error)
                     }
-                    */
 
                     try {
                         console.log("criando NF")
