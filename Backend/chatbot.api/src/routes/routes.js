@@ -5,6 +5,7 @@ import fila from "./filaRoutes.js"
 import usuario from "./usuarioRoutes.js"
 import coleta from "./coletaRoutes.js"
 import nfe from "./nfeRoutes.js"
+import embarcador from "./embarcadorRoutes.js";
 
 const routes = (app) => {
     app.route('/').get((req, res) => {
@@ -15,10 +16,11 @@ const routes = (app) => {
         express.json(),
         whatsapp,
         contato,
-        fila,
+        embarcador,
         usuario,
+        fila,
         coleta,
-        nfe
+        nfe,
     )
 }
 

@@ -1,6 +1,11 @@
 import Contatos from '../models/contato.js';
+import Feriados from '../models/feriado.js';
+import Embarcadores from '../models/embarcador.js';
 import dbSql from '../config/dbSqlConfig.js'
 import Nfe from '../models/nfe.js';
+import Nf from './nfeController.js';
+import Contato from './contatoController.js';
+import Embarcador from './embarcadorController.js';
 import moment from 'moment'
 import dotenv from 'dotenv'
 dotenv.config()
@@ -27,6 +32,7 @@ class coleta {
                 tbl_coleta.valorTotalNf,
                 tbl_coleta.chaveNfe,
                 tbl_coleta_produto.descricaoProduto,
+                marketplace.cnpjCpf,
                 marketplace.nomeMkt
             FROM
                 tbl_coleta
@@ -72,6 +78,7 @@ class coleta {
                 tbl_coleta.valorTotalNf,
                 tbl_coleta.chaveNfe,
                 tbl_coleta_produto.descricaoProduto,
+                marketplace.cnpjCpf,
                 marketplace.nomeMkt
             FROM
                 tbl_coleta
@@ -123,6 +130,7 @@ class coleta {
             tbl_coleta.valorTotalNf,
             tbl_coleta.chaveNfe,
             tbl_coleta_produto.descricaoProduto,
+            marketplace.cnpjCpf,
             marketplace.nomeMkt
         FROM
             tbl_coleta
@@ -166,25 +174,7 @@ class coleta {
 
         if (!contato || contato === "") { //se contato esta vazio
             try {
-                //cria contato no BD
-                const cliente = new Contatos({
-                    tel: telefone,
-                    name: dadosSql.nomeCliente,
-                    nameWhatsapp: dadosSql.nomeCliente,
-                    cpfCnpj: dadosSql.cpfCnpj,
-                    address: {
-                        street: dadosSql.logradouro,
-                        number: dadosSql.numero,
-                        district: dadosSql.bairro,
-                        city: dadosSql.cidade,
-                        state: dadosSql.uf,
-                        cep: dadosSql.cep,
-                        complement: dadosSql.complemento
-                    }
-                })
-
-                contato = await cliente.save() //Salva contato no mongo
-                console.log(contato)
+                contato = await Contato.criarContatoBySql(dadosSql, telefone)
             } catch (error) {
                 console.log(error)
             }
@@ -194,68 +184,18 @@ class coleta {
             console.log("contato preenchido")
             let existeNota = ""
             try {
-                existeNota = await Nfe.findOne({ key: dadosSql.chaveNfe });
+                existeNota = await Nfe.exists({ key: dadosSql.chaveNfe });
                 console.log("existe nota")
             } catch (error) {
                 console.log("Nf nao localizada")
             }
 
             if (!existeNota || existeNota === "") {
-                let coletaStatus = ""
-                let dataFrete = ""
-
-                try {
-                    console.log("consultando ESL")
-                    await axios.get(`${baseURL}coleta/agendamento/${dadosSql.chaveNfe}`)
-                        .then(resposta => {
-                            const ultimoObjeto = resposta.data.pop();
-                            const primeiroObjeto = resposta.data[0]
-                            coletaStatus = ultimoObjeto.occurrence.code //pega o codigo do status
-                            dataFrete = primeiroObjeto.created_at
-                        })
-                        .catch(error => console.log(error))
-                } catch (error) {
-                    console.log(error)
-                }
-
-                try {
-                    console.log("criando NF")
-                    const nota = {
-                        client: contato._id,
-                        key: dadosSql.chaveNfe,
-                        freightDate: dataFrete,
-                        product: dadosSql.descricaoProduto,
-                        value: dadosSql.valorTotalNf,
-                        status: coletaStatus,
-                        shipper: dadosSql.nomeMkt
-                    };
-
-                    const newNota = await Nfe.create(nota);
-                    console.log(newNota);
-                } catch (error) {
-                    console.log(error)
-                }
+                let embarcador = await Embarcador.criaEmbarcadorSql(dadosSql)
+                await Nf.criaNfBySql(dadosSql, contato._id, embarcador)
             }
         }
         return contato
-    }
-
-    static calculaDataAgendamento = (dataNf) => {
-        try {
-            let data = moment(dataNf, 'YYYY-MM-DD')
-            let diasAdicionados = 0;
-            while (diasAdicionados < 3) {
-                data.add(1, 'days');
-                if (data.isoWeekday() < 6) {
-                    // Adiciona apenas se não for sábado ou domingo
-                    diasAdicionados++;
-                }
-            }
-            const dataAgendamento = data
-            return dataAgendamento
-        } catch (error) {
-            console.log(error)
-        }
     }
 
     static consultaAgendamento = async (req, res) => {
@@ -273,6 +213,80 @@ class coleta {
         } catch (error) {
             console.log(error);
             res.status(500).json(error);
+        }
+    }
+
+    static calculaDataAgendamento = async (dataNf, embarcador) => {
+        let datasDisponiveis = []
+        if (embarcador) {
+            try {
+                let data = moment(dataNf, 'YYYY-MM-DD')
+                let diasAdicionados = 0;
+                while (diasAdicionados < embarcador.appointmentLimit) {
+                    data.add(1, 'days');
+                    let feriado = await this.feriados(data)
+                    if (data.isoWeekday() < 6 && feriado != "Feriado") {
+                        // Adiciona apenas se não for sábado ou domingo
+                        if (embarcador.daysWeek.includes(data.isoWeekday())) { //verifica se o dia esta presente no array
+                            console.log("O número está presente no array.");
+                            datasDisponiveis.push(moment(data))
+                            diasAdicionados++;
+                        } else {
+                            console.log("O número não está presente no array.");
+                        }
+                    }
+                }
+                let melhorData = datasDisponiveis[datasDisponiveis.length - 2];
+                return melhorData;
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        else{
+            return "Sem Embarcador"
+        }
+
+    }
+
+    static feriados = async (data) => {
+        const year = moment(data).format("YYYY") //pega apenas o ano
+        const anoNovo = moment(`01/01/${year}`, 'DD/MM/YYYY').format('YYYY-MM-DD');
+
+        //confere se feriados estao preenchidos no banco
+        try {
+            let feriado = await Feriados.exists({ date: anoNovo })
+            if (!feriado) { //caso nao tenha dados no banco popula
+                let listaFeriados = ""
+                await axios.get(`https://brasilapi.com.br/api/feriados/v1/${year}`)
+                    .then(resposta => {
+                        listaFeriados = resposta.data
+                    })
+                    .catch(error => console.log(error))
+
+                for (let i = 0; i < listaFeriados.length; i++) {
+                    let holyday = {
+                        date: moment(listaFeriados[i].date).format('YYYY-MM-DD'),
+                        name: listaFeriados[i].name,
+                        type: listaFeriados[i].type
+                    };
+                    Feriados.create(holyday);
+                }
+            }
+        } catch (error) {
+            console.log(error)
+        }
+
+        try {
+            let feriado = await Feriados.exists({ date: moment(data).format('YYYY-MM-DD') })
+
+            if (feriado) {
+                return "Feriado"
+            }
+            else {
+                return "Não é Feriado"
+            }
+        } catch (error) {
+            console.log(error)
         }
     }
 }

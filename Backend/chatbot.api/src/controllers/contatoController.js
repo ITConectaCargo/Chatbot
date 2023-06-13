@@ -66,7 +66,7 @@ class contato {
         const dados = req.body
         try {
             const contato = await Contatos.findByIdAndUpdate(
-                {tel: dados.tel},
+                { tel: dados.tel },
                 {
                     name: dados.name,
                     nameWhatsapp: dados.nameWhatsapp,
@@ -87,7 +87,35 @@ class contato {
             res.status(500).json(error)
         }
 
-        
+
+
+    }
+
+    static criarContatoBySql = async (dadosSql, telefone) => {
+        try {
+            //cria contato no BD
+            const cliente = new Contatos({
+                tel: telefone,
+                name: dadosSql.nomeCliente,
+                nameWhatsapp: dadosSql.nomeCliente,
+                cpfCnpj: dadosSql.cpfCnpj,
+                address: {
+                    street: dadosSql.logradouro,
+                    number: dadosSql.numero,
+                    district: dadosSql.bairro,
+                    city: dadosSql.cidade,
+                    state: dadosSql.uf,
+                    cep: dadosSql.cep,
+                    complement: dadosSql.complemento
+                }
+            })
+
+            contato = await cliente.save() //Salva contato no mongo
+            return contato
+        } catch (error) {
+            console.log(error)
+        }
+
         
     }
 
@@ -108,7 +136,7 @@ class contato {
                 }
             },
             { new: true } //retorna o valor atualizado
-        )  
+        )
 
         return contato
     }

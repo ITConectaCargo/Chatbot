@@ -39,14 +39,15 @@ class nfe {
         }
     }
 
-    static criaNfBySql = async (dadosSql, contatoId) => {
+    static criaNfBySql = async (dadosSql, contatoId, embarcador) => {
+        console.log(dadosSql.length)
         if (dadosSql.length >= 1) {
             console.log(`Achei ${dadosSql.length} Nfs`)
             for (let contador = 0; contador < dadosSql.length; contador++) {
                 let element = dadosSql[contador]
                 let existeNota = ""
                 try {
-                    existeNota = await Nfe.findOne({ key: element.chaveNfe });
+                    existeNota = await Nfe.exists({ key: element.chaveNfe });
                     console.log("existe nota")
                 } catch (error) {
                     console.log("Nf nao localizada")
@@ -84,16 +85,19 @@ class nfe {
                             product: element.descricaoProduto,
                             value: element.valorTotalNf,
                             status: coletaStatus,
-                            shipper: element.nomeMkt
+                            shipper: embarcador._id
                         };
 
                         const newNota = await Nfe.create(nota);
-                        console.log(newNota);
+                        return newNota;
                     } catch (error) {
                         console.log(error)
                     }
                 }
             }
+        }
+        else if(dadosSql){
+            this.criaNfBySql([dadosSql], contatoId, embarcador)
         }
     }
 

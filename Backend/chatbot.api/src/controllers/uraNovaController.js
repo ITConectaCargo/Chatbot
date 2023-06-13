@@ -44,13 +44,15 @@ class ura {
         try {
             nf = await Nfs.findOne({ client: fila.from, status: { $in: ['114', '308', "112"] } }) //busca NF status114(a Agendar) ou 308(reagendar)
                 .populate("client")
+                .populate("shipper")
                 .exec()
+
             console.log("encontrou NF na ura")
 
             botMensagem.parameters = {
                 name: nf.client.name,
                 product: nf.product,
-                shipper: nf.shipper
+                shipper: nf.shipper.name
             }
 
             this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf)
@@ -112,7 +114,7 @@ class ura {
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF Inicio negativo")
                 let texto = `Ok, sem problemas\n`
-                    + `Com qual setor você gostaria de conversarEstou te tranferindo para um de nossos atendentes?`
+                    + `Estou te tranferindo para um de nossos atendentes`
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -159,7 +161,7 @@ class ura {
                 botMensagem.text = texto
                 botMensagem.template = ""
                 fila.botStage = "0"
-                fila.status = "espera"
+                fila.status = "ura"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -252,24 +254,8 @@ class ura {
             }
             //Caso mora em apartamento negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                let dataAgendamento = Coleta.calculaDataAgendamento(nf.freightDate) //Calcula data de agendamento
-                axios.put(`${baseURL}nfe/${nf._id}`, { //salva data no banco
-                    appointmentDate: dataAgendamento
-                })
-                    .then(resposta => console.log("Salvou no banco"))
-                    .catch(error => console.log(error))
-
-                dataAgendamento = dataAgendamento.format('DD/MM/YYYY')
-
-                console.log("ura NF apartamento negativo")
-                let texto = `Data em que iremos coletar o produto: \n\n`
-                    + `*${dataAgendamento}*`
-                    + `\n\nConcorda com a data de coleta ?`
-                //coloca mensagem no Bot
-                botMensagem.text = texto
-                botMensagem.template = "botao"
-                fila.botStage = "NF confirmaData"
-                this.preparaMensagemBot(botMensagem, fila)
+                fila.botStage = "NF calculaData"
+                this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf)
             }
             //caso nao aperte botao
             else {
@@ -281,35 +267,19 @@ class ura {
 
         else if (fila.botStage == "NF elevador") {
             //Caso andar acima do 4 andar positivo
-            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "3") {
+            if (ultimaMensagem.text == "2" || ultimaMensagem.text == "3" || ultimaMensagem.text == "Entre 4º e 10º Andar" || ultimaMensagem.text == "Acima do 10º Andar") {
                 console.log("ura NF elevador")
                 let texto = `Possui elevador de serviço e é permitido o seu uso?`
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF aceitaData"
+                fila.botStage = "NF calculaData"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso ate 3º andar
-            else if (ultimaMensagem.text == "1") {
-                let dataAgendamento = Coleta.calculaDataAgendamento(nf.freightDate) //Calcula data de agendamento
-                axios.put(`${baseURL}nfe/${nf._id}`, { //salva data no banco
-                    appointmentDate: dataAgendamento
-                })
-                    .then(resposta => console.log("Salvou no banco"))
-                    .catch(error => console.log(error))
-
-                dataAgendamento = dataAgendamento.format('DD/MM/YYYY')
-
-                console.log("ura NF apartamento negativo")
-                let texto = `Data em que iremos coletar o produto: \n\n`
-                    + `*${dataAgendamento}*`
-                    + `\n\nConcorda com a data de coleta ?`
-                //coloca mensagem no Bot
-                botMensagem.text = texto
-                botMensagem.template = "botao"
-                fila.botStage = "NF confirmaData"
-                this.preparaMensagemBot(botMensagem, fila)
+            else if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Até o 3º Andar") {
+                fila.botStage = "NF calculaData"
+                this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf)
             }
             //caso nao aperte botao
             else {
@@ -318,12 +288,39 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
-
+        
         else if (fila.botStage == "NF aceitaData") {
             //Caso confirma data positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                let dataAgendamento = Coleta.calculaDataAgendamento(nf.freightDate) //Calcula data de agendamento
-                axios.put(`${baseURL} nfe / ${nf._id} `, { // salva data no banco
+                fila.botStage = "NF calculaData"
+                this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf)
+            }
+            //Caso confirma data negativo
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
+                console.log("ura NF elevador Negativo")
+                let texto = `Entendi\n`
+                    + `Vou te transferir para um de nossos atendentes\n`
+                    + `Aguarde que em breve você será atendido`
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "0"
+                fila.status = "espera"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //caso nao aperte botao
+            else {
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "NF aceitaData"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+        }
+
+        else if (fila.botStage == "NF calculaData") {
+            let dataAgendamento = await Coleta.calculaDataAgendamento(nf.freightDate, nf.shipper) //Calcula data de agendamento
+
+            if (dataAgendamento !== "Sem Embarcador") {
+                axios.put(`${baseURL}nfe/${nf._id}`, { // salva data no banco
                     appointmentDate: dataAgendamento
                 })
                     .then(resposta => console.log("Salvou no banco"))
@@ -341,25 +338,19 @@ class ura {
                 fila.botStage = "NF confirmaData"
                 this.preparaMensagemBot(botMensagem, fila)
             }
-            //Caso confirma data negativo
-            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                console.log("ura NF confimaData Negativo")
-                let texto = `Entendi\n`
-                    + `Vou te transferir para um de nossos atendentes\n`
-                    + `Aguarde que em breve você será atendido`
+            else {
+                let texto = `Xiii... 😣\n\n`
+                    + `Houve um erro no agendamento!\n\n`
+                    + `Vou te transferir para um dos nossos atendentes`
+                    + `Aguarde e em breve você será atendido.`
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = ""
+                fila.status = "finalizado"
                 fila.botStage = "0"
-                fila.status = "espera"
                 this.preparaMensagemBot(botMensagem, fila)
             }
-            //caso nao aperte botao
-            else {
-                botMensagem.template = "naoApertouBotao"
-                fila.botStage = "NF aceitaData"
-                return this.preparaMensagemBot(botMensagem, fila)
-            }
+
         }
 
         else if (fila.botStage == "NF confirmaData") {
@@ -540,7 +531,7 @@ class ura {
         if (fila.botStage == 0) {
             //inicio
             console.log("ura 0")
-            let texto = `Olá, tudo bem? 🙂\n\n`
+            let texto = `*Olá, tudo bem?* 🙂\n\n`
                 + `Fiz uma breve busca em nosso banco de dados e infelizmente não encontramos devolução em seu nome.\n\n`
                 + `Poderia digitar o seu número de *CPF* ou *CNPJ* para eu realizar mais uma consulta? *(digite apenas números)*`;
 
@@ -572,7 +563,7 @@ class ura {
                     await Nfe.criaNfBySql(dadosSql, fila.from._id) //Cria as NFs no banco Mongo
 
                     let texto =
-                        `Legal, Encontrei 😊\n\n`
+                        `Legal, encontrei 😊\n\n`
                         + `*${contato.name}*\n\n`
                         + `Seria você ou a pessoa/empresa que gostaria de agendar a devolução?`
 

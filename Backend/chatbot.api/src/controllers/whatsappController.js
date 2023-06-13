@@ -71,7 +71,7 @@ class whatsapp {
                 let telefone = body_param.entry[0].changes[0].value.messages[0].from
                 let phoneId = body_param.entry[0].changes[0].value.metadata.phone_number_id
                 let timestamp = body_param.entry[0].changes[0].value.messages[0].timestamp
-                let text = body_param.entry[0].changes[0].value.messages[0].interactive.button_reply.id
+                let text = body_param.entry[0].changes[0].value.messages[0].interactive.button_reply.title
                 let context = body_param.entry[0].changes[0].value.messages[0].context.id
                 const mensagem = {
                     phoneId,
