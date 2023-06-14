@@ -174,7 +174,7 @@ class ura {
 
         else if (fila.botStage == "NF confirmaEndereco") {
             //caso Inicio positivo
-            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Concordo") {
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF confirmaEndereco");
                 let texto =
                     `Boaa... 😎\n\n` +
@@ -193,7 +193,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila);
             }
             //caso Inicio negativo
-            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Discordo") {
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF aceitaTermos negativo")
                 let texto = `Ok, sem problemas\n`
                     + `Vou te transferir para um de nossos atendentes\n`

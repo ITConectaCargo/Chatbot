@@ -246,7 +246,7 @@ class coleta {
     }
 
     static consultaChecklist = async (chaveNFe) => {
-        const url = `http://inectar.com.br/modulos/Checklists_Magazine/${chaveNFe}.pdf`; // Monta a URL do PDF com base no parâmetro
+        const url = `https://inectar.com.br/modulos/Checklists_Magazine/${chaveNFe}.pdf`; // Monta a URL do PDF com base no parâmetro
         let dados = []; // Array para armazenar os dados extraídos do PDF
 
         try {
