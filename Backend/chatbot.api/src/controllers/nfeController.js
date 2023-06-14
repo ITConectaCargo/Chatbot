@@ -88,7 +88,7 @@ class nfe {
                             status: coletaStatus,
                             shipper: embarcador._id,
                             checklist: {
-                                status: checklist.estado,
+                                statusPackaging: checklist.estadoPacote,
                                 reason: checklist.motivo,
                                 details: checklist.detalhes,
                             }

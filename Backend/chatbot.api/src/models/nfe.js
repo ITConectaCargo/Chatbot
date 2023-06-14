@@ -10,7 +10,7 @@ const nfeSchema = new mongoose.Schema({
     status: { type: String },
     shipper: { type: mongoose.Schema.Types.ObjectId, ref: 'embarcadores', require: true },
     checklist: {
-        status: {type: String},
+        statusPackaging: {type: String},
         reason: {type: String},
         details: {type: String},
     },

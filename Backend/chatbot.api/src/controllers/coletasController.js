@@ -285,7 +285,7 @@ class coleta {
             }
 
             const json = {
-                estado: dados[0], // Primeiro item do array é o estado da embalagem
+                estadoPacote: dados[0], // Primeiro item do array é o estado da embalagem
                 motivo: dados[1], // Segundo item do array é o motivo da coleta
                 detalhes: dados[2], // Terceiro item do array são os detalhes
             };
@@ -293,7 +293,7 @@ class coleta {
             return json // Retorna os dados extraídos como JSON na resposta HTTP
         } catch (error) {
             const json = {
-                estado: "", 
+                estadoPacote: "", 
                 motivo: "", 
                 detalhes: "",
             };

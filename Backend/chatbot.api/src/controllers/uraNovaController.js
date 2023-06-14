@@ -108,7 +108,7 @@ class ura {
                     opcao1: "Concordo",
                     opcao2: "Discordo"
                 }
-                fila.botStage = "NF confirmaEndereco"
+                fila.botStage = "NF checklist"
                 await this.preparaMensagemBot(botMensagem, fila);
             }
             //caso Inicio negativo
@@ -132,11 +132,52 @@ class ura {
             }
         }
 
+        else if (fila.botStage == "NF checklist") {
+            //caso Inicio positivo
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Concordo") {
+                console.log("ura NF confirmaEndereco");
+                let texto =
+                    `Perfeito! 😉\n\n`
+                    + `Olha o que eu encontrei:\n\n`
+                    + `Estado da embalagem: *${nf.checklist.statusPackaging}*\n`
+                    + `Motivo da Devolução: *${nf.checklist.reason}*\n`
+                    + `Detalhes: *${nf.checklist.details}*\n\n`
+                    + `Os dados deste Checklist estão corretos?`
+
+                // Coloca mensagem no Bot
+                botMensagem.text = texto;
+                botMensagem.template = "botao";;
+                fila.botStage = "NF confirmaEndereco";
+                this.preparaMensagemBot(botMensagem, fila);
+            }
+            //caso Inicio negativo
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Discordo") {
+                console.log("ura NF aceitaTermos negativo")
+                let texto = `Ok, sem problemas\n`
+                    + `Vou te transferir para um de nossos atendentes\n`
+                    + `Aguarde que em breve você será atendido`
+
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "0"
+                fila.status = "ura"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //caso nao aperte botao
+            else {
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "NF checklist"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+        }
+
         else if (fila.botStage == "NF confirmaEndereco") {
             //caso Inicio positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Concordo") {
                 console.log("ura NF confirmaEndereco");
                 let texto =
+                    `Boaa... 😎\n\n` +
                     "Encontrei este endereço em meu banco de dados:\n\n" +
                     "Rua: *" + nf.client.address.street + "*\n" +
                     "Bairro: *" + nf.client.address.district + "*\n" +
