@@ -5,7 +5,6 @@ import Nfe from '../models/nfe.js';
 import Nf from './nfeController.js';
 import Contato from './contatoController.js';
 import Embarcador from './embarcadorController.js';
-import fs from 'fs';
 import pdfjs from 'pdfjs-dist';
 import moment from 'moment'
 import dotenv from 'dotenv'
@@ -246,30 +245,59 @@ class coleta {
 
     }
 
-    static consultaChecklist = async (req, res) => {
-        const chaveNFe = req.params.nf;
-        const urlPDF = `http://inectar.com.br/modulos/Checklists_Magazine/35230647960950089785550510001634191072263707.pdf`;
+    static consultaChecklist = async (chaveNFe) => {
+        const url = `http://inectar.com.br/modulos/Checklists_Magazine/${chaveNFe}.pdf`; // Monta a URL do PDF com base no parâmetro
+        let dados = []; // Array para armazenar os dados extraídos do PDF
+
         try {
-            const response = await axios.get(urlPDF);
-            const buffer = Buffer.from(response.data);
+            const response = await axios.get(url, { responseType: 'arraybuffer' }); // Faz a requisição HTTP para obter o PDF
+            const pdfBuffer = Buffer.from(response.data, 'binary'); // Converte os dados do PDF para um buffer em formato binário
+            const pdf = await pdfjs.getDocument(pdfBuffer).promise; // Carrega o PDF usando o PDF.js
 
-            const documento = await pdfjs.getDocument(buffer).promise;
-            const numPaginas = documento.numPages;
+            // Expressões regulares para extrair os trechos desejados do PDF
+            const estadoRegex = /ESTADO DA EMBALAGEM:(.*?)l   MOTIVO DA COLETA/gm;
+            const motivoRegex = /MOTIVO DA COLETA:(.*?)l   DETALHES/gm;
+            const detalhesRegex = /DETALHES:(.*?)PASSO/gm;
 
-            let conteudoPDF = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i); // Obtém a página do PDF
+                const content = await page.getTextContent(); // Obtém o conteúdo de texto da página
+                const textos = content.items.map(item => item.str).join(' '); // Converte os itens de texto em uma única string
 
-            for (let i = 1; i <= numPaginas; i++) {
-                const pagina = await documento.getPage(i);
-                const conteudoPagina = await pagina.getTextContent();
+                // Extrai o estado da embalagem e adiciona ao array de dados
+                let match;
+                while ((match = estadoRegex.exec(textos)) !== null) {
+                    const estado = match[1].trim().replace(/\s{3,}/g, ' '); // Remove espaços triplos da string extraída
+                    dados.push(estado);
+                }
 
-                const linhas = conteudoPagina.items.map(item => item.str);
-                const conteudo = linhas.join('\n');
+                // Extrai o motivo da coleta e adiciona ao array de dados
+                while ((match = motivoRegex.exec(textos)) !== null) {
+                    const motivo = match[1].trim().replace(/\s{3,}/g, ' '); // Remove espaços triplos da string extraída
+                    dados.push(motivo);
+                }
 
-                conteudoPDF += conteudo;
+                // Extrai os detalhes e adiciona ao array de dados
+                while ((match = detalhesRegex.exec(textos)) !== null) {
+                    const detalhes = match[1].trim().replace(/\s{3,}/g, ' '); // Remove espaços triplos da string extraída
+                    dados.push(detalhes);
+                }
             }
-            res.status(200).send(conteudoPDF);
+
+            const json = {
+                estado: dados[0], // Primeiro item do array é o estado da embalagem
+                motivo: dados[1], // Segundo item do array é o motivo da coleta
+                detalhes: dados[2], // Terceiro item do array são os detalhes
+            };
+
+            return json // Retorna os dados extraídos como JSON na resposta HTTP
         } catch (error) {
-            console.log(error)
+            const json = {
+                estado: "", 
+                motivo: "", 
+                detalhes: "",
+            };
+            return json
         }
     }
 

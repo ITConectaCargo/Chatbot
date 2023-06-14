@@ -1,6 +1,7 @@
 import axios from 'axios'
 import Nfe from '../models/nfe.js'
 import dotenv from 'dotenv'
+import Coleta from './coletasController.js'
 dotenv.config()
 
 const baseURL = process.env.BASEURL
@@ -57,7 +58,7 @@ class nfe {
                     console.log("Nf nao localizada")
                 }
 
-                if (!existeNota || existeNota === "") {                    
+                if (!existeNota || existeNota === "") {
                     let coletaStatus = ""
                     let dataFrete = ""
 
@@ -74,6 +75,8 @@ class nfe {
                         console.log(error)
                     }
 
+                    let checklist = await Coleta.consultaChecklist(element.chaveNfe)
+
                     try {
                         console.log("criando NF")
                         const nota = {
@@ -83,7 +86,12 @@ class nfe {
                             product: element.descricaoProduto,
                             value: element.valorTotalNf,
                             status: coletaStatus,
-                            shipper: embarcador._id
+                            shipper: embarcador._id,
+                            checklist: {
+                                status: checklist.estado,
+                                reason: checklist.motivo,
+                                details: checklist.detalhes,
+                            }
                         };
 
                         const newNota = await Nfe.create(nota);
@@ -94,7 +102,7 @@ class nfe {
                 }
             }
         }
-        else if(dadosSql){
+        else if (dadosSql) {
             this.criaNfBySql([dadosSql], contatoId, embarcador)
         }
     }
@@ -123,7 +131,7 @@ class nfe {
             for (let i = 0; i < 9; i++) {
                 soma += parseInt(cpfCnpj.charAt(i)) * (10 - i);
             }
-            
+
             let primeiroDigito = 11 - (soma % 11);
             if (primeiroDigito > 9) {
                 primeiroDigito = 0;
