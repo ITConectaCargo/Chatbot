@@ -25,7 +25,7 @@
     "mongoose": "^7.0.5",
     "mysql": "^2.18.1",
     "mysql2-promise": "^0.1.4",
-    "pdfjs-dist": "^3.7.107",
+    "pdfjs-dist": "^2.8.335",
     "socket.io": "^4.6.1",
     "socket.io-client": "^4.6.1"
   },

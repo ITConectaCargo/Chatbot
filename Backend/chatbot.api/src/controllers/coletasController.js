@@ -246,7 +246,7 @@ class coleta {
     }
 
     static consultaChecklist = async (chaveNFe) => {
-        const url = `https://inectar.com.br/modulos/Checklists_Magazine/${chaveNFe}.pdf`; // Monta a URL do PDF com base no parâmetro
+        const url = `http://inectar.com.br/modulos/Checklists_Magazine/${chaveNFe}.pdf`; // Monta a URL do PDF com base no parâmetro
         let dados = []; // Array para armazenar os dados extraídos do PDF
 
         try {
@@ -290,11 +290,12 @@ class coleta {
                 detalhes: dados[2], // Terceiro item do array são os detalhes
             };
 
-            return json // Retorna os dados extraídos como JSON na resposta HTTP
+            return json  // Retorna os dados extraídos como JSON na resposta HTTP
         } catch (error) {
+            console.log(error)
             const json = {
-                estadoPacote: "", 
-                motivo: "", 
+                estadoPacote: "",
+                motivo: "",
                 detalhes: "",
             };
             return json
