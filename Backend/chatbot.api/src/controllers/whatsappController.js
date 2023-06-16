@@ -111,7 +111,6 @@ class whatsapp {
     static async verificaContato(nome, telefone, mensagem) {
         let contato = ""
         let fila = ""
-        let novaMensagem = ""
         let dadosSql = ""
 
         //verifica se telefone esta no BD Mongo
@@ -127,7 +126,7 @@ class whatsapp {
                 .sort({ date: -1 }) // Ordena por data em ordem decrescente
                 .exec()
         } catch (error) {
-            console.log(error)
+            console.log("Nao esta na fila")
         }
 
         if (!fila || fila.status === "finalizado") { //se nao existir fila ou status for finalizado
@@ -180,29 +179,28 @@ class whatsapp {
             }
 
             if (contato) {
+                fila = await Fila.adicionaNaFila(contato, "0", "ura")
                 //Salva a mensagem
-                let resposta = await this.salvaMensagem(contato, mensagem)
-                novaMensagem = resposta
-
-                Fila.verificaAtendimento(novaMensagem) //Verifica a fila
+                let resposta = await this.salvaMensagem(contato, mensagem, fila.protocol)
+                Fila.verificaAtendimento(resposta) //Verifica a fila
             }
         }
         else {
             console.log("Esta na fila")
-            let resposta = await this.salvaMensagem(contato, mensagem)
-            novaMensagem = resposta
+            let resposta = await this.salvaMensagem(contato, mensagem, fila.protocol)
 
-            if (novaMensagem == "respostaDuplicada") {
+            if (resposta == "respostaDuplicada") {
                 // Pessoa clicou em mais de uma opcao
                 return ""
             } else {
-                Fila.verificaAtendimento(novaMensagem) //Verifica a fila
+                Fila.verificaAtendimento(resposta) //Verifica a fila
             }
         }
     }
 
-    static async salvaMensagem(contato, mensagem) {
+    static async salvaMensagem(contato, mensagem, protocol) {
         console.log("salvando mensagem")
+        let protocolo = protocol
         let room = ''
         let ultimaMensagem = null
         if (mensagem.to === '5511945718427') {
@@ -217,13 +215,16 @@ class whatsapp {
             }
         }
         else {
+            protocolo = mensagem.protocol //coloca o protocolo da mensagem
             room = mensagem.to //define a sala para enviar a mensagem
         }
 
+        
         if (ultimaMensagem === null || ultimaMensagem.context == undefined || ultimaMensagem.context != mensagem.context) {
             //salva mensagem
             try {
                 const msg = new Mensagens({
+                    protocol: protocolo,
                     from: contato._id,
                     to: mensagem.to,
                     room: room,

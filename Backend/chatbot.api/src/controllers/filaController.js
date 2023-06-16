@@ -1,4 +1,5 @@
 import Fila from '../models/fila.js'
+import Coleta from './coletasController.js'
 import Ura from "./uraNovaController.js"
 
 class fila {
@@ -112,7 +113,8 @@ class fila {
                 console.log("status Finalizado")
                 botStage = "0"
                 status = "ura"
-                this.adicionaNaFila(mensagem, botStage, status) //cria o atendimento novamente
+                fila = await this.adicionaNaFila(mensagem, botStage, status) //Cria contato novamente na fila
+                Ura.verificaDadosUra(fila)
             }
             //se status for URA
             else if (fila.status == "ura") {
@@ -123,16 +125,19 @@ class fila {
         } else {
             botStage = "0"
             status = "ura"
-            this.adicionaNaFila(mensagem, botStage, status) //Cria contato novo na fila
+            fila = await this.adicionaNaFila(mensagem, botStage, status) //Cria contato novo na fila
+            Ura.verificaDadosUra(fila)
         }
     }
 
-    static async adicionaNaFila(mensagem, botStage, status) {
+    static async adicionaNaFila(contato, botStage, status) {
         console.log("Adicionando a Fila")
+        const protocol = await Coleta.protocolo(contato.tel)
+
         // pegando os dados da fila
         const atendimento = new Fila({
-            from: mensagem.from,
-            timestamp: mensagem.timestamp,
+            protocol,
+            from: contato._id,
             botStage,
             department: "",
             status
@@ -140,7 +145,7 @@ class fila {
         try {
             const newAtendimento = await atendimento.save(); // salva os dados no BD
             console.log("Adicionado na fila com sucesso")
-            Ura.verificaDadosUra(newAtendimento) // envia para a URA de atendimento
+            return newAtendimento
         } catch (err) {
             return console.log(err)
         }

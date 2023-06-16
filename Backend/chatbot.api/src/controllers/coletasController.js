@@ -1,21 +1,21 @@
 import Contatos from '../models/contato.js';
 import Feriados from '../models/feriado.js';
-import dbSql from '../config/dbSqlConfig.js'
 import Nfe from '../models/nfe.js';
+import Agendamento from '../models/agendamento.js';
+import dbSql from '../config/dbSqlConfig.js'
 import Nf from './nfeController.js';
 import Contato from './contatoController.js';
 import Embarcador from './embarcadorController.js';
 import pdfjs from 'pdfjs-dist';
 import moment from 'moment'
+import axios from 'axios';
+import fetch from 'node-fetch';
 import dotenv from 'dotenv'
 dotenv.config()
 
 const baseURL = process.env.BASEURL
-import axios from 'axios';
-import fetch from 'node-fetch';
 
 class coleta {
-
     static consultaByTelefone = async (tel) => {
         const telefone = tel.slice(2); //retira o 55 do numero
         const query = `
@@ -45,7 +45,7 @@ class coleta {
             INNER JOIN
                 tbl_coleta_produto ON mktclientesnfe.codProduto = tbl_coleta_produto.codProduto
             WHERE
-                clientes.foneCliente = ${telefone};
+                clientes.foneCliente = ${telefone}
         `;
 
         return new Promise((resolve, reject) => {
@@ -54,9 +54,7 @@ class coleta {
                     console.error('Erro ao executar a consulta: ' + error.stack);
                     reject({ message: 'Erro ao buscar dados.' });
                 } else {
-                    let dados = results;
-                    console.log(dados);
-                    resolve(dados);
+                    resolve(results);
                 }
             });
         });
@@ -100,9 +98,7 @@ class coleta {
                         console.error('Erro ao executar a consulta: ' + error.stack);
                         reject({ message: 'Erro ao buscar dados.' });
                     } else {
-                        let dados = results;
-                        console.log(dados);
-                        resolve(dados);
+                        resolve(results);
                     }
                 });
             });
@@ -151,8 +147,7 @@ class coleta {
                         console.error('Erro ao executar a consulta: ' + error.stack);
                         reject({ message: 'Erro ao buscar dados.' });
                     } else {
-                        let dados = results;
-                        resolve(dados);
+                        resolve(results);
                     }
                 });
             });
@@ -185,17 +180,58 @@ class coleta {
             let existeNota = ""
             try {
                 existeNota = await Nfe.exists({ key: dadosSql.chaveNfe });
-                console.log("existe nota")
             } catch (error) {
                 console.log("Nf nao localizada")
             }
 
             if (!existeNota || existeNota === "") {
+                console.log("Nao existe nota")
                 let embarcador = await Embarcador.criaEmbarcadorSql(dadosSql)
-                await Nf.criaNfBySql(dadosSql, contato._id, embarcador)
+                let nota = await Nf.criaNfBySql(dadosSql, contato._id, embarcador)
+                await this.criaAgendamento(contato._id, nota._id, embarcador._id, nota.key)
             }
         }
         return contato
+    }
+
+    static criaAgendamento = async (clienteId, nfeId, embarcadorId, chaveNfe, protocolo) => {
+        let coletaStatus = ""
+        let dataFrete = ""
+
+        try {
+            console.log("consultando ESL")
+            await axios.get(`${baseURL}coleta/agendamento/${chaveNfe}`)
+                .then(resposta => {
+                    const ultimoObjeto = resposta.data.pop();
+                    coletaStatus = ultimoObjeto.occurrence.code //pega o codigo do status
+                    dataFrete = ultimoObjeto.created_at //pega data do frete
+                })
+                .catch(error => console.log(error))
+        } catch (error) {
+            console.log(error)
+        }
+
+        let checklist = await this.consultaChecklist(chaveNfe)
+
+        try {
+            const agendamento = {
+                protocol: protocolo,
+                client: clienteId,
+                nfe: nfeId,
+                shipper: embarcadorId,
+                status: coletaStatus,
+                freightDate: dataFrete,
+                checklist: {
+                    statusPackaging: checklist.estadoPacote,
+                    reason: checklist.motivo,
+                    details: checklist.detalhes,
+                },
+            }
+            const newAgendamento = await Agendamento.create(agendamento);
+            return newAgendamento
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     static consultaAgendamento = async (req, res) => {
@@ -245,9 +281,28 @@ class coleta {
 
     }
 
-    static consultaChecklist = async (chaveNFe) => {
-        const url = `http://inectar.com.br/modulos/Checklists_Magazine/${chaveNFe}.pdf`; // Monta a URL do PDF com base no parâmetro
+    static deletaAgendamento = async (agendamentoId) => {
+        try {
+            // Excluindo os documentos do cliente criados na data de hoje
+            await Agendamento.findByIdAndDelete(agendamentoId);
+            console.log('Agendamento do cliente excluída com sucesso.');
+        } catch (err) {
+            console.error('Ocorreu um erro ao excluir agendagemento:', err);
+        }
+    }
+
+    static consultaChecklist = async (chaveNfe) => {
+        const cnpj = chaveNfe.substr(6, 14);
+        const raizCnpj = cnpj.substr(0, 8)
+        let url = ''
         let dados = []; // Array para armazenar os dados extraídos do PDF
+
+        if (raizCnpj == '47960950') { //Magazine
+            url = `http://inectar.com.br/modulos/Checklists_Magazine/${chaveNfe}.pdf`; // Monta a URL do PDF com base no parâmetro
+        }
+        else if (raizCnpj == '05570714') { //Kabum
+            url = `https://inectar.com.br/src/painelUsuario/checklists/${raizCnpj}/${cnpj}/${chaveNfe}.pdf`; // Monta a URL do PDF com base no parâmetro
+        }
 
         try {
             const response = await axios.get(url, { responseType: 'arraybuffer' }); // Faz a requisição HTTP para obter o PDF
@@ -255,8 +310,8 @@ class coleta {
             const pdf = await pdfjs.getDocument(pdfBuffer).promise; // Carrega o PDF usando o PDF.js
 
             // Expressões regulares para extrair os trechos desejados do PDF
-            const estadoRegex = /ESTADO DA EMBALAGEM:(.*?)l   MOTIVO DA COLETA/gm;
-            const motivoRegex = /MOTIVO DA COLETA:(.*?)l   DETALHES/gm;
+            const estadoRegex = /ESTADO DA EMBALAGEM:(.*?)l MOTIVO DA COLETA/gm;
+            const motivoRegex = /MOTIVO DA COLETA:(.*?)l DETALHES/gm;
             const detalhesRegex = /DETALHES:(.*?)PASSO/gm;
 
             for (let i = 1; i <= pdf.numPages; i++) {
@@ -267,19 +322,19 @@ class coleta {
                 // Extrai o estado da embalagem e adiciona ao array de dados
                 let match;
                 while ((match = estadoRegex.exec(textos)) !== null) {
-                    const estado = match[1].trim().replace(/\s{3,}/g, ' '); // Remove espaços triplos da string extraída
+                    const estado = match[1].trim().replace(/\s{2,}/g, ' '); // Remove espaços triplos da string extraída
                     dados.push(estado);
                 }
 
                 // Extrai o motivo da coleta e adiciona ao array de dados
                 while ((match = motivoRegex.exec(textos)) !== null) {
-                    const motivo = match[1].trim().replace(/\s{3,}/g, ' '); // Remove espaços triplos da string extraída
+                    const motivo = match[1].trim().replace(/\s{2,}/g, ' '); // Remove espaços triplos da string extraída
                     dados.push(motivo);
                 }
 
                 // Extrai os detalhes e adiciona ao array de dados
                 while ((match = detalhesRegex.exec(textos)) !== null) {
-                    const detalhes = match[1].trim().replace(/\s{3,}/g, ' '); // Remove espaços triplos da string extraída
+                    const detalhes = match[1].trim().replace(/\s{2,}/g, ' '); // Remove espaços triplos da string extraída
                     dados.push(detalhes);
                 }
             }
@@ -342,6 +397,29 @@ class coleta {
         } catch (error) {
             console.log(error)
         }
+    }
+
+    static protocolo = async (telefone) => {
+        const padZero = (valor, tamanho = 2) => {
+            let valorString = String(valor);
+            while (valorString.length < tamanho) {
+                valorString = '0' + valorString;
+            }
+            return valorString;
+        };
+
+        const data = new Date();
+        const ano = data.getFullYear();
+        const mes = padZero(data.getMonth() + 1);
+        const dia = padZero(data.getDate());
+        const hora = padZero(data.getHours());
+        const minuto = padZero(data.getMinutes());
+        const segundo = padZero(data.getSeconds());
+        const tel = telefone.substr(9, 13);
+
+        const protocol = `${ano}${mes}${dia}${tel}${hora}${minuto}${segundo}`
+
+        return protocol
     }
 }
 

@@ -49,61 +49,40 @@ class nfe {
         if (dadosSql.length >= 1) {
             console.log(`Achei ${dadosSql.length} Nfs`)
             for (let contador = 0; contador < dadosSql.length; contador++) {
-                let element = dadosSql[contador]
+                let element = dadosSql[contador] // seleciona os dados do SQL 
                 let existeNota = ""
                 try {
-                    existeNota = await Nfe.exists({ key: element.chaveNfe });
-                    console.log("existe nota")
+                    existeNota = await Nfe.findOne({ key: element.chaveNfe });
                 } catch (error) {
-                    console.log("Nf nao localizada")
+                    console.log(error)
                 }
 
                 if (!existeNota || existeNota === "") {
-                    let coletaStatus = ""
-                    let dataFrete = ""
-
-                    try {
-                        console.log("consultando ESL")
-                        await axios.get(`${baseURL}coleta/agendamento/${element.chaveNfe}`)
-                            .then(resposta => {
-                                const ultimoObjeto = resposta.data.pop();
-                                coletaStatus = ultimoObjeto.occurrence.code //pega o codigo do status
-                                dataFrete = ultimoObjeto.created_at //pega data do frete
-                            })
-                            .catch(error => console.log(error))
-                    } catch (error) {
-                        console.log(error)
-                    }
-
-                    let checklist = await Coleta.consultaChecklist(element.chaveNfe)
+                    console.log("NF nao existe")
 
                     try {
                         console.log("criando NF")
-                        const nota = {
+                        const nota = new Nfe({
                             client: contatoId,
                             key: element.chaveNfe,
-                            freightDate: dataFrete,
                             product: element.descricaoProduto,
                             value: element.valorTotalNf,
-                            status: coletaStatus,
                             shipper: embarcador._id,
-                            checklist: {
-                                statusPackaging: checklist.estadoPacote,
-                                reason: checklist.motivo,
-                                details: checklist.detalhes,
-                            }
-                        };
+                        })
 
-                        const newNota = await Nfe.create(nota);
+                        const newNota = await nota.save()
                         return newNota;
                     } catch (error) {
                         console.log(error)
                     }
                 }
+                else {
+                    return existeNota
+                }
             }
         }
         else if (dadosSql) {
-            this.criaNfBySql([dadosSql], contatoId, embarcador)
+            return await this.criaNfBySql([dadosSql], contatoId, embarcador)
         }
     }
 

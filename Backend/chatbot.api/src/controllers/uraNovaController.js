@@ -1,6 +1,6 @@
 import Contatos from "../models/contato.js"
+import Agendamentos from "../models/agendamento.js"
 import Mensagem from "../models/mensagem.js"
-import Nfs from '../models/nfe.js'
 import Embarcador from '../controllers/embarcadorController.js'
 import Nfe from '../controllers/nfeController.js'
 import Coleta from "./coletasController.js"
@@ -18,7 +18,6 @@ class ura {
         console.log("tratando dados para a ura")
         let ultimaMensagem = ""
         let botMensagem = ""
-        let nf = ""
 
         //Prepara a mensagem que o Bot vai enviar
         try {
@@ -43,42 +42,56 @@ class ura {
 
         //Verifica se existe NF deste cliente
         try {
-            nf = await Nfs.findOne({ client: fila.from, status: { $in: ['114', '308'] } }) //busca NF status 114 (a Agendar) ou 308(reagendar)
+            let agendamento = await Agendamentos.findOne({ client: fila.from, status: { $in: ['114', '308', '303'] } }) //busca NF status 114 (a Agendar) ou 308(reagendar)
                 .populate("client")
+                .populate("nfe")
                 .populate("shipper")
                 .exec()
 
-            console.log("encontrou NF na ura")
-
             botMensagem.parameters = {
-                name: nf.client.name,
-                product: nf.product,
-                shipper: nf.shipper.name
+                name: agendamento.client.name,
+                product: agendamento.nfe.product,
+                shipper: agendamento.shipper.name
             }
 
-            this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf)
+            this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento)
         } catch (error) {
-            console.log("nao encontrou NF na ura")
+            console.log("nao agendamento na ura")
             this.uraAtendimento(fila, ultimaMensagem, botMensagem)
         }
     }
 
-    static async uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf) {
+    static async uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento) {
         console.log("cheguei na ura Agendamento")
         //Inicia o Bot
         if (fila.botStage == 0) {
-            console.log("ura NF Inicio")
-            let texto =
-                `*Olá ${botMensagem.parameters.name}, tudo bem?*\n\n`
-                + `Localizei aqui que você quer devolver:\n\n *${botMensagem.parameters.product}*\n\n`
-                + `Nós somos transportadores autorizados: \n\n*${botMensagem.parameters.shipper}*\n\n`
-                + `Gostaria de agendar a devolução?\n\n`
+            if (botMensagem.parameters.product != "Produto nao cadastrado") {
+                console.log("ura NF Inicio")
+                let texto =
+                    `*Olá ${botMensagem.parameters.name}, tudo bem?*\n\n`
+                    + `Localizei aqui que você quer devolver:\n\n*${botMensagem.parameters.product}*\n\n`
+                    + `Nós somos transportadores autorizados: \n\n*${botMensagem.parameters.shipper}*\n\n`
+                    + `Gostaria de agendar a devolução?\n\n`
 
-            //coloca mensagem no Bot
-            botMensagem.text = texto
-            botMensagem.template = "botao"
-            fila.botStage = "NF aceitaTermos"
-            this.preparaMensagemBot(botMensagem, fila)
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = "botao"
+                fila.botStage = "NF aceitaTermos"
+                this.preparaMensagemBot(botMensagem, fila)
+            } else {
+                console.log("ura NF Inicio")
+                let texto =
+                    `*Olá ${botMensagem.parameters.name}, tudo bem?*\n\n`
+                    + `Localizei aqui que você deseja fazer uma devolução\n\n`
+                    + `Nós somos transportadores autorizados: \n\n*${botMensagem.parameters.shipper}*\n\n`
+                    + `Gostaria de agendar a devolução?\n\n`
+
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = "botao"
+                fila.botStage = "NF aceitaTermos"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
         }
 
         else if (fila.botStage == "NF aceitaTermos") {
@@ -139,10 +152,10 @@ class ura {
                 let texto =
                     `Perfeito! 😉\n\n`
                     + `Olha o que eu encontrei:\n\n`
-                    + `Estado da embalagem: *${nf.checklist.statusPackaging}*\n`
-                    + `Motivo da Devolução: *${nf.checklist.reason}*\n`
-                    + `Detalhes: *${nf.checklist.details}*\n\n`
-                    + `Os dados deste Checklist estão corretos?`
+                    + `Estado da embalagem: *${agendamento.checklist.statusPackaging}*\n`
+                    + `Motivo da Devolução: *${agendamento.checklist.reason}*\n`
+                    + `Detalhes: *${agendamento.checklist.details}*\n\n`
+                    + `Os dados que você informou estão corretos?`
 
                 // Coloca mensagem no Bot
                 botMensagem.text = texto;
@@ -177,13 +190,13 @@ class ura {
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF confirmaEndereco");
                 let texto =
-                    `Boaa... 😎\n\n` +
+                    `Legal! 🙂\n\n` +
                     "Encontrei este endereço em meu banco de dados:\n\n" +
-                    "Rua: *" + nf.client.address.street + "*\n" +
-                    "Bairro: *" + nf.client.address.district + "*\n" +
-                    "Cidade: *" + nf.client.address.city + "* - *" + nf.client.address.state + "*\n" +
-                    "Cep: *" + nf.client.address.cep + "*\n" +
-                    "Complemento: *" + nf.client.address.complement + "*\n\n" +
+                    "Rua: *" + agendamento.client.address.street + "*\n" +
+                    "Bairro: *" + agendamento.client.address.district + "*\n" +
+                    "Cidade: *" + agendamento.client.address.city + "* - *" + agendamento.client.address.state + "*\n" +
+                    "Cep: *" + agendamento.client.address.cep + "*\n" +
+                    "Complemento: *" + agendamento.client.address.complement + "*\n\n" +
                     "As informações acima estão corretas?";
 
                 // Coloca mensagem no Bot
@@ -321,7 +334,7 @@ class ura {
             //Caso ate 3º andar
             else if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Até o 3º Andar") {
                 fila.botStage = "NF calculaData"
-                this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf)
+                this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento)
             }
             //caso nao aperte botao
             else {
@@ -359,10 +372,10 @@ class ura {
         }
 
         else if (fila.botStage == "NF calculaData") {
-            let dataAgendamento = await Coleta.calculaDataAgendamento(nf.freightDate, nf.shipper) //Calcula data de agendamento
+            let dataAgendamento = await Coleta.calculaDataAgendamento(agendamento.freightDate, agendamento.shipper) //Calcula data de agendamento
 
             if (dataAgendamento !== "Sem Embarcador") {
-                axios.put(`${baseURL}nfe/${nf._id}`, { // salva data no banco
+                axios.put(`${baseURL}nfe/${agendamento.nfe._id}`, { // salva data no banco
                     appointmentDate: dataAgendamento
                 })
                     .then(resposta => console.log("Salvou no banco"))
@@ -439,21 +452,13 @@ class ura {
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 fila.botStage = 0
                 //refaz os passos do bot
-                this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf)
+                this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento)
             }
 
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                let contato = ""
-                let dados = ""
-                //apaga dados do contato
                 try {
-                    dados = await Contatos.findOne({ tel: botMensagem.to })
-                } catch (error) {
-                    console.log(error)
-                }
-                try {
-                    contato = await Contatos.findByIdAndUpdate(
-                        dados.id,
+                    await Contatos.findByIdAndUpdate(
+                        agendamento.client._id,
                         {
                             name: "",
                             nameWhatsapp: "Desconhecido",
@@ -474,7 +479,8 @@ class ura {
                 }
 
                 //apaga Nfs geradas na data de hoje 
-                await Nfe.deletaNfeHoje(contato._id)
+                await Nfe.deletaNfeHoje(agendamento.client._id)
+                await Coleta.deletaAgendamento(agendamento._id)
 
                 let texto = `Me Desculpe, 😕\n\n`
                     + `Estou te tranferindo para um de nossos atendentes`
@@ -603,7 +609,8 @@ class ura {
                     //atualiza dados do contato
                     contato = await Contato.atualizaDadosContatoBySql(dadosSql[0], fila.from._id) //Atualiza contato com os dados vindo do SQL
                     let embarcador = await Embarcador.criaEmbarcadorSql(dadosSql[0])
-                    await Nfe.criaNfBySql(dadosSql, fila.from._id, embarcador) //Cria as NFs no banco Mongo
+                    let nf = await Nfe.criaNfBySql(dadosSql, fila.from._id, embarcador) //Cria as NFs no banco Mongo
+                    Coleta.criaAgendamento(contato._id, nf._id, embarcador._id, nf.key) // Cria agendamento
 
                     let texto =
                         `Legal, encontrei 😊\n\n`

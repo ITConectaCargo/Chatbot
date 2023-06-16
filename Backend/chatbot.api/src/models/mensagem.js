@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const mensagemSchema = new mongoose.Schema(
     {
+        protocol: {type: String},
         from: {type: mongoose.Schema.Types.ObjectId, ref: 'contatos', required: true},
         user: {type: mongoose.Schema.Types.ObjectId, ref: 'usuario'},
         to: {type: String},

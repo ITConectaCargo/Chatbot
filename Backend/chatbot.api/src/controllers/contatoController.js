@@ -110,13 +110,11 @@ class contato {
                 }
             })
 
-            contato = await cliente.save() //Salva contato no mongo
+            const contato = await cliente.save() //Salva contato no mongo
             return contato
         } catch (error) {
             console.log(error)
         }
-
-        
     }
 
     static atualizaDadosContatoBySql = async (dadosSql, contatoId) => {
