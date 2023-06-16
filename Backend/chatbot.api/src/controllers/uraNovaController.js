@@ -201,7 +201,7 @@ class ura {
 
                 // Coloca mensagem no Bot
                 botMensagem.text = texto;
-                botMensagem.template = "botao";;
+                botMensagem.template = "botao";
                 fila.botStage = "NF produtoDesmontado";
                 this.preparaMensagemBot(botMensagem, fila);
             }

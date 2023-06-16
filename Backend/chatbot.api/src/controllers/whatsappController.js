@@ -179,10 +179,11 @@ class whatsapp {
             }
 
             if (contato) {
+                //cria Fila
                 fila = await Fila.adicionaNaFila(contato, "0", "ura")
                 //Salva a mensagem
                 let resposta = await this.salvaMensagem(contato, mensagem, fila.protocol)
-                Fila.verificaAtendimento(resposta) //Verifica a fila
+                Fila.verificaAtendimento(fila) //Verifica a fila
             }
         }
         else {
@@ -193,7 +194,7 @@ class whatsapp {
                 // Pessoa clicou em mais de uma opcao
                 return ""
             } else {
-                Fila.verificaAtendimento(resposta) //Verifica a fila
+                Fila.verificaAtendimento(fila) //Verifica a fila
             }
         }
     }

@@ -94,18 +94,10 @@ class fila {
         }
     }
 
-    static async verificaAtendimento(mensagem) {
+    static async verificaAtendimento(fila) {
         console.log("verificando atendimento")
-        let fila = ""
         let botStage = ""
         let status = ""
-
-        try {
-            fila = await Fila.findOne({ from: mensagem.from }) //verifica se telefone esta na fila
-                .sort({ date: -1 }) //busca pela ultima data
-        } catch (error) {
-            console.log(error)
-        }
 
         if (fila) {
             //se status for finalizado
@@ -113,7 +105,6 @@ class fila {
                 console.log("status Finalizado")
                 botStage = "0"
                 status = "ura"
-                fila = await this.adicionaNaFila(mensagem, botStage, status) //Cria contato novamente na fila
                 Ura.verificaDadosUra(fila)
             }
             //se status for URA
@@ -121,12 +112,6 @@ class fila {
                 console.log("status URA")
                 Ura.verificaDadosUra(fila) // envia para ura de atendimento
             }
-            //se nao existe contato na fila
-        } else {
-            botStage = "0"
-            status = "ura"
-            fila = await this.adicionaNaFila(mensagem, botStage, status) //Cria contato novo na fila
-            Ura.verificaDadosUra(fila)
         }
     }
 
