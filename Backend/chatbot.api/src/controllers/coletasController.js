@@ -234,7 +234,36 @@ class coleta {
         }
     }
 
-    static consultaAgendamento = async (req, res) => {
+    static atualizaAgendamento = async (dados) => {
+        try {
+            const agendar = Agendamento.findByIdAndUpdate(
+                dados._id,
+                {
+                    protocol: dados.protocol,
+                    appointmentDate: dados.appointmentDate,
+                    disassembledProduct: dados.disassembledProduct,
+                    checklist: {
+                        statusPackaging: dados.checklist.statusPackaging,
+                        reason: dados.checklist.reason,
+                        details: dados.checklist.details,
+                    },
+                    residence: {
+                        type: dados.residence.type,
+                        floor: dados.residence.floor,
+                        elevator: dados.residence.elevator,
+                    },
+                },
+                { new: true } //retorna o valor atualizado
+            )
+                .exec()
+
+                return agendar
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    static consultaAgendamentoEsl = async (req, res) => {
         const chaveNfe = req.params.chaveNfe;
 
         try {
@@ -415,9 +444,10 @@ class coleta {
         const hora = padZero(data.getHours());
         const minuto = padZero(data.getMinutes());
         const segundo = padZero(data.getSeconds());
+        const milisegundos = padZero(data.getMilliseconds());
         const tel = telefone.substr(9, 13);
 
-        const protocol = `${ano}${mes}${dia}${tel}${hora}${minuto}${segundo}`
+        const protocol = `${ano}${mes}${dia}${tel}${hora}${minuto}${segundo}${milisegundos}`
 
         return protocol
     }

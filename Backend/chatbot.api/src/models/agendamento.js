@@ -1,7 +1,7 @@
 import mongoose from "mongoose"
 
 const agendamentoSchema = new mongoose.Schema({
-    protocol: { type: String },
+    protocol: [{ type: String }],
     client: { type: mongoose.Schema.Types.ObjectId, ref: 'contatos', required: true },
     nfe: { type: mongoose.Schema.Types.ObjectId, ref: 'nfes', required: true },
     shipper: { type: mongoose.Schema.Types.ObjectId, ref: 'embarcadores', required: true },

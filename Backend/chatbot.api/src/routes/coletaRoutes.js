@@ -5,6 +5,6 @@ const router = express.Router()
 
 router
     .get("/coleta/:nf", coletaController.consultaChecklist)
-    .get("/coleta/agendamento/:chaveNfe", coletaController.consultaAgendamento)
+    .get("/coleta/agendamento/:chaveNfe", coletaController.consultaAgendamentoEsl)
 
 export default router

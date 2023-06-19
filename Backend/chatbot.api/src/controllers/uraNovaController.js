@@ -148,20 +148,52 @@ class ura {
         else if (fila.botStage == "NF checklist") {
             //caso Inicio positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Concordo") {
+                let checklist = false
                 console.log("ura NF confirmaEndereco");
-                let texto =
-                    `Perfeito! 😉\n\n`
-                    + `Olha o que eu encontrei:\n\n`
-                    + `Estado da embalagem: *${agendamento.checklist.statusPackaging}*\n`
-                    + `Motivo da Devolução: *${agendamento.checklist.reason}*\n`
-                    + `Detalhes: *${agendamento.checklist.details}*\n\n`
-                    + `Os dados que você informou estão corretos?`
+                if (agendamento.checklist.statusPackaging == "" || agendamento.checklist.reason == "" || agendamento.checklist.details == "") {
+                    let dadosCheklist = await Coleta.consultaChecklist(agendamento.nfe.key)
+                    if (dadosCheklist) {
+                        agendamento.checklist.details = dadosCheklist.detalhes
+                        agendamento.checklist.statusPackaging = dadosCheklist.estadoPacote
+                        agendamento.checklist.reason = dadosCheklist.motivo
+                        Coleta.atualizaAgendamento(agendamento)
 
-                // Coloca mensagem no Bot
-                botMensagem.text = texto;
-                botMensagem.template = "botao";;
-                fila.botStage = "NF confirmaEndereco";
-                this.preparaMensagemBot(botMensagem, fila);
+                        checklist = true
+                    }
+                }
+                else {
+                    checklist = true
+                }
+
+                if (checklist === true) {
+                    let texto =
+                        `Perfeito! 😉\n\n`
+                        + `Olha o que eu encontrei:\n\n`
+                        + `Estado da embalagem: *${agendamento.checklist.statusPackaging}*\n`
+                        + `Motivo da Devolução: *${agendamento.checklist.reason}*\n`
+                        + `Detalhes: *${agendamento.checklist.details}*\n\n`
+                        + `Os dados que você informou estão corretos?`
+
+                    // Coloca mensagem no Bot
+                    botMensagem.text = texto;
+                    botMensagem.template = "botao";;
+                    fila.botStage = "NF confirmaEndereco";
+                    this.preparaMensagemBot(botMensagem, fila);
+                }
+                else {
+                    let texto =
+                        `Huuum... 🤔\n\n`
+                        + `Acho que esta faltando algumas informações\n\n`
+                        + `Para evitar problemas, vou te tranferir para um dos nossos atendentes\n`
+                        + `Aguarde um momento, embreve você será atendido! 😉`
+
+                    // Coloca mensagem no Bot
+                    botMensagem.text = texto;
+                    botMensagem.template = "";
+                    fila.botStage = "0"
+                    fila.status = "finalizado"
+                    this.preparaMensagemBot(botMensagem, fila)
+                }
             }
             //caso Inicio negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Discordo") {
@@ -216,7 +248,7 @@ class ura {
                 botMensagem.text = texto
                 botMensagem.template = ""
                 fila.botStage = "0"
-                fila.status = "ura"
+                fila.status = "finalizado"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -262,6 +294,9 @@ class ura {
         else if (fila.botStage == "NF apartamento") {
             //Caso produto desmontado positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
+                agendamento.protocol.push(fila.protocol)
+                agendamento.disassembledProduct = true
+                Coleta.atualizaAgendamento(agendamento)
                 console.log("ura NF apartamento")
                 let texto = `Você mora em apartamento?`
                 //coloca mensagem no Bot
@@ -273,6 +308,8 @@ class ura {
             //Caso produto desmontado negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF produtoDesmontado negativo")
+                agendamento.disassembledProduct = false
+                Coleta.atualizaAgendamento(agendamento)
                 let texto = `Entendi\n`
                     + `Vou te transferir para um de nossos atendentes\n`
                     + `Aguarde que em breve você será atendido`
@@ -309,8 +346,13 @@ class ura {
             }
             //Caso mora em apartamento negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
+                agendamento.residence.type = "casa"
+                agendamento.residence.floor = ""
+                agendamento.residence.elevator = ""
+                Coleta.atualizaAgendamento(agendamento)
+
                 fila.botStage = "NF calculaData"
-                this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf)
+                this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento)
             }
             //caso nao aperte botao
             else {
@@ -324,17 +366,59 @@ class ura {
             //Caso andar acima do 4 andar positivo
             if (ultimaMensagem.text == "2" || ultimaMensagem.text == "3" || ultimaMensagem.text == "Entre 4º e 10º Andar" || ultimaMensagem.text == "Acima do 10º Andar") {
                 console.log("ura NF elevador")
+                agendamento.residence.type = "apartamento"
+                agendamento.residence.floor = ultimaMensagem.text
+                Coleta.atualizaAgendamento(agendamento)
+
                 let texto = `Possui elevador de serviço e é permitido o seu uso?`
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF calculaData"
+                fila.botStage = "NF confirmaElevador"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso ate 3º andar
             else if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Até o 3º Andar") {
+                agendamento.residence.type = "apartamento"
+                agendamento.residence.floor = ultimaMensagem.text
+                agendamento.residence.elevator = true
+                Coleta.atualizaAgendamento(agendamento)
+
                 fila.botStage = "NF calculaData"
                 this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento)
+            }
+            //caso nao aperte botao
+            else {
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "NF elevador"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+        }
+
+        else if (fila.botStage == "NF confirmaElevador") {
+            //Caso andar acima do 4 andar positivo
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
+                console.log("ura NF confirmaElevador")
+                agendamento.residence.elevator = true
+                Coleta.atualizaAgendamento(agendamento)
+
+                fila.botStage = "NF calculaData"
+                this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento)
+            }
+            //Caso ate 3º andar
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
+                agendamento.residence.elevator = false
+                Coleta.atualizaAgendamento(agendamento)
+
+                let texto = `Entendi\n`
+                    + `Vou te transferir para um de nossos atendentes\n`
+                    + `Aguarde que em breve você será atendido`
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "0"
+                fila.status = "finalizado"
+                this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
             else {
@@ -360,7 +444,7 @@ class ura {
                 botMensagem.text = texto
                 botMensagem.template = ""
                 fila.botStage = "0"
-                fila.status = "espera"
+                fila.status = "finalizado"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -380,6 +464,9 @@ class ura {
                 })
                     .then(resposta => console.log("Salvou no banco"))
                     .catch(error => console.log(error))
+
+                agendamento.appointmentDate = dataAgendamento
+                Coleta.atualizaAgendamento(agendamento)
 
                 dataAgendamento = dataAgendamento.format('DD/MM/YYYY')
 
@@ -580,8 +667,8 @@ class ura {
             //inicio
             console.log("ura 0")
             let texto = `*Olá, tudo bem?* 🙂\n\n`
-                + `Fiz uma breve busca em nosso banco de dados e infelizmente não encontramos devolução em seu nome.\n\n`
-                + `Poderia digitar o seu número de *CPF* ou *CNPJ* para eu realizar mais uma consulta? *(digite apenas números)*`;
+                + `Fiz uma breve busca em nosso banco de dados e infelizmente não encontramos devolução registrada com este telefone.\n\n`
+                + `Poderia digitar o número de *CPF* ou *CNPJ* do consumidor para eu realizar mais uma consulta? *(digite apenas números)*`;
 
             botMensagem.text = texto
             botMensagem.template = ""
