@@ -594,12 +594,6 @@ class ura {
         else if (fila.botStage == "validaTitular") {
             let eValido = true //
 
-            let texto = `Consultando`
-
-            botMensagem.text = texto
-            botMensagem.template = ""
-            this.preparaMensagemBot(botMensagem, fila)
-
             if (isNaN(ultimaMensagem.text)) { //se for texto
                 let nomeContatoNF = diacritics.remove(agendamento.client.name.trim()) //remove os caracteres especiais
                 let [primeiroNome] = nomeContatoNF.split(' ') //salva a primeira palavra
@@ -620,57 +614,66 @@ class ura {
                 }
             }
 
-            if (eValido === true) {
-                console.log("valido")
+            let texto = `Consultando`
+            botMensagem.text = texto
+            botMensagem.template = ""
+            this.preparaMensagemBot(botMensagem, fila)
 
-                botMensagem.template = ""
-                fila.botStage = "0"
-                return this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento) // devolve para o inicio da fila
-            }
-            else {
-                console.log("invalido")
-                let contato = ""
-                try {
-                    contato = await Contatos.findByIdAndUpdate(
-                        agendamento.client._id,
-                        {
-                            name: "",
-                            nameWhatsapp: "Desconhecido",
-                            cpfCnpj: "",
-                            address: {
-                                street: "",
-                                district: "",
-                                city: "",
-                                state: "",
-                                cep: "",
-                                complement: "",
-                            }
-                        },
-                        { new: true } //retorna o valor atualizado
-                    )
-                } catch (error) {
-                    console.log(error)
+            setTimeout(async () => { // Aguarda 3 segundos antes de executar a função
+
+                if (eValido === true) {
+                    console.log("valido")
+
+                    botMensagem.template = ""
+                    fila.botStage = "0"
+                    return this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento) // devolve para o inicio da fila
                 }
+                else {
+                    console.log("invalido")
+                    let contato = ""
+                    try {
+                        contato = await Contatos.findByIdAndUpdate(
+                            agendamento.client._id,
+                            {
+                                name: "",
+                                nameWhatsapp: "Desconhecido",
+                                cpfCnpj: "",
+                                address: {
+                                    street: "",
+                                    district: "",
+                                    city: "",
+                                    state: "",
+                                    cep: "",
+                                    complement: "",
+                                }
+                            },
+                            { new: true } //retorna o valor atualizado
+                        )
+                    } catch (error) {
+                        console.log(error)
+                    }
 
-                //apaga Nfs geradas na data de hoje 
-                await Nfe.deletaNfeHoje(contato._id)
-                await Coleta.deletaAgendamento(agendamento._id)
+                    //apaga Nfs geradas na data de hoje 
+                    await Nfe.deletaNfeHoje(contato._id)
+                    await Coleta.deletaAgendamento(agendamento._id)
 
-                let texto = `Poxaa... os dados nao conferem 😕\n\n`
-                    + `Bom... neste caso podemos tentar novamente pelo *CPF/CNPJ* ou pela *Nota fiscal*, mas se preferir eu posso te transferir para um dos nossos atendentes`
-                    + `\n\nO que você prefere?`
+                    let texto = `Poxaa... os dados nao conferem 😕\n\n`
+                        + `Bom... neste caso podemos tentar novamente pelo *CPF/CNPJ* ou pela *Nota fiscal*, mas se preferir eu posso te transferir para um dos nossos atendentes`
+                        + `\n\nO que você prefere?`
 
-                botMensagem.text = texto
-                botMensagem.template = "opcoes"
-                botMensagem.parameters = {
-                    opcao1: "CPF/CNPJ",
-                    opcao2: "Nota Fiscal",
-                    opcao3: "Atendente"
+                    botMensagem.text = texto
+                    botMensagem.template = "opcoes"
+                    botMensagem.parameters = {
+                        opcao1: "CPF/CNPJ",
+                        opcao2: "Nota Fiscal",
+                        opcao3: "Atendente"
+                    }
+
+                    fila.botStage = "invalidoNotaFiscal"
+                    return this.preparaMensagemBot(botMensagem, fila)
+
                 }
-
-                fila.botStage = "invalidoNotaFiscal"
-                return this.preparaMensagemBot(botMensagem, fila)
-            }
+            }, 3000);
         }
     }
 
