@@ -81,15 +81,16 @@ class ura {
             } else {
                 console.log("ura NF Inicio")
                 let texto =
-                    `*Olá ${botMensagem.parameters.name}, tudo bem?*\n\n`
-                    + `Localizei aqui que você deseja fazer uma devolução\n\n`
-                    + `Nós somos transportadores autorizados: \n\n*${botMensagem.parameters.shipper}*\n\n`
-                    + `Gostaria de agendar a devolução?\n\n`
+                    `Poxa... 😕\n\n`
+                    + `Houve um problema aqui no meu sistema\n\n`
+                    + `Vou transferir para um de meus colegas de trabalho para corrigir\n\n`
+                    + `Aguarde um momento e em breve sera atendido`
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                botMensagem.template = "botao"
-                fila.botStage = "NF aceitaTermos"
+                botMensagem.template = ""
+                fila.botStage = "0"
+                fila.status = "finalizado"
                 this.preparaMensagemBot(botMensagem, fila)
             }
         }
@@ -127,8 +128,9 @@ class ura {
             //caso Inicio negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF Inicio negativo")
-                let texto = `Ok, sem problemas\n`
-                    + `Estou te tranferindo para um de nossos atendentes`
+                let texto = `Ok, sem problemas\n\n`
+                    + `Estou te tranferindo para um de nossos atendentes\n\n`
+                    + `Aguarde um momento e em breve sera atendido`
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -169,9 +171,9 @@ class ura {
                     let texto =
                         `Perfeito! 😉\n\n`
                         + `Olha o que eu encontrei:\n\n`
-                        + `Estado da embalagem: *${agendamento.checklist.statusPackaging}*\n`
-                        + `Motivo da Devolução: *${agendamento.checklist.reason}*\n`
-                        + `Detalhes: *${agendamento.checklist.details}*\n\n`
+                        + `Estado da embalagem: *${agendamento.checklist.statusPackaging}*\n\n`
+                        + `Motivo da Devolução: *${agendamento.checklist.reason}*\n\n`
+                        + `Detalhes:\n *${agendamento.checklist.details}*\n\n`
                         + `Os dados que você informou estão corretos?`
 
                     // Coloca mensagem no Bot
@@ -498,8 +500,12 @@ class ura {
         else if (fila.botStage == "NF confirmaData") {
             //Caso confirma data positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                console.log("ura NF Enviando pra o ESL")
-                let texto = `Agendado com sucesso`
+                console.log("ura NF confirmaData")
+                let texto = `Agendado com sucesso ☺️\n\n`
+                    + `Seu numero de protocolo é:\n`
+                    + `*${fila.protocol}*\n\n`
+                    + `Agradecemos seu contato!`
+
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -588,8 +594,14 @@ class ura {
         else if (fila.botStage == "validaTitular") {
             let eValido = true //
 
+            let texto = `Consultando`
+
+            botMensagem.text = texto
+            botMensagem.template = ""
+            this.preparaMensagemBot(botMensagem, fila)
+
             if (isNaN(ultimaMensagem.text)) { //se for texto
-                let nomeContatoNF = diacritics.remove(nf.client.name.trim()) //remove os caracteres especiais
+                let nomeContatoNF = diacritics.remove(agendamento.client.name.trim()) //remove os caracteres especiais
                 let [primeiroNome] = nomeContatoNF.split(' ') //salva a primeira palavra
 
                 let nome = diacritics.remove(ultimaMensagem.text.trim()) //remove caracters especiais
@@ -599,7 +611,7 @@ class ura {
                 }
             }
             else {
-                let cpfCnpjContato = nf.client.cpfCnpj
+                let cpfCnpjContato = agendamento.client.cpfCnpj
                 for (let i = 0; i < 4; i++) {
                     if (cpfCnpjContato[i] !== ultimaMensagem.text[i]) { //se for diferente altera para false
                         eValido = false
@@ -613,14 +625,14 @@ class ura {
 
                 botMensagem.template = ""
                 fila.botStage = "0"
-                return this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf) // devolve para o inicio da fila
+                return this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento) // devolve para o inicio da fila
             }
             else {
                 console.log("invalido")
                 let contato = ""
                 try {
                     contato = await Contatos.findByIdAndUpdate(
-                        nf.client._id,
+                        agendamento.client._id,
                         {
                             name: "",
                             nameWhatsapp: "Desconhecido",
@@ -642,6 +654,7 @@ class ura {
 
                 //apaga Nfs geradas na data de hoje 
                 await Nfe.deletaNfeHoje(contato._id)
+                await Coleta.deletaAgendamento(agendamento._id)
 
                 let texto = `Poxaa... os dados nao conferem 😕\n\n`
                     + `Bom... neste caso podemos tentar novamente pelo *CPF/CNPJ* ou pela *Nota fiscal*, mas se preferir eu posso te transferir para um dos nossos atendentes`
@@ -697,16 +710,16 @@ class ura {
                     contato = await Contato.atualizaDadosContatoBySql(dadosSql[0], fila.from._id) //Atualiza contato com os dados vindo do SQL
                     let embarcador = await Embarcador.criaEmbarcadorSql(dadosSql[0])
                     let nf = await Nfe.criaNfBySql(dadosSql, fila.from._id, embarcador) //Cria as NFs no banco Mongo
-                    Coleta.criaAgendamento(contato._id, nf._id, embarcador._id, nf.key) // Cria agendamento
+                    await Coleta.criaAgendamento(contato._id, nf._id, embarcador._id, nf.key) // Cria agendamento
 
                     let texto =
                         `Legal, encontrei 😊\n\n`
-                        + `*${contato.name}*\n\n`
-                        + `Seria você ou a pessoa/empresa que gostaria de agendar a devolução?`
+                        + `Por motivos de segurança, poderia me informar o *primeiro nome* do titular da compra?`
+
 
                     botMensagem.text = texto
-                    botMensagem.template = "botao"
-                    fila.botStage = "confirmaCpfCnpjNf"
+                    botMensagem.template = ""
+                    fila.botStage = "validaTitular"
                     return this.preparaMensagemBot(botMensagem, fila)
                 }
                 else {
