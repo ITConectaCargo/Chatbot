@@ -339,8 +339,8 @@ class coleta {
             const pdf = await pdfjs.getDocument(pdfBuffer).promise; // Carrega o PDF usando o PDF.js
 
             // Expressões regulares para extrair os trechos desejados do PDF
-            const estadoRegex = /ESTADO DA EMBALAGEM:(.*?)l MOTIVO DA COLETA/gm;
-            const motivoRegex = /MOTIVO DA COLETA:(.*?)l DETALHES/gm;
+            const estadoRegex = /ESTADO DA EMBALAGEM:(.*?)l   MOTIVO DA COLETA:/gm;
+            const motivoRegex = /MOTIVO DA COLETA:(.*?)l   DETALHES:/gm;
             const detalhesRegex = /DETALHES:(.*?)PASSO/gm;
 
             for (let i = 1; i <= pdf.numPages; i++) {
@@ -351,19 +351,19 @@ class coleta {
                 // Extrai o estado da embalagem e adiciona ao array de dados
                 let match;
                 while ((match = estadoRegex.exec(textos)) !== null) {
-                    const estado = match[1].trim().replace(/\s{2,}/g, ' '); // Remove espaços triplos da string extraída
+                    const estado = match[1].trim().replace(/\s{3,}/g, ' '); // Remove espaços triplos da string extraída
                     dados.push(estado);
                 }
 
                 // Extrai o motivo da coleta e adiciona ao array de dados
                 while ((match = motivoRegex.exec(textos)) !== null) {
-                    const motivo = match[1].trim().replace(/\s{2,}/g, ' '); // Remove espaços triplos da string extraída
+                    const motivo = match[1].trim().replace(/\s{3,}/g, ' '); // Remove espaços triplos da string extraída
                     dados.push(motivo);
                 }
 
                 // Extrai os detalhes e adiciona ao array de dados
                 while ((match = detalhesRegex.exec(textos)) !== null) {
-                    const detalhes = match[1].trim().replace(/\s{2,}/g, ' '); // Remove espaços triplos da string extraída
+                    const detalhes = match[1].trim().replace(/\s{3,}/g, ' '); // Remove espaços triplos da string extraída
                     dados.push(detalhes);
                 }
             }

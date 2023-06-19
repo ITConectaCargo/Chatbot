@@ -150,13 +150,13 @@ class ura {
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Concordo") {
                 let checklist = false
                 console.log("ura NF confirmaEndereco");
-                if (agendamento.checklist.statusPackaging == "" || agendamento.checklist.reason == "" || agendamento.checklist.details == "") {
+                if (agendamento.checklist.statusPackaging == undefined || agendamento.checklist.reason == undefined || agendamento.checklist.details == undefined) {
                     let dadosCheklist = await Coleta.consultaChecklist(agendamento.nfe.key)
                     if (dadosCheklist) {
                         agendamento.checklist.details = dadosCheklist.detalhes
                         agendamento.checklist.statusPackaging = dadosCheklist.estadoPacote
                         agendamento.checklist.reason = dadosCheklist.motivo
-                        Coleta.atualizaAgendamento(agendamento)
+                        await Coleta.atualizaAgendamento(agendamento)
 
                         checklist = true
                     }
