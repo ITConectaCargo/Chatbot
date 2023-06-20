@@ -90,7 +90,7 @@ class ura {
                 botMensagem.text = texto
                 botMensagem.template = ""
                 fila.botStage = "0"
-                fila.status = "finalizado"
+                fila.status = "ura"
                 this.preparaMensagemBot(botMensagem, fila)
             }
         }
@@ -128,15 +128,13 @@ class ura {
             //caso Inicio negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF Inicio negativo")
-                let texto = `Ok, sem problemas\n\n`
-                    + `Estou te tranferindo para um de nossos atendentes\n\n`
-                    + `Aguarde um momento e em breve sera atendido`
+                let texto = `Ok, sem problemas 😉\n\n`
+                    + `Gostaria de falar diretamente com um atendente?`
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                botMensagem.template = ""
-                fila.botStage = "0"
-                fila.status = "finalizado"
+                botMensagem.template = "botao"
+                fila.botStage = "NF validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -537,6 +535,41 @@ class ura {
             else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "NF confirmaData"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+        }
+
+        else if (fila.botStage == "NF validaAtendimento") {
+            //Caso mora em apartamento positivo
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
+                console.log("ura NF andar")
+                let texto = `Maravilha! 😃\n\n`
+                + `Estou te transferindo para um dos nossos atendentes\n\n`
+                + `Aguarde e em breve você será atendido!`
+
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "0"
+                fila.status = "ura"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //Caso mora em apartamento negativo
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
+                let texto = `Sem problemas 😌\n\n`
+                + `Estarei aqui sempre que precisar\n\n`
+                + `Ate a proxima 👋🏻`
+
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "0"
+                fila.status = "finalizado"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //caso nao aperte botao
+            else {
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "NF andar"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
