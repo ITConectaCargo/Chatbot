@@ -458,9 +458,10 @@ class ura {
         }
 
         else if (fila.botStage == "NF calculaData") {
+            // busca uma data 
             let dataAgendamento = await Coleta.calculaDataAgendamento(agendamento.freightDate, agendamento.shipper, agendamento.client.address.cep) //Calcula data de agendamento
 
-            if (dataAgendamento !== "Sem Embarcador") {
+            if (dataAgendamento !== "Fora de SP") {
                 axios.put(`${baseURL}nfe/${agendamento.nfe._id}`, { // salva data no banco
                     appointmentDate: dataAgendamento
                 })
@@ -475,7 +476,7 @@ class ura {
                 console.log("ura NF apartamento negativo")
                 let texto = `Data em que iremos coletar o produto: \n\n`
                     + `*${dataAgendamento}*`
-                    + `\n\nConcorda com a data de coleta ? `
+                    + `\n\nConcorda com a data de coleta?`
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
@@ -483,8 +484,8 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             else {
-                let texto = `Xiii... 😣\n\n`
-                    + `Houve um erro no agendamento!\n\n`
+                let texto = `Poxa... 😣\n\n`
+                    + `Não possuo datas disponiveis para a coleta no momento\n\n`
                     + `Vou te transferir para um dos nossos atendentes`
                     + `Aguarde e em breve você será atendido.`
                 //coloca mensagem no Bot

@@ -334,7 +334,7 @@ class coleta {
             }
         }
         else {
-            return "Sem Embarcador"
+            return "Fora de SP"
         }
 
     }
