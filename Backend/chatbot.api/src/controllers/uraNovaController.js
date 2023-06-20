@@ -198,15 +198,13 @@ class ura {
             //caso Inicio negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Discordo") {
                 console.log("ura NF aceitaTermos negativo")
-                let texto = `Ok, sem problemas\n`
-                    + `Vou te transferir para um de nossos atendentes\n`
-                    + `Aguarde que em breve você será atendido`
+                let texto = `Ok, sem problemas 😉\n\n`
+                + `Gostaria de falar diretamente com um atendente?`
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                botMensagem.template = ""
-                fila.botStage = "0"
-                fila.status = "ura"
+                botMensagem.template = "botao"
+                fila.botStage = "NF validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -240,15 +238,13 @@ class ura {
             //caso Inicio negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF aceitaTermos negativo")
-                let texto = `Ok, sem problemas\n`
-                    + `Vou te transferir para um de nossos atendentes\n`
-                    + `Aguarde que em breve você será atendido`
+                let texto = `Ok, sem problemas 😉\n\n`
+                + `Gostaria de falar diretamente com um atendente?`
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                botMensagem.template = ""
-                fila.botStage = "0"
-                fila.status = "finalizado"
+                botMensagem.template = "botao"
+                fila.botStage = "NF validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -273,14 +269,13 @@ class ura {
             //Caso Confirma endereço negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF confirmaEndereco negativo")
-                let texto = `Entendi\n`
-                    + `Vou te transferir para um de nossos atendentes\n`
-                    + `Aguarde que em breve você será atendido`
+                let texto = `Ok, sem problemas 😉\n\n`
+                + `Gostaria de falar diretamente com um atendente?`
+
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                botMensagem.template = ""
-                fila.botStage = "0"
-                fila.status = "espera"
+                botMensagem.template = "botao"
+                fila.botStage = "NF validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -310,14 +305,13 @@ class ura {
                 console.log("ura NF produtoDesmontado negativo")
                 agendamento.disassembledProduct = false
                 Coleta.atualizaAgendamento(agendamento)
-                let texto = `Entendi\n`
-                    + `Vou te transferir para um de nossos atendentes\n`
-                    + `Aguarde que em breve você será atendido`
+                let texto = `Ok, sem problemas 😉\n\n`
+                + `Gostaria de falar diretamente com um atendente?`
+
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                botMensagem.template = ""
-                fila.botStage = "0"
-                fila.status = "espera"
+                botMensagem.template = "botao"
+                fila.botStage = "NF validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -410,14 +404,13 @@ class ura {
                 agendamento.residence.elevator = false
                 Coleta.atualizaAgendamento(agendamento)
 
-                let texto = `Entendi\n`
-                    + `Vou te transferir para um de nossos atendentes\n`
-                    + `Aguarde que em breve você será atendido`
+                let texto = `Ok, sem problemas 😉\n\n`
+                + `Gostaria de falar diretamente com um atendente?`
+
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                botMensagem.template = ""
-                fila.botStage = "0"
-                fila.status = "finalizado"
+                botMensagem.template = "botao"
+                fila.botStage = "NF validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -437,14 +430,13 @@ class ura {
             //Caso confirma data negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF elevador Negativo")
-                let texto = `Entendi\n`
-                    + `Vou te transferir para um de nossos atendentes\n`
-                    + `Aguarde que em breve você será atendido`
+                let texto = `Ok, sem problemas 😉\n\n`
+                + `Gostaria de falar diretamente com um atendente?`
+
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                botMensagem.template = ""
-                fila.botStage = "0"
-                fila.status = "finalizado"
+                botMensagem.template = "botao"
+                fila.botStage = "NF validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -484,13 +476,11 @@ class ura {
             else {
                 let texto = `Poxa... 😣\n\n`
                     + `Não possuo datas disponiveis para a coleta no momento\n\n`
-                    + `Vou te transferir para um dos nossos atendentes`
-                    + `Aguarde e em breve você será atendido.`
+                    + `Gostaria de falar diretamente com um atendente?`
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                botMensagem.template = ""
-                fila.status = "finalizado"
-                fila.botStage = "0"
+                botMensagem.template = "botao"
+                fila.botStage = "NF validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
 
@@ -514,21 +504,20 @@ class ura {
             }
             //Caso confirma data negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                axios.put(`${baseURL}nfe/${nf._id}`, { //salva data no banco
+                axios.put(`${baseURL}nfe/${agendamento.nfe._id}`, { //salva data no banco
                     appointmentDate: ""
                 })
                     .then(resposta => console.log("Salvou no banco"))
                     .catch(error => console.log(error))
 
                 console.log("ura NF confimaData Negativo")
-                let texto = `Entendi\n`
-                    + `Vou te transferir para um de nossos atendentes\n`
-                    + `Aguarde que em breve você será atendido`
+                let texto = `Ok, sem problemas 😉\n\n`
+                + `Gostaria de falar diretamente com um atendente?`
+
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                botMensagem.template = ""
-                fila.botStage = "0"
-                fila.status = "espera"
+                botMensagem.template = "botao"
+                fila.botStage = "NF validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -558,7 +547,7 @@ class ura {
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 let texto = `Sem problemas 😌\n\n`
                 + `Estarei aqui sempre que precisar\n\n`
-                + `Ate a proxima 👋🏻`
+                + `Até a próxima 👋🏻`
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -570,57 +559,6 @@ class ura {
             else {
                 botMensagem.template = "naoApertouBotao"
                 fila.botStage = "NF andar"
-                return this.preparaMensagemBot(botMensagem, fila)
-            }
-        }
-
-        else if (fila.botStage == "confirmaCpfCnpjNf") {
-            //consulta CPF CNPJ positivo
-            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                fila.botStage = 0
-                //refaz os passos do bot
-                this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento)
-            }
-
-            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                try {
-                    await Contatos.findByIdAndUpdate(
-                        agendamento.client._id,
-                        {
-                            name: "",
-                            nameWhatsapp: "Desconhecido",
-                            cpfCnpj: "",
-                            address: {
-                                street: "",
-                                district: "",
-                                city: "",
-                                state: "",
-                                cep: "",
-                                complement: "",
-                            }
-                        },
-                        { new: true } //retorna o valor atualizado
-                    )
-                } catch (error) {
-                    console.log(error)
-                }
-
-                //apaga Nfs geradas na data de hoje 
-                await Nfe.deletaNfeHoje(agendamento.client._id)
-                await Coleta.deletaAgendamento(agendamento._id)
-
-                let texto = `Me Desculpe, 😕\n\n`
-                    + `Estou te tranferindo para um de nossos atendentes`
-
-                botMensagem.text = texto
-                botMensagem.template = ""
-                fila.botStage = "0"
-                return this.preparaMensagemBot(botMensagem, fila)
-            }
-            //caso nao aperte botao
-            else {
-                botMensagem.template = "naoApertouBotao"
-                fila.botStage = "confirmaCpfCnpjNf"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
