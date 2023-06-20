@@ -42,7 +42,7 @@ class ura {
 
         //Verifica se existe NF deste cliente
         try {
-            let agendamento = await Agendamentos.findOne({ client: fila.from, status: { $in: ['114', '308', '303'] } }) //busca NF status 114 (a Agendar) ou 308(reagendar)
+            let agendamento = await Agendamentos.findOne({ client: fila.from, status: { $in: ['114', '308'] } }) //busca NF status 114 (a Agendar) ou 308(reagendar)
                 .populate("client")
                 .populate("nfe")
                 .populate("shipper")
@@ -81,10 +81,10 @@ class ura {
             } else {
                 console.log("ura NF Inicio")
                 let texto =
-                    `Poxa... 😕\n\n`
-                    + `Houve um problema aqui no meu sistema\n\n`
-                    + `Vou transferir para um de meus colegas de trabalho para corrigir\n\n`
-                    + `Aguarde um momento e em breve sera atendido`
+                    `Ola *${agendamento.client.name}*, tudo bem?\n\n`
+                    + `Fiz uma busca porem no meu sistema porem nao encontrei o produto 😕\n\n`
+                    + `Vou transferir para um dos nossos atendentes\n\n`
+                    + `Aguarde um momento e em breve você sera atendido`
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -171,9 +171,9 @@ class ura {
                     let texto =
                         `Perfeito! 😉\n\n`
                         + `Olha o que eu encontrei:\n\n`
-                        + `Estado da embalagem: *${agendamento.checklist.statusPackaging}*\n\n`
-                        + `Motivo da Devolução: *${agendamento.checklist.reason}*\n\n`
-                        + `Detalhes:\n *${agendamento.checklist.details}*\n\n`
+                        + `Estado da embalagem:\n*${agendamento.checklist.statusPackaging}*\n\n`
+                        + `Motivo da Devolução:\n*${agendamento.checklist.reason}*\n\n`
+                        + `Detalhes:\n*${agendamento.checklist.details}*\n\n`
                         + `Os dados que você informou estão corretos?`
 
                     // Coloca mensagem no Bot
@@ -226,11 +226,11 @@ class ura {
                 let texto =
                     `Legal! 🙂\n\n` +
                     "Encontrei este endereço em meu banco de dados:\n\n" +
-                    "Rua: *" + agendamento.client.address.street + "*\n" +
-                    "Bairro: *" + agendamento.client.address.district + "*\n" +
-                    "Cidade: *" + agendamento.client.address.city + "* - *" + agendamento.client.address.state + "*\n" +
-                    "Cep: *" + agendamento.client.address.cep + "*\n" +
-                    "Complemento: *" + agendamento.client.address.complement + "*\n\n" +
+                    `Rua:\n*${agendamento.client.address.street}*\n\n`+
+                    `Bairro:\n*${agendamento.client.address.district}*\n\n` +
+                    `Cidade:\n*${agendamento.client.address.city}* - *${agendamento.client.address.state}*\n\n` +
+                    `Cep:\n*${agendamento.client.address.cep}*\n\n` + 
+                    `Complemento:\n*${agendamento.client.address.complement}*\n\n` +
                     "As informações acima estão corretas?";
 
                 // Coloca mensagem no Bot
@@ -458,7 +458,7 @@ class ura {
         }
 
         else if (fila.botStage == "NF calculaData") {
-            let dataAgendamento = await Coleta.calculaDataAgendamento(agendamento.freightDate, agendamento.shipper) //Calcula data de agendamento
+            let dataAgendamento = await Coleta.calculaDataAgendamento(agendamento.freightDate, agendamento.shipper, agendamento.client.address.cep) //Calcula data de agendamento
 
             if (dataAgendamento !== "Sem Embarcador") {
                 axios.put(`${baseURL}nfe/${agendamento.nfe._id}`, { // salva data no banco
@@ -614,7 +614,7 @@ class ura {
                 }
             }
 
-            let texto = `Consultando`
+            let texto = `Consultando...`
             botMensagem.text = texto
             botMensagem.template = ""
             this.preparaMensagemBot(botMensagem, fila)
@@ -867,7 +867,8 @@ class ura {
                 //atualiza dados do contato
                 let contato = await Contato.atualizaDadosContatoBySql(dadosSql[0], fila.from._id) //Atualiza contato com os dados vindo do SQL
                 let embarcador = await Embarcador.criaEmbarcadorSql(dadosSql[0])
-                await Nfe.criaNfBySql(dadosSql, fila.from._id, embarcador) //Cria as NFs no banco Mongo
+                let nf = await Nfe.criaNfBySql(dadosSql, fila.from._id, embarcador) //Cria as NFs no banco Mongo
+                await Coleta.criaAgendamento(contato._id, nf._id, embarcador._id, nf.key) // Cria agendamento
 
                 let texto = `Boaa! 😎\n\n`
                     + `Encontrei uma Nota Fiscal aqui!\n\n`

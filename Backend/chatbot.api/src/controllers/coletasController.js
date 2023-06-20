@@ -33,6 +33,7 @@ class coleta {
                 tbl_coleta.chaveNfe,
                 tbl_coleta_produto.descricaoProduto,
                 marketplace.cnpjCpf,
+                marketplace.uf as ufEmbarcador,
                 marketplace.nomeMkt
             FROM
                 tbl_coleta
@@ -157,6 +158,29 @@ class coleta {
         }
     }
 
+    static consultaDiasColetaSql = async (cnpj, cep) => {
+        try {
+            const query = `
+            SELECT *
+                FROM tbl_dias_coleta
+                WHERE raizCnpj = ${cnpj} AND ${cep} BETWEEN cepDe AND cepAte
+        `;
+
+            return new Promise((resolve, reject) => {
+                dbSql.query(query, [cnpj, cep], (error, results) => {
+                    if (error) {
+                        console.error('Erro ao executar a consulta: ' + error.stack);
+                        reject({ message: 'Erro ao buscar dados.' });
+                    } else {
+                        resolve(results);
+                    }
+                });
+            });
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     static verificaMongo = async (dadosSql, telefone) => {
         let contato = ""
 
@@ -257,7 +281,7 @@ class coleta {
             )
                 .exec()
 
-                return agendar
+            return agendar
         } catch (error) {
             console.log(error)
         }
@@ -281,19 +305,24 @@ class coleta {
         }
     }
 
-    static calculaDataAgendamento = async (dataNf, embarcador) => {
+    static calculaDataAgendamento = async (dataNf, embarcador, cep) => {
+        let raizCnpj = embarcador.cpfCnpj.substr(0, 8)
+        let inicioCep = cep.substr(0, 5)
+        const [dias] = await this.consultaDiasColetaSql(raizCnpj, inicioCep)
+        
         let datasDisponiveis = []
-        if (embarcador.appointmentLimit) {
+
+        if (dias) {
             try {
                 let data = moment(dataNf, 'YYYY-MM-DD')
                 let diasAdicionados = 0;
-                while (diasAdicionados < embarcador.appointmentLimit) {
+                while (diasAdicionados < dias.limiteColeta) {
                     data.add(1, 'days');
                     let feriado = await this.feriados(data)
                     if (data.isoWeekday() < 6 && feriado != "Feriado") {
                         // Adiciona apenas se não for sábado ou domingo
                         diasAdicionados++;
-                        if (embarcador.daysWeek.includes(data.isoWeekday()) && diasAdicionados !== 1) { //verifica se o dia esta presente no array
+                        if (dias.diasSemana.includes(data.isoWeekday()) && diasAdicionados !== 1) { //verifica se o dia esta presente no array
                             datasDisponiveis.push(moment(data))
                         }
                     }
