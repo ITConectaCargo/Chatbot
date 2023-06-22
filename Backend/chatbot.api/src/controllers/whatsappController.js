@@ -279,6 +279,16 @@ class whatsapp {
             res.status(500).json({ message: err.message });
         }
     }
+    
+    static enviaMensagemAtivo = async (req, res) => {
+        const tel = req.params.tel
+
+        try {
+            res.status(200).json({msg: tel })
+        } catch (error) {
+            res.status(500).json({msg: error })
+        }
+    } 
 }
 
 export default whatsapp

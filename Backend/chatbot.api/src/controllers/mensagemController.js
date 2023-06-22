@@ -8,7 +8,7 @@ class mensagem {
 
     static identificaMensagem = (mensagem) => {
         if(mensagem.template === 'botao'){
-            console.log("mensagem com botao")
+            console.log("mensagem com botao Sim e Não")
             this.enviaMensagemBotao(mensagem)
         }
         else if(mensagem.template === "agendar_devolucao"){
@@ -20,7 +20,7 @@ class mensagem {
             this.enviaMensagemOpcoes(mensagem)
         }
         else if(mensagem.template === "BotaoEditavel"){
-            console.log("mensagem com opcoes")
+            console.log("mensagem com botao editavel")
             this.enviaMensagemBotaoEditavel(mensagem)
         }
         else if(mensagem.template === "naoApertouBotao"){

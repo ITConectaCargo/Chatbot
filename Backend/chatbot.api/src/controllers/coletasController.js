@@ -4,9 +4,9 @@ import Nfe from '../models/nfe.js';
 import Agendamento from '../models/agendamento.js';
 import dbSql from '../config/dbSqlConfig.js'
 import Nf from './nfeController.js';
+import Checklist from './checklistController.js';
 import Contato from './contatoController.js';
 import Embarcador from './embarcadorController.js';
-import pdfjs from 'pdfjs-dist';
 import moment from 'moment'
 import axios from 'axios';
 import fetch from 'node-fetch';
@@ -164,7 +164,7 @@ class coleta {
             SELECT *
                 FROM tbl_dias_coleta
                 WHERE raizCnpj = ${cnpj} AND ${cep} BETWEEN cepDe AND cepAte
-        `;
+            `;
 
             return new Promise((resolve, reject) => {
                 dbSql.query(query, [cnpj, cep], (error, results) => {
@@ -221,21 +221,36 @@ class coleta {
     static criaAgendamento = async (clienteId, nfeId, embarcadorId, chaveNfe, protocolo) => {
         let coletaStatus = ""
         let dataFrete = ""
+        let descricao = ""
 
         try {
             console.log("consultando ESL")
-            await axios.get(`${baseURL}coleta/agendamento/${chaveNfe}`)
-                .then(resposta => {
-                    const ultimoObjeto = resposta.data.pop();
-                    coletaStatus = ultimoObjeto.occurrence.code //pega o codigo do status
-                    dataFrete = ultimoObjeto.created_at //pega data do frete
-                })
-                .catch(error => console.log(error))
+            const resposta = await axios.get(`${baseURL}coleta/agendamento/${chaveNfe}`);
+            let dataMaisRecente = moment('0000-01-01T00:00:00');
+            let objetoMaisRecente = null;
+
+            resposta.data.forEach(element => {
+                const dataElemento = moment(element.occurrence_at);
+                if (dataElemento > dataMaisRecente) {
+                    dataMaisRecente = dataElemento;
+                    objetoMaisRecente = element;
+                }
+            });
+
+            if (objetoMaisRecente) {
+                coletaStatus = objetoMaisRecente.occurrence.code;
+                dataFrete = objetoMaisRecente.created_at;
+                descricao = objetoMaisRecente.description;
+                
+            } else {
+                // Caso nenhum objeto seja encontrado
+                console.log('Nenhum objeto encontrado');
+            }
         } catch (error) {
             console.log(error)
         }
 
-        let checklist = await this.consultaChecklist(chaveNfe)
+        let checklist = await Checklist.consultaChecklist(chaveNfe)
 
         try {
             const agendamento = {
@@ -244,6 +259,7 @@ class coleta {
                 nfe: nfeId,
                 shipper: embarcadorId,
                 status: coletaStatus,
+                statusDescription: descricao,
                 freightDate: dataFrete,
                 checklist: {
                     statusPackaging: checklist.estadoPacote,
@@ -309,7 +325,7 @@ class coleta {
         let raizCnpj = embarcador.cpfCnpj.substr(0, 8)
         let inicioCep = cep.substr(0, 5)
         const [dias] = await this.consultaDiasColetaSql(raizCnpj, inicioCep)
-        
+
         let datasDisponiveis = []
 
         if (dias) {
@@ -346,72 +362,6 @@ class coleta {
             console.log('Agendamento do cliente excluída com sucesso.');
         } catch (err) {
             console.error('Ocorreu um erro ao excluir agendagemento:', err);
-        }
-    }
-
-    static consultaChecklist = async (chaveNfe) => {
-        const cnpj = chaveNfe.substr(6, 14);
-        const raizCnpj = cnpj.substr(0, 8)
-        let url = ''
-        let dados = []; // Array para armazenar os dados extraídos do PDF
-
-        if (raizCnpj == '47960950') { //Magazine
-            url = `http://inectar.com.br/modulos/Checklists_Magazine/${chaveNfe}.pdf`; // Monta a URL do PDF com base no parâmetro
-        }
-        else if (raizCnpj == '05570714') { //Kabum
-            url = `https://inectar.com.br/src/painelUsuario/checklists/${raizCnpj}/${cnpj}/${chaveNfe}.pdf`; // Monta a URL do PDF com base no parâmetro
-        }
-
-        try {
-            const response = await axios.get(url, { responseType: 'arraybuffer' }); // Faz a requisição HTTP para obter o PDF
-            const pdfBuffer = Buffer.from(response.data, 'binary'); // Converte os dados do PDF para um buffer em formato binário
-            const pdf = await pdfjs.getDocument(pdfBuffer).promise; // Carrega o PDF usando o PDF.js
-
-            // Expressões regulares para extrair os trechos desejados do PDF
-            const estadoRegex = /ESTADO DA EMBALAGEM:(.*?)l   MOTIVO DA COLETA:/gm;
-            const motivoRegex = /MOTIVO DA COLETA:(.*?)l   DETALHES:/gm;
-            const detalhesRegex = /DETALHES:(.*?)PASSO/gm;
-
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i); // Obtém a página do PDF
-                const content = await page.getTextContent(); // Obtém o conteúdo de texto da página
-                const textos = content.items.map(item => item.str).join(' '); // Converte os itens de texto em uma única string
-
-                // Extrai o estado da embalagem e adiciona ao array de dados
-                let match;
-                while ((match = estadoRegex.exec(textos)) !== null) {
-                    const estado = match[1].trim().replace(/\s{3,}/g, ' '); // Remove espaços triplos da string extraída
-                    dados.push(estado);
-                }
-
-                // Extrai o motivo da coleta e adiciona ao array de dados
-                while ((match = motivoRegex.exec(textos)) !== null) {
-                    const motivo = match[1].trim().replace(/\s{3,}/g, ' '); // Remove espaços triplos da string extraída
-                    dados.push(motivo);
-                }
-
-                // Extrai os detalhes e adiciona ao array de dados
-                while ((match = detalhesRegex.exec(textos)) !== null) {
-                    const detalhes = match[1].trim().replace(/\s{3,}/g, ' '); // Remove espaços triplos da string extraída
-                    dados.push(detalhes);
-                }
-            }
-
-            const json = {
-                estadoPacote: dados[0], // Primeiro item do array é o estado da embalagem
-                motivo: dados[1], // Segundo item do array é o motivo da coleta
-                detalhes: dados[2], // Terceiro item do array são os detalhes
-            };
-
-            return json  // Retorna os dados extraídos como JSON na resposta HTTP
-        } catch (error) {
-            console.log(error)
-            const json = {
-                estadoPacote: "",
-                motivo: "",
-                detalhes: "",
-            };
-            return json
         }
     }
 

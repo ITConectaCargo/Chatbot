@@ -2,6 +2,7 @@ import Contatos from "../models/contato.js"
 import Agendamentos from "../models/agendamento.js"
 import Mensagem from "../models/mensagem.js"
 import Embarcador from '../controllers/embarcadorController.js'
+import Checklist from '../controllers/checklistController.js'
 import Nfe from '../controllers/nfeController.js'
 import Coleta from "./coletasController.js"
 import Fila from './filaController.js'
@@ -83,14 +84,12 @@ class ura {
                 let texto =
                     `Ola *${agendamento.client.name}*, tudo bem?\n\n`
                     + `Fiz uma busca porem no meu sistema porem nao encontrei o produto 😕\n\n`
-                    + `Vou transferir para um dos nossos atendentes\n\n`
-                    + `Aguarde um momento e em breve você sera atendido`
+                    + `Gostaria de falar diretamente com um atendente?`
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                botMensagem.template = ""
-                fila.botStage = "0"
-                fila.status = "ura"
+                botMensagem.template = "botao"
+                fila.botStage = "validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
         }
@@ -134,7 +133,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF validaAtendimento"
+                fila.botStage = "validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -151,7 +150,7 @@ class ura {
                 let checklist = false
                 console.log("ura NF confirmaEndereco");
                 if (agendamento.checklist.statusPackaging == undefined || agendamento.checklist.reason == undefined || agendamento.checklist.details == undefined) {
-                    let dadosCheklist = await Coleta.consultaChecklist(agendamento.nfe.key)
+                    let dadosCheklist = await Checklist.consultaChecklist(agendamento.nfe.key)
                     if (dadosCheklist) {
                         agendamento.checklist.details = dadosCheklist.detalhes
                         agendamento.checklist.statusPackaging = dadosCheklist.estadoPacote
@@ -204,7 +203,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF validaAtendimento"
+                fila.botStage = "validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -244,7 +243,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF validaAtendimento"
+                fila.botStage = "validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -275,7 +274,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF validaAtendimento"
+                fila.botStage = "validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -311,7 +310,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF validaAtendimento"
+                fila.botStage = "validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -410,7 +409,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF validaAtendimento"
+                fila.botStage = "validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -436,7 +435,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF validaAtendimento"
+                fila.botStage = "validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -480,7 +479,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF validaAtendimento"
+                fila.botStage = "validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
 
@@ -517,7 +516,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF validaAtendimento"
+                fila.botStage = "validaAtendimento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //caso nao aperte botao
@@ -528,7 +527,7 @@ class ura {
             }
         }
 
-        else if (fila.botStage == "NF validaAtendimento") {
+        else if (fila.botStage == "validaAtendimento") {
             //Caso mora em apartamento positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF andar")
@@ -903,6 +902,142 @@ class ura {
                 fila.botStage = "invalidoNotaFiscal"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
+        }
+
+        else if (fila.botStage == "validaAtendimento") {
+            //Caso mora em apartamento positivo
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
+                console.log("ura NF andar")
+                let texto = `Maravilha! 😃\n\n`
+                + `Estou te transferindo para um dos nossos atendentes\n\n`
+                + `Aguarde e em breve você será atendido!`
+
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "0"
+                fila.status = "ura"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //Caso mora em apartamento negativo
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
+                let texto = `Sem problemas 😌\n\n`
+                + `Estarei aqui sempre que precisar\n\n`
+                + `Até a próxima 👋🏻`
+
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "0"
+                fila.status = "finalizado"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //caso nao aperte botao
+            else {
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "NF andar"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
+        }
+
+        else if (fila.botStage == "validaTitular") {
+            let eValido = true //
+            let agendamento = ""
+
+            try {
+                agendamento = await Agendamentos.findOne({client: fila.from})
+                .populate("client")
+                .populate("nfe")
+                .populate("shipper")
+                .exec()
+            } catch (error) {
+                console.log(error)
+            }
+
+            if (isNaN(ultimaMensagem.text)) { //se for texto
+                let nomeContatoNF = diacritics.remove(agendamento.client.name.trim()) //remove os caracteres especiais
+                let [primeiroNome] = nomeContatoNF.split(' ') //salva a primeira palavra
+
+                let nome = diacritics.remove(ultimaMensagem.text.trim()) //remove caracters especiais
+
+                if (primeiroNome.toLowerCase() !== nome.toLowerCase()) { //se for diferente altera para false
+                    eValido = false
+                }
+            }
+            else {
+                let cpfCnpjContato = agendamento.client.cpfCnpj
+                for (let i = 0; i < 4; i++) {
+                    if (cpfCnpjContato[i] !== ultimaMensagem.text[i]) { //se for diferente altera para false
+                        eValido = false
+                        break
+                    }
+                }
+            }
+
+            let texto = `Consultando...`
+            botMensagem.text = texto
+            botMensagem.template = ""
+            this.preparaMensagemBot(botMensagem, fila)
+
+            setTimeout(async () => { // Aguarda 3 segundos antes de executar a função
+
+                if (eValido === true) {
+                    console.log("valido")
+                    let texto = `Ola *${agendamento.client.name}*! 😃\n\n`
+                    + `Vejo que você não possui coletas a agendar\n\n`
+                    + `Gostaria de falar diretamente com um dos nossos atendentes?`
+    
+                    //coloca mensagem no Bot
+                    botMensagem.text = texto
+                    botMensagem.template = "botao"
+                    fila.botStage = "validaAtendimento"
+                    this.preparaMensagemBot(botMensagem, fila)
+                }
+                else {
+                    console.log("invalido")
+                    let contato = ""
+                    try {
+                        contato = await Contatos.findByIdAndUpdate(
+                            agendamento.client._id,
+                            {
+                                name: "",
+                                nameWhatsapp: "Desconhecido",
+                                cpfCnpj: "",
+                                address: {
+                                    street: "",
+                                    district: "",
+                                    city: "",
+                                    state: "",
+                                    cep: "",
+                                    complement: "",
+                                }
+                            },
+                            { new: true } //retorna o valor atualizado
+                        )
+                    } catch (error) {
+                        console.log(error)
+                    }
+
+                    //apaga Nfs geradas na data de hoje 
+                    await Nfe.deletaNfeHoje(contato._id)
+                    await Coleta.deletaAgendamento(agendamento._id)
+
+                    let texto = `Poxaa... os dados nao conferem 😕\n\n`
+                        + `Bom... neste caso podemos tentar novamente pelo *CPF/CNPJ* ou pela *Nota fiscal*, mas se preferir eu posso te transferir para um dos nossos atendentes`
+                        + `\n\nO que você prefere?`
+
+                    botMensagem.text = texto
+                    botMensagem.template = "opcoes"
+                    botMensagem.parameters = {
+                        opcao1: "CPF/CNPJ",
+                        opcao2: "Nota Fiscal",
+                        opcao3: "Atendente"
+                    }
+
+                    fila.botStage = "invalidoNotaFiscal"
+                    return this.preparaMensagemBot(botMensagem, fila)
+
+                }
+            }, 3000);
         }
     }
 

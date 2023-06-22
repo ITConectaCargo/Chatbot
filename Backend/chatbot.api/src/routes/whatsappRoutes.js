@@ -8,5 +8,7 @@ router
     .get("/whatsapp/:telefone", whatsappController.listaMensagensByTelefone)
     .post("/whatsapp", whatsappController.recebeMensagem)
     .post("/whatsapp/mensagem", whatsappController.preparaMensagem)
+    .post("/whatsapp/mensagem/ativo/:tel", whatsappController.enviaMensagemAtivo)
+
 
 export default router
