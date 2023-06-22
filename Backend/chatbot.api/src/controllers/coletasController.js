@@ -230,7 +230,7 @@ class coleta {
             let objetoMaisRecente = null;
 
             resposta.data.forEach(element => {
-                const dataElemento = moment(element.occurrence_at);
+                let dataElemento = moment(element.occurrence_at);
                 if (dataElemento > dataMaisRecente) {
                     dataMaisRecente = dataElemento;
                     objetoMaisRecente = element;
@@ -239,8 +239,8 @@ class coleta {
 
             if (objetoMaisRecente) {
                 coletaStatus = objetoMaisRecente.occurrence.code;
-                dataFrete = objetoMaisRecente.created_at;
-                descricao = objetoMaisRecente.description;
+                dataFrete = objetoMaisRecente.occurrence_at;
+                descricao = objetoMaisRecente.occurrence.description;
                 
             } else {
                 // Caso nenhum objeto seja encontrado
