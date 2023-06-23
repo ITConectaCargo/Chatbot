@@ -220,7 +220,7 @@ class whatsapp {
             room = mensagem.to //define a sala para enviar a mensagem
         }
 
-        
+
         if (ultimaMensagem === null || ultimaMensagem.context == undefined || ultimaMensagem.context != mensagem.context) {
             //salva mensagem
             try {
@@ -279,16 +279,50 @@ class whatsapp {
             res.status(500).json({ message: err.message });
         }
     }
-    
+
     static enviaMensagemAtivo = async (req, res) => {
         const tel = req.params.tel
 
-        try {
-            res.status(200).json({msg: tel })
-        } catch (error) {
-            res.status(500).json({msg: error })
+        let dadosMensagem = {
+            from: {
+                _id: '646d0571d6c7e9233c0cdad8',
+                name: 'Conecta Cargo',
+                nameWhatsapp: 'Conecta Cargo',
+                tel: '5511945718427',
+                cpfCnpj: '12146737000104',
+                address: 'Avenida Monteiro Lobato, 4550 Galpao02 Asa 06 CIDADE JARDIM CUMBICA GUARULHOS - SP 07180-000',
+                date: '2023-05-09T18:07:09.168Z',
+                __v: 0
+            },
+            to: tel,
+            phoneId: '105378582538953',
+            timestamp: new Date().getTime(),
+            text: mensagem,
+            __v: 0
         }
-    } 
+
+        try {
+            res.status(200).json({ msg: tel })
+        } catch (error) {
+            res.status(500).json({ msg: error })
+        }
+
+        /*
+        let layout = {
+                    protocol: "202306237199094543505",
+                    from: null,
+                    to: "5511997397199",
+                    room: "5511997397199",
+                    phoneId: "105378582538953",
+                    timestamp: "1682542640000",
+                    text: "*Olá, tudo bem?* 🙂\n\nFiz uma breve busca em nosso banco de dados e infelizmente não encontramos devolução registrada com este telefone.\n\nPoderia digitar o número de *CPF* ou *CNPJ* do consumidor para eu realizar mais uma consulta? *(digite apenas números)*",
+                    date: "2023-06-23T12:45:43.566Z",
+                    __v: 0,
+                    template: "",
+                    parameters: "",
+                }
+         */
+    }
 }
 
 export default whatsapp

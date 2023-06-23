@@ -241,7 +241,7 @@ class coleta {
                 coletaStatus = objetoMaisRecente.occurrence.code;
                 dataFrete = objetoMaisRecente.occurrence_at;
                 descricao = objetoMaisRecente.occurrence.description;
-                
+
             } else {
                 // Caso nenhum objeto seja encontrado
                 console.log('Nenhum objeto encontrado');
@@ -309,7 +309,7 @@ class coleta {
         try {
             const response = await fetch(`https://conecta.eslcloud.com.br/api/invoice_occurrences?invoice_key=${chaveNfe}`, {
                 headers: {
-                    Authorization: `Bearer qxYaURbavegtz2sLsZjAVxsLT-a-_i2r_BE7yxzVTP_TvjsuuYWQ9w`
+                    Authorization: `Bearer ${process.env.TOKENCONSULTAELS}`
                 }
             });
 
@@ -319,6 +319,66 @@ class coleta {
             console.log(error);
             res.status(500).json(error);
         }
+    }
+
+    static enviaAgendamentoEsl = async (agendamento) => {
+        let comentario = `Telefone: ${agendamento.client.tel} // `
+
+        if (agendamento.residence.type == 'Casa') {
+            comentario += `Residencia: ${agendamento.residence.type} //`;
+        }
+        else if (agendamento.residence.elevator == true) {
+            comentario += `Residencia: ${agendamento.residence.type}, Andar: ${agendamento.residence.floor}, Elevador: Sim //`;
+        }
+        else {
+            comentario += `Residencia: ${agendamento.residence.type}, Andar: ${agendamento.residence.floor}, Elevador: Não //`;
+        }
+
+        let query = `
+        {
+	        "query":"mutation ReversePickFreightScheduleCreate {
+		        reversePickFreightScheduleCreate(
+                key: ${agendamento.nfe.key},
+                params: {
+                    invoiceOccurrence: {
+                    occurrenceCode: 300,
+                    occurrenceId: null,
+                    comments: ${comentario},
+                    occurrenceAt: ${new Date()}
+                    }
+                },
+                schedulingDate: ${agendamento.appointmentDate},
+                schedulingPeriod: "all"
+            	) 
+            	{
+                errors
+                success
+            	}
+            }
+        }
+          `
+        console.log(query)
+
+        /*
+                try {
+                    const response = await fetch(`https://conecta.eslcloud.com.br/graphql`, 
+                    {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${process.env.TOKENAGENGAMENTOELS}`
+                        },
+                        body: JSON.stringify({ query }),
+                    });
+        
+                    const dados = await response.json();
+                    
+        res.status(200).json(dados.data);
+        
+    } catch(error) {
+        console.log(error);
+        res.status(500).json(error);
+    }
+    */
     }
 
     static calculaDataAgendamento = async (dataNf, embarcador, cep) => {
