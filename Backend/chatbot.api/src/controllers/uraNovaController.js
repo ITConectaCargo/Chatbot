@@ -127,7 +127,7 @@ class ura {
             //caso Inicio negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF Inicio negativo")
-                let texto = `Ok, sem problemas 😉\n\n`
+                let texto = `*Ok, sem problemas* 😉\n\n`
                     + `Gostaria de falar diretamente com um atendente?`
 
                 //coloca mensagem no Bot
@@ -181,7 +181,7 @@ class ura {
                 }
                 else {
                     let texto =
-                        `Huuum... 🤔\n\n`
+                        `*Huuum...* 🤔\n\n`
                         + `Acho que esta faltando algumas informações\n\n`
                         + `Para evitar problemas, vou te tranferir para um dos nossos atendentes\n`
                         + `Aguarde um momento, embreve você será atendido! 😉`
@@ -219,7 +219,7 @@ class ura {
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF confirmaEndereco");
                 let texto =
-                    `*Legal!* 🙂\n\n` +
+                    `*Certo!* 🙂\n\n` +
                     "Encontrei este endereço em meu banco de dados:\n\n" +
                     `Rua:\n*${agendamento.client.address.street}*\n\n` +
                     `Bairro:\n*${agendamento.client.address.district}*\n\n` +
@@ -268,7 +268,7 @@ class ura {
             //Caso Confirma endereço negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF confirmaEndereco negativo")
-                let texto = `Ok, sem problemas 😉\n\n`
+                let texto = `*Ok, sem problemas* 😉\n\n`
                     + `Gostaria de falar diretamente com um atendente?`
 
                 //coloca mensagem no Bot
@@ -304,7 +304,7 @@ class ura {
                 console.log("ura NF produtoDesmontado negativo")
                 agendamento.disassembledProduct = false
                 Coleta.atualizaAgendamento(agendamento)
-                let texto = `Ok, sem problemas 😉\n\n`
+                let texto = `*Ok, sem problemas* 😉\n\n`
                     + `Gostaria de falar diretamente com um atendente?`
 
                 //coloca mensagem no Bot
@@ -403,7 +403,7 @@ class ura {
                 agendamento.residence.elevator = false
                 Coleta.atualizaAgendamento(agendamento)
 
-                let texto = `Ok, sem problemas 😉\n\n`
+                let texto = `*Ok, sem problemas* 😉\n\n`
                     + `Gostaria de falar diretamente com um atendente?`
 
                 //coloca mensagem no Bot
@@ -429,7 +429,7 @@ class ura {
             //Caso confirma data negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF elevador Negativo")
-                let texto = `Ok, sem problemas 😉\n\n`
+                let texto = `*Ok, sem problemas* 😉\n\n`
                     + `Gostaria de falar diretamente com um atendente?`
 
                 //coloca mensagem no Bot
@@ -473,7 +473,7 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             else {
-                let texto = `Poxa... 😣\n\n`
+                let texto = `*Poxa...* 😣\n\n`
                     + `Não possuo datas disponiveis para a coleta no momento\n\n`
                     + `Gostaria de falar diretamente com um atendente?`
                 //coloca mensagem no Bot
@@ -494,8 +494,8 @@ class ura {
                 let texto = `*Agendado com sucesso* ☺️\n\n`
                     + `Seu número de protocolo é:\n`
                     + `*${fila.protocol}*\n\n`
-                    + `Estaremos aqui sempre que precisar\n\n`
-                    + `Até a próxima 👋🏻`
+                    + `Em caso de dúvidas, estaremos aqui sempre que precisar\n\n`
+                    + `*Até mais* 👋🏻`
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -513,7 +513,7 @@ class ura {
                     .catch(error => console.log(error))
 
                 console.log("ura NF confimaData Negativo")
-                let texto = `Ok, sem problemas 😉\n\n`
+                let texto = `*Ok, sem problemas* 😉\n\n`
                     + `Gostaria de falar diretamente com um atendente?`
 
                 //coloca mensagem no Bot
@@ -534,7 +534,7 @@ class ura {
             //Caso mora em apartamento positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF andar")
-                let texto = `Maravilha! 😃\n\n`
+                let texto = `*Maravilha!* 😃\n\n`
                     + `Estou te transferindo para um dos nossos atendentes\n\n`
                     + `Aguarde e em breve você será atendido!`
 
@@ -547,7 +547,7 @@ class ura {
             }
             //Caso mora em apartamento negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                let texto = `Sem problemas 😌\n\n`
+                let texto = `*Sem problemas* 😌\n\n`
                     + `Estarei aqui sempre que precisar\n\n`
                     + `Até a próxima 👋🏻`
 
@@ -588,7 +588,7 @@ class ura {
                 }
             }
 
-            let texto = `Consultando...`
+            let texto = `*Consultando...*`
             botMensagem.text = texto
             botMensagem.template = ""
             this.preparaMensagemBot(botMensagem, fila)
@@ -631,7 +631,7 @@ class ura {
                     await Nfe.deletaNfeHoje(contato._id)
                     await Coleta.deletaAgendamento(agendamento._id)
 
-                    let texto = `Poxaa... os dados nao conferem 😕\n\n`
+                    let texto = `*Poxa... os dados nao conferem* 😕\n\n`
                         + `Bom... neste caso podemos tentar novamente pelo *CPF/CNPJ* ou pela *Nota fiscal*, mas se preferir eu posso te transferir para um dos nossos atendentes`
                         + `\n\nO que você prefere?`
 
@@ -693,15 +693,14 @@ class ura {
                         `*Legal, encontrei* 😊\n\n`
                         + `Por motivos de segurança, poderia me informar o *primeiro nome* do titular da compra?`
 
-
                     botMensagem.text = texto
                     botMensagem.template = ""
                     fila.botStage = "validaTitular"
                     return this.preparaMensagemBot(botMensagem, fila)
                 }
                 else {
-                    let texto = `Poxa... Me desculpe 😕\n\n`
-                        + `Não consegui localizar este CPF/CNPJ em nosso Sistema.\n`
+                    let texto = `*Poxa... Me desculpe* 😕\n\n`
+                        + `Não consegui localizar este *CPF/CNPJ* em nosso Sistema.\n`
                         + `\nPosso tentar localizar pelo número da Nota Fiscal ou se preferir, transfiro você para um de nossos atendentes.`
 
                     botMensagem.text = texto
@@ -719,8 +718,8 @@ class ura {
 
                 if (isNaN(mensagem)) {
                     console.log("A string não é um número.");
-                    let texto = `*Desculpe*\n\n`
-                        + `Aparentemente você não digitou número\n\n`
+                    let texto = `*Desculpe* 😕\n\n`
+                        + `Aparentemente você não digitou um número de *CPF* ou *CNPJ*\n\n`
                         + `Vale lembrar:\n`
                         + `*CPF:* possui *11* dígitos\n`
                         + `*CNPJ:* possui *14* dígitos\n\n`
@@ -732,7 +731,7 @@ class ura {
                     return this.preparaMensagemBot(botMensagem, fila)
                 } else {
                     console.log("A string é um número.");
-                    let texto = `Poxa 😕\n\n`
+                    let texto = `*Poxa* 😕\n\n`
                         + `Parece que tem algo errado com este CPF ou CNPJ\n\n`
                         + `*${ultimaMensagem.text}*\n\n`
                         + `Vale lembrar que:\n`
@@ -748,25 +747,10 @@ class ura {
             }
         }
 
-        else if (fila.botStage == "confirmaCpfCnpjNf") {
-            console.log("ura confirmaCpfCnpjNf")
-            let texto =
-                `Certo... 🤔\n\n`
-                + `Pelo visto você não possui agendamento a realizar\n\n`
-                + `Vou te transferir para um de nossos atendentes para poder auxilia-lo melhor\n\n`
-                + `Aguarde e em breve você será atendido`
-
-            botMensagem.text = texto
-            botMensagem.template = ""
-            fila.botStage = "0"
-            return this.preparaMensagemBot(botMensagem, fila)
-
-        }
-
         else if (fila.botStage == "invalidoCpfCnpj") {
             console.log("ura invalidoCpfCnpj")
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                let texto = `Legal!\n\n`
+                let texto = `*Legal!* 😁\n\n`
                     + `Digite novamente o *CPF* ou *CNPJ* *(apenas números)*`
 
                 botMensagem.text = texto
@@ -774,8 +758,8 @@ class ura {
                 fila.botStage = "consultaCpfCnpj"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
-            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Nâo") {
-                let texto = `Sem problemas!\n\n`
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
+                let texto = `*Sem problemas!* 😌\n\n`
                     + `Posso tentar localizar pelo *Número da Nota Fiscal* ou se preferir posso te transferir para um de nossos atendentes?`
 
                 botMensagem.text = texto
@@ -798,7 +782,7 @@ class ura {
         else if (fila.botStage == "buscaNotaFiscal") {
             console.log("ura buscaNotaFiscal")
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Nota Fiscal") {
-                let texto = `Certo!\n\n`
+                let texto = `*Certo!* 😌\n\n`
                     + `Consegue me passar o *Número da Nota fiscal* para eu fazer uma busca aqui para você`
 
                 botMensagem.text = texto
@@ -807,7 +791,7 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Atendente") {
-                let texto = `*Sem problemas.*\n\n`
+                let texto = `*Sem problemas.* 😌\n\n`
                     + `Estou te transferindo para um dos nossos atendentes,\n`
                     + `Em breve você será atendido.`
 
@@ -844,7 +828,7 @@ class ura {
                 let nf = await Nfe.criaNfBySql(dadosSql, fila.from._id, embarcador) //Cria as NFs no banco Mongo
                 await Coleta.criaAgendamento(contato._id, nf._id, embarcador._id, nf.key) // Cria agendamento
 
-                let texto = `Boaa! 😎\n\n`
+                let texto = `*Boaa!* 😎\n\n`
                     + `Encontrei uma Nota Fiscal aqui!\n\n`
                     + `Por motivos de segurança, poderia me informar o *primeiro nome* ou os *4 primeiros digitos* do *CPF/CNPJ* do titular desta Nota Fiscal?`
 
@@ -854,7 +838,7 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             else {
-                let texto = `Xiii, Não encontrei 😣\n\n`
+                let texto = `*Xiii, Não encontrei* 😣\n\n`
                     + `Bom... neste caso podemos tentar novamente pelo *CPF/CNPJ* ou pela *Nota fiscal*, mas se preferir eu posso te transferir para um dos nossos atendentes`
                     + `\n\nO que você prefere?`
 
@@ -872,7 +856,7 @@ class ura {
 
         else if (fila.botStage == "invalidoNotaFiscal") {
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "CPF/CNPJ") {
-                let texto = `Perfeito! 😊\n\n`
+                let texto = `*Perfeito!* 😊\n\n`
                     + `Poderia digitar o *CPF* ou *CNPJ*`
 
                 botMensagem.text = texto
@@ -881,7 +865,7 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Nota Fiscal") {
-                let texto = `Perfeito! 😊\n\n`
+                let texto = `*Perfeito!* 😊\n\n`
                     + `Poderia digitar o *número da Nota Fiscal*?`
 
                 botMensagem.text = texto
@@ -890,7 +874,7 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             else if (ultimaMensagem.text == "3" || ultimaMensagem.text == "Atendente") {
-                let texto = `Sem problemas\n\n`
+                let texto = `*Sem problemas* 😉\n\n`
                     + `Estou te transferindo para um dos nossos atendentes\n\n`
                     + `Em breve você será atendido`
 
@@ -911,7 +895,7 @@ class ura {
             //Caso mora em apartamento positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF andar")
-                let texto = `Maravilha! 😃\n\n`
+                let texto = `*Maravilha!* 😃\n\n`
                     + `Estou te transferindo para um dos nossos atendentes\n\n`
                     + `Aguarde e em breve você será atendido!`
 
@@ -924,7 +908,7 @@ class ura {
             }
             //Caso mora em apartamento negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                let texto = `Sem problemas 😌\n\n`
+                let texto = `*Sem problemas* 😌\n\n`
                     + `Estarei aqui sempre que precisar\n\n`
                     + `Até a próxima 👋🏻`
 
@@ -976,7 +960,7 @@ class ura {
                 }
             }
 
-            let texto = `Consultando...`
+            let texto = `*Consultando...*`
             botMensagem.text = texto
             botMensagem.template = ""
             this.preparaMensagemBot(botMensagem, fila)
@@ -1024,7 +1008,7 @@ class ura {
                     await Nfe.deletaNfeHoje(contato._id)
                     await Coleta.deletaAgendamento(agendamento._id)
 
-                    let texto = `Poxaa... os dados nao conferem 😕\n\n`
+                    let texto = `*Poxa... os dados nao conferem* 😕\n\n`
                         + `Bom... neste caso podemos tentar novamente pelo *CPF/CNPJ* ou pela *Nota fiscal*, mas se preferir eu posso te transferir para um dos nossos atendentes`
                         + `\n\nO que você prefere?`
 

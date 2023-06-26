@@ -343,25 +343,25 @@ class coleta {
                     invoiceOccurrence: {
                     occurrenceCode: 300,
                     occurrenceId: null,
-                    comments: ${comentario},
+                    comments: \"${comentario}\",
                     occurrenceAt: ${new Date()}
                     }
                 },
                 schedulingDate: ${agendamento.appointmentDate},
-                schedulingPeriod: "all"
+                schedulingPeriod: \"all\"
             	) 
             	{
                 errors
                 success
             	}
-            }
+            }"
         }
           `
         console.log(query)
 
-        /*
-                try {
-                    const response = await fetch(`https://conecta.eslcloud.com.br/graphql`, 
+        /*  
+            try {
+                const response = await fetch(`https://conecta.eslcloud.com.br/graphql`, 
                     {
                         method: 'POST',
                         headers: {
@@ -372,13 +372,13 @@ class coleta {
         
                     const dados = await response.json();
                     
-        res.status(200).json(dados.data);
+                res.status(200).json(dados.data);
         
-    } catch(error) {
-        console.log(error);
-        res.status(500).json(error);
-    }
-    */
+            } catch(error) {
+                console.log(error);
+                res.status(500).json(error);
+            }
+        */
     }
 
     static calculaDataAgendamento = async (dataNf, embarcador, cep) => {
