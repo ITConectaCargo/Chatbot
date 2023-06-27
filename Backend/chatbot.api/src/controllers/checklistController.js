@@ -9,67 +9,74 @@ class checklist {
         const [parametros] = await Coleta.consultaChecklistSql(raizCnpj)
 
         let texto = ''
-
-        if (parametros.checkModelo == 'magazine') { //Magazine
-            const url = parametros.checkUrl
-                .replace("{{chaveNfe}}", chaveNfe)
-
-            const estadoRegex = /ESTADO DA EMBALAGEM:(.*?)l   MOTIVO DA COLETA:/gm;
-            const motivoRegex = /MOTIVO DA COLETA:(.*?)l   DETALHES:/gm;
-            const detalhesRegex = /DETALHES:(.*?)PASSO/gm;
-            texto = await this.checklistBusca(estadoRegex, motivoRegex, detalhesRegex, url)
+        if (parametros) {
+            if (parametros.checkModelo == 'magazine') { //Magazine
+                const url = parametros.checkUrl
+                    .replace("{{chaveNfe}}", chaveNfe)
+    
+                const estadoRegex = /ESTADO DA EMBALAGEM:(.*?)l   MOTIVO DA COLETA:/gm;
+                const motivoRegex = /MOTIVO DA COLETA:(.*?)l   DETALHES:/gm;
+                const detalhesRegex = /DETALHES:(.*?)PASSO/gm;
+                texto = await this.checklistBusca(estadoRegex, motivoRegex, detalhesRegex, url)
+            }
+            else if (parametros.checkModelo == 'kabum') { //Kabum
+                const url = parametros.checkUrl
+                    .replace("{{chaveNfe}}", chaveNfe)
+                    .replace("{{raizCnpj}}", raizCnpj)
+                    .replace("{{cnpj}}", cnpj)
+    
+                const estadoRegex = /Situa çã o   da   Embalagem   Para   Coleta:(.*?)Caro   Cliente/gm;
+                const motivoRegex = /Motivo   de   Devolu çã o:(.*?)Observa çõ es   importantes   para   coleta:/gm;
+                const detalhesRegex = /Observa çõ es   importantes   para   coleta:(.*?)Situa çã o   da   Embalagem/gm;
+                texto = await this.checklistBusca(estadoRegex, motivoRegex, detalhesRegex, url)
+    
+                const itensSelecionados = /.*?\[x\]\s+(.*?)\s+\[/g; //regex sobre o que esta entre [x] e [
+                let match;
+    
+                //busca o que esta entre [x] e [ do estadoPacote
+                while ((match = itensSelecionados.exec(texto.estadoPacote)) !== null) {
+                    texto.estadoPacote = match[1];
+                }
+    
+                //busca o que esta entre [x] e [ do motivo
+                while ((match = itensSelecionados.exec(texto.motivo)) !== null) {
+                    texto.motivo = match[1];
+                }
+            }
+            else if (parametros.checkModelo == "conecta") { //multilazer e mvx
+                const url = parametros.checkUrl
+                    .replace("{{chaveNfe}}", chaveNfe)
+                    .replace("{{raizCnpj}}", raizCnpj)
+                    .replace("{{cnpj}}", cnpj)
+    
+                const estadoRegex = /ESTADO DA EMBALAGEM:(.*?)MOTIVO/gm;
+                const motivoRegex = /MOTIVO DA COLETA:(.*?)Detalhamento/gm;
+                const detalhesRegex = /Detalhamento:(.*?)CAMPOS PARA VALIDAÇÃO/gm;
+                texto = await this.checklistBusca(estadoRegex, motivoRegex, detalhesRegex, url)
+    
+                const itensSelecionadosRegex = /☑\s*([^☐]+)/; //regex sobre o que está entre [x] e [
+    
+                // busca o texto entre [x] e [ para o estadoPacote
+                let estadoPacoteMatch = itensSelecionadosRegex.exec(texto.estadoPacote);
+                if (estadoPacoteMatch) {
+                    texto.estadoPacote = estadoPacoteMatch[1].trim()
+                }
+    
+                // busca o texto entre [x] e [ para o motivo
+                let motivoMatch = itensSelecionadosRegex.exec(texto.motivo);
+                if (motivoMatch) {
+                    texto.motivo = motivoMatch[1].trim()
+                }
+            }
+    
+            return texto
+        } else {
+            return texto = {
+                estadoPacote: "",
+                motivo: "",
+                detalhes: ""
+            }
         }
-        else if (parametros.checkModelo == 'kabum') { //Kabum
-            const url = parametros.checkUrl
-                .replace("{{chaveNfe}}", chaveNfe)
-                .replace("{{raizCnpj}}", raizCnpj)
-                .replace("{{cnpj}}", cnpj)
-
-            const estadoRegex = /Situa çã o   da   Embalagem   Para   Coleta:(.*?)Caro   Cliente/gm;
-            const motivoRegex = /Motivo   de   Devolu çã o:(.*?)Observa çõ es   importantes   para   coleta:/gm;
-            const detalhesRegex = /Observa çõ es   importantes   para   coleta:(.*?)Situa çã o   da   Embalagem/gm;
-            texto = await this.checklistBusca(estadoRegex, motivoRegex, detalhesRegex, url)
-
-            const itensSelecionados = /.*?\[x\]\s+(.*?)\s+\[/g; //regex sobre o que esta entre [x] e [
-            let match;
-
-            //busca o que esta entre [x] e [ do estadoPacote
-            while ((match = itensSelecionados.exec(texto.estadoPacote)) !== null) {
-                texto.estadoPacote = match[1];
-            }
-
-            //busca o que esta entre [x] e [ do motivo
-            while ((match = itensSelecionados.exec(texto.motivo)) !== null) {
-                texto.motivo = match[1];
-            }
-        }
-        else if (parametros.checkModelo == "conecta") { //multilazer e mvx
-            const url = parametros.checkUrl
-                .replace("{{chaveNfe}}", chaveNfe)
-                .replace("{{raizCnpj}}", raizCnpj)
-                .replace("{{cnpj}}", cnpj)
-
-            const estadoRegex = /ESTADO DA EMBALAGEM:(.*?)MOTIVO/gm;
-            const motivoRegex = /MOTIVO DA COLETA:(.*?)Detalhamento/gm;
-            const detalhesRegex = /Detalhamento:(.*?)CAMPOS PARA VALIDAÇÃO/gm;
-            texto = await this.checklistBusca(estadoRegex, motivoRegex, detalhesRegex, url)
-
-            const itensSelecionadosRegex = /☑\s*([^☐]+)/; //regex sobre o que está entre [x] e [
-
-            // busca o texto entre [x] e [ para o estadoPacote
-            let estadoPacoteMatch = itensSelecionadosRegex.exec(texto.estadoPacote);
-            if (estadoPacoteMatch) {
-                texto.estadoPacote = estadoPacoteMatch[1]
-            }
-
-            // busca o texto entre [x] e [ para o motivo
-            let motivoMatch = itensSelecionadosRegex.exec(texto.motivo);
-            if (motivoMatch) {
-                texto.motivo = motivoMatch[1]
-            }
-        }
-
-        return texto
     }
 
     static checklistBusca = async (estadoRegex, motivoRegex, detalhesRegex, url) => {

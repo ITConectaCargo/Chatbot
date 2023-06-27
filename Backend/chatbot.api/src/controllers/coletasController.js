@@ -259,10 +259,10 @@ class coleta {
                 console.log("Nao existe nota")
                 let embarcador = await Embarcador.criaEmbarcadorSql(dadosSql)
                 let nota = await Nf.criaNfBySql(dadosSql, contato._id, embarcador)
-                nota.forEach(async(element) => {
-                    await this.criaAgendamento(contato._id, nota._id, embarcador._id, nota.key)
-                });
-                
+                for (let i = 0; i < nota.length; i++) {
+                    const element = nota[i];
+                    await this.criaAgendamento(contato._id, element._id, embarcador._id, element.key); // Cria agendamento
+                }
             }
         }
         return contato
