@@ -29,6 +29,7 @@ class nfe {
         console.log(dadosSql.length)
         if (dadosSql.length >= 1) {
             console.log(`Achei ${dadosSql.length} Nfs`)
+            let nf = []
             for (let contador = 0; contador < dadosSql.length; contador++) {
                 let element = dadosSql[contador] // seleciona os dados do SQL 
                 let existeNota = ""
@@ -52,15 +53,16 @@ class nfe {
                         })
 
                         const newNota = await nota.save()
-                        return newNota;
+                        nf.push(newNota)
                     } catch (error) {
                         console.log(error)
                     }
                 }
                 else {
-                    return existeNota
+                    nf.push(existeNota)
                 }
             }
+            return nf
         }
         else if (dadosSql) {
             return await this.criaNfBySql([dadosSql], contatoId, embarcador)

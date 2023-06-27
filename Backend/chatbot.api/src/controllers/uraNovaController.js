@@ -66,7 +66,10 @@ class ura {
         console.log("cheguei na ura Agendamento")
         //Inicia o Bot
         if (fila.botStage == 0) {
-            if (botMensagem.parameters.product != "Produto nao cadastrado") {
+            const raizCnpj = agendamento.shipper.cpfCnpj.substr(0, 8)
+            const [deploy] = await Coleta.consultaDeploySql(raizCnpj)
+
+            if (botMensagem.parameters.product != "Produto nao cadastrado" && deploy !== undefined) {
                 console.log("ura NF Inicio")
                 let texto =
                     `*Olá ${botMensagem.parameters.name}, tudo bem?*\n\n`
@@ -79,12 +82,27 @@ class ura {
                 botMensagem.template = "botao"
                 fila.botStage = "NF aceitaTermos"
                 this.preparaMensagemBot(botMensagem, fila)
-            } else {
-                console.log("ura NF Inicio")
+
+            } else if (botMensagem.parameters.product == "Produto nao cadastrado") {
+                console.log("ura NF Inicio produto nao cadastrado")
                 let texto =
                     `Ola *${agendamento.client.name}*, tudo bem?\n\n`
                     + `Fiz uma busca porem no meu sistema porem nao encontrei o produto 😕\n\n`
                     + `Gostaria de falar diretamente com um atendente?`
+
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = "botao"
+                fila.botStage = "validaAtendimento"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            else {
+                console.log("ura NF Inicio")
+                let texto =
+                    `Ola *${agendamento.client.name}*, tudo bem? 😃\n\n`
+                    + `Verifiquei aqui que você mora fora da *Cidade de São Paulo*\n\n`
+                    + `Para combinarmos a melhor data para realizar a coleta do produto\n\n`
+                    + `Posso te transferir para um dos nossos atendentes? 😉`
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -152,9 +170,9 @@ class ura {
                 if (agendamento.checklist.statusPackaging == undefined || agendamento.checklist.reason == undefined || agendamento.checklist.details == undefined) {
                     let dadosCheklist = await Checklist.consultaChecklist(agendamento.nfe.key)
                     if (dadosCheklist) {
-                        agendamento.checklist.details = dadosCheklist.detalhes
-                        agendamento.checklist.statusPackaging = dadosCheklist.estadoPacote
-                        agendamento.checklist.reason = dadosCheklist.motivo
+                        agendamento.checklist.details = dadosCheklist.detalhes.trim()
+                        agendamento.checklist.statusPackaging = dadosCheklist.estadoPacote.trim()
+                        agendamento.checklist.reason = dadosCheklist.motivo.trim()
                         await Coleta.atualizaAgendamento(agendamento)
 
                         checklist = true
@@ -687,7 +705,9 @@ class ura {
                     contato = await Contato.atualizaDadosContatoBySql(dadosSql[0], fila.from._id) //Atualiza contato com os dados vindo do SQL
                     let embarcador = await Embarcador.criaEmbarcadorSql(dadosSql[0])
                     let nf = await Nfe.criaNfBySql(dadosSql, fila.from._id, embarcador) //Cria as NFs no banco Mongo
-                    await Coleta.criaAgendamento(contato._id, nf._id, embarcador._id, nf.key) // Cria agendamento
+                    nf.forEach(async (element) => {
+                        await Coleta.criaAgendamento(contato._id, element._id, embarcador._id, element.key) // Cria agendamento
+                    });
 
                     let texto =
                         `*Legal, encontrei* 😊\n\n`

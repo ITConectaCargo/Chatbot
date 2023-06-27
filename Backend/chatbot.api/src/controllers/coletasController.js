@@ -34,6 +34,7 @@ class coleta {
                 tbl_coleta_produto.descricaoProduto,
                 marketplace.cnpjCpf,
                 marketplace.uf as ufEmbarcador,
+                marketplace.cidade as cidadeEmbarcador,
                 marketplace.nomeMkt
             FROM
                 tbl_coleta
@@ -78,6 +79,8 @@ class coleta {
                 tbl_coleta.chaveNfe,
                 tbl_coleta_produto.descricaoProduto,
                 marketplace.cnpjCpf,
+                marketplace.uf as ufEmbarcador,
+                marketplace.cidade as cidadeEmbarcador,
                 marketplace.nomeMkt
             FROM
                 tbl_coleta
@@ -128,6 +131,8 @@ class coleta {
             tbl_coleta.chaveNfe,
             tbl_coleta_produto.descricaoProduto,
             marketplace.cnpjCpf,
+            marketplace.uf as ufEmbarcador,
+            marketplace.cidade as cidadeEmbarcador,
             marketplace.nomeMkt
         FROM
             tbl_coleta
@@ -155,6 +160,48 @@ class coleta {
         } catch (error) {
             console.log(error)
             return []
+        }
+    }
+
+    static consultaDeploySql = async (raizCnpj) => {
+        try {
+            const query = `
+            SELECT * FROM bot_deploy WHERE raizCnpj = ${raizCnpj}
+            `;
+
+            return new Promise((resolve, reject) => {
+                dbSql.query(query, [raizCnpj], (error, results) => {
+                    if (error) {
+                        console.error('Erro ao executar a consulta: ' + error.stack);
+                        reject({ message: 'Erro ao buscar dados.' });
+                    } else {
+                        resolve(results);
+                    }
+                });
+            });
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    static consultaChecklistSql = async (raizCnpj) => {
+        try {
+            const query = `
+            SELECT * FROM bot_checklist WHERE raizCnpj = ${raizCnpj}
+            `;
+
+            return new Promise((resolve, reject) => {
+                dbSql.query(query, [raizCnpj], (error, results) => {
+                    if (error) {
+                        console.error('Erro ao executar a consulta: ' + error.stack);
+                        reject({ message: 'Erro ao buscar dados.' });
+                    } else {
+                        resolve(results);
+                    }
+                });
+            });
+        } catch (error) {
+            console.log(error)
         }
     }
 
@@ -212,7 +259,10 @@ class coleta {
                 console.log("Nao existe nota")
                 let embarcador = await Embarcador.criaEmbarcadorSql(dadosSql)
                 let nota = await Nf.criaNfBySql(dadosSql, contato._id, embarcador)
-                await this.criaAgendamento(contato._id, nota._id, embarcador._id, nota.key)
+                nota.forEach(async(element) => {
+                    await this.criaAgendamento(contato._id, nota._id, embarcador._id, nota.key)
+                });
+                
             }
         }
         return contato

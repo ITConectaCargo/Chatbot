@@ -35,12 +35,21 @@ class contato {
     }
 
     static consultaContatoByTelefone = async (req, res) => {
-        const telefone = req.params.telefone;
+        let telefone = req.params.telefone;
         try {
             const contato = await Contatos.findOne({ tel: telefone })
-            res.status(200).json(contato);
+            return res.status(200).json(contato);
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            return res.status(500).json({ message: error.message });
+        }
+    }
+
+    static consultaContatoByTelefoneApi = async (telefone) => {
+        try {
+            const contato = await Contatos.findOne({ tel: telefone })
+            return contato;
+        } catch (error) {
+            console.log(error)
         }
     }
 

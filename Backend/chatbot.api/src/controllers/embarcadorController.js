@@ -5,17 +5,19 @@ class embarcador {
         let existeEmbarcador = ""
 
         try {
-            existeEmbarcador = await Embarcador.findOne({cpfCnpj: dados.cnpjCpf})
+            existeEmbarcador = await Embarcador.findOne({ cpfCnpj: dados.cnpjCpf })
         } catch (error) {
             console.log(error)
         }
 
-        if(!existeEmbarcador){
+        if (!existeEmbarcador) {
             try {
                 const embarcador = new Embarcador(
                     {
                         cpfCnpj: dados.cnpjCpf,
                         name: dados.nomeMkt,
+                        city: dados.cidadeEmbarcador,
+                        state: dados.ufEmbarcador,
                     }
                 )
                 const newEmbarcador = await embarcador.save()
@@ -24,8 +26,8 @@ class embarcador {
                 return error
             }
         }
-        else{
-           return existeEmbarcador
+        else {
+            return existeEmbarcador
         }
     }
 }
