@@ -29,7 +29,6 @@ export default function ConversasHeader({ contato, atualizaContatosFila, setCont
       dados.status = "finalizado"
       await api.put('/fila', dados)
         .then(resposta => {
-          console.log(resposta.data)
           setContato("")
           atualizaContatosFila()
         })

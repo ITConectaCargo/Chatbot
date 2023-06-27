@@ -15,6 +15,7 @@ export default function SidebarChats({ filas, selecionaContato }) {
               telefone={fila.from.tel}
               imagem={avatar}
               nome={fila.from.nameWhatsapp}
+              protocolo={fila.protocol}
               selecionaContato={selecionaContato}
             />
           }

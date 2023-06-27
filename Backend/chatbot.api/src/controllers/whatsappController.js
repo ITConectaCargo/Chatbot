@@ -283,6 +283,29 @@ class whatsapp {
         }
     }
 
+    static listaMensagensByProtocolo = async (req, res) => {
+        const protocolo = req.params.protocolo;
+        try {
+            const fila = await Filas.findOne({ protocol: protocolo }).populate('from').exec()
+            const contato = await Contatos.findOne({ tel: fila.from.tel })
+            const filter = {
+                $and: [
+                    { $or: [{ from: fila.from._id }, { to: contato.tel }] },
+                    { protocol: protocolo } // Adicione esta linha para filtrar pelo protocolo
+                ]
+            };
+
+            const result = await Mensagens.find(filter)
+                .populate('from')
+                .sort('date')
+                .exec();
+
+            res.status(200).json(result);
+        } catch (err) {
+            res.status(500).json({ message: err.message });
+        }
+    }
+
     static enviaMensagemAtivo = async (req, res) => {
         const tel = req.params.tel
         const destinatario = await Contato.consultaContatoByTelefoneApi(tel)
@@ -290,7 +313,7 @@ class whatsapp {
 
         let msg = ""
 
-        if(destinatario){
+        if (destinatario) {
             msg = {
                 protocol: "",
                 from: remetente,
@@ -308,7 +331,7 @@ class whatsapp {
                     shipper: "Mex Shop"
                 },
             }
-        }else{
+        } else {
             msg = {
                 protocol: "",
                 from: remetente,

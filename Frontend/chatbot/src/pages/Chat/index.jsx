@@ -54,6 +54,7 @@ export default function Chat() {
       })
   }
 
+  //botao chat
   const buscaContatoFila = async () => {
     await api.post('/fila', usuario)
       .then(resposta => {
@@ -66,7 +67,7 @@ export default function Chat() {
   }
 
   // seleciona contato ao clicar
-  const selecionaContato = async (telefone) => {
+  const selecionaContato = async (telefone, protocolo) => {
     try {
       await api.get(`contato/${telefone}`, {
         headers: {
@@ -84,9 +85,9 @@ export default function Chat() {
       window.location.reload()
     }
     try {
-      await api.get(`whatsapp/${telefone}`)
-        .then((response) => {
-          setMensagens(response.data)
+      await api.get(`whatsapp/protocolo/${protocolo}`)
+        .then((resposta) => {
+           setMensagens(resposta.data)
         })
     } catch (error) {
       console.log(error)
@@ -111,6 +112,7 @@ export default function Chat() {
           setContato={setContato}
           setMensagens={setMensagens}
           mensagens={mensagens}
+          token={token}
         />
       </section>
     </>

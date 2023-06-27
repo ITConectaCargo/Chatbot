@@ -6,39 +6,49 @@ import styles from './Conversas.module.css'
 import api from 'config.js'
 import { useEffect, useState } from 'react'
 
-export default function Conversas({ setMensagens, socket, contato, mensagens, atualizaContatosFila, setContato }) {
+export default function Conversas({ setMensagens, socket, contato, mensagens, atualizaContatosFila, setContato, token }) {
     const [mensagem, setMensagem] = useState("");
+    const [contatoBot, setContatoBot] = useState("");
 
+    //atualização das msg em tempo real
     useEffect(() => {
         socket.on('chat.mensagem', (dados) => {
             setMensagens([...mensagens, dados])
         })
     })
 
+    const getContatoBot = async () => {
+        api.get(`contato/5511945718427`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          })
+        .then(resposta =>{
+            setContatoBot(resposta.data)
+        })
+        .catch(error => {
+            console.log(error)
+        })
+    }
+
     const enviaMensagem = async () => {
         if (mensagem !== '') {
+            await getContatoBot()
+
             let dadosMensagem = {
-                from: {
-                    _id: '646d0571d6c7e9233c0cdad8',
-                    name: 'Conecta Cargo',
-                    nameWhatsapp: 'Conecta Cargo',
-                    tel: '5511945718427',
-                    cpfCnpj: '12146737000104',
-                    address: 'Avenida Monteiro Lobato, 4550 Galpao02 Asa 06 CIDADE JARDIM CUMBICA GUARULHOS - SP 07180-000',
-                    date: '2023-05-09T18:07:09.168Z',
-                    __v: 0
-                },
+                from: contatoBot,
                 to: contato.tel,
                 phoneId: '105378582538953',
                 timestamp: new Date().getTime(),
                 text: mensagem,
+                protocol: mensagens[0].protocol,
                 __v: 0
             }
 
             try {
                 const resposta = await api.post(`whatsapp/mensagem`, dadosMensagem)
                 const dados = resposta.data
-
+                
                 await socket.emit('chat.sala', dadosMensagem.to)
                 await socket.emit("chat.mensagem", dados);
                 setMensagens((msg) => [...msg, dadosMensagem]);

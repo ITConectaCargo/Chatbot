@@ -576,7 +576,7 @@ class ura {
                 botMensagem.text = texto
                 botMensagem.template = ""
                 fila.botStage = "0"
-                fila.status = "ura"
+                fila.status = "espera"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso mora em apartamento negativo
