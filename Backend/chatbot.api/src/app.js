@@ -5,7 +5,6 @@ import bodyParser from "body-parser"
 import cors from 'cors'
 import routes from "./routes/routes.js"
 import db from "./config/dbConfig.js"
-import dbSql from "./config/dbSqlConfig.js"
 import dotenv from 'dotenv'
 dotenv.config()
 
