@@ -18,7 +18,6 @@ export default function ConversasBody({ mensagens }) {
         {mensagens.map((msg) => {
           return <Mensagem
             key={msg._id}
-            nome={msg.from.nameWhatsapp}
             remetente={msg.from.tel}
             mensagem={msg.text}
             hora={msg.date}

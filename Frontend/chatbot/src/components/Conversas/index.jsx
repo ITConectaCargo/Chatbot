@@ -15,26 +15,30 @@ export default function Conversas({ setMensagens, socket, contato, mensagens, at
         socket.on('chat.mensagem', (dados) => {
             setMensagens([...mensagens, dados])
         })
-    })
+    }, [socket, mensagens, setMensagens])
 
+    //popula os dados da empresa
     const getContatoBot = async () => {
         api.get(`contato/5511945718427`, {
             headers: {
-              Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`
             }
-          })
-        .then(resposta =>{
-            setContatoBot(resposta.data)
         })
-        .catch(error => {
-            console.log(error)
-        })
+            .then(resposta => {
+                setContatoBot(resposta.data)
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
+
+    //se contato estiver vazio popula os dados da empresa
+    if(!contatoBot){
+        getContatoBot()
     }
 
     const enviaMensagem = async () => {
         if (mensagem !== '') {
-            await getContatoBot()
-
             let dadosMensagem = {
                 from: contatoBot,
                 to: contato.tel,
@@ -48,10 +52,10 @@ export default function Conversas({ setMensagens, socket, contato, mensagens, at
             try {
                 const resposta = await api.post(`whatsapp/mensagem`, dadosMensagem)
                 const dados = resposta.data
-                
+
                 await socket.emit('chat.sala', dadosMensagem.to)
                 await socket.emit("chat.mensagem", dados);
-                setMensagens((msg) => [...msg, dadosMensagem]);
+                setMensagens((msg) => [...msg, dados]);
                 setMensagem('')
             } catch (error) {
                 console.log(error)

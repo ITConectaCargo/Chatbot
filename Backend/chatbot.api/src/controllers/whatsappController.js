@@ -239,13 +239,16 @@ class whatsapp {
                 });
                 const novaMensagem = await msg.save();
 
+                // Consulta a mensagem recém-salva e popula o campo "from" com os dados do documento "contato"
+                const mensagemPopulada = await Mensagens.findById(novaMensagem._id).populate('from');
+
                 //envia mensagem via socket.io
                 if (novaMensagem.to === '5511945718427') {
-                    await socket.emit("chat.sala", novaMensagem.to);
-                    await socket.emit("chat.mensagem", novaMensagem);
+                    await socket.emit("chat.sala", mensagemPopulada.to);
+                    await socket.emit("chat.mensagem", mensagemPopulada);
                 }
 
-                return novaMensagem
+                return mensagemPopulada
             } catch (error) {
                 console.log(error)
             }
@@ -356,6 +359,8 @@ class whatsapp {
         } catch (error) {
             console.log(error)
         }
+
+        res.status(200).send("OK")
 
     }
 }
