@@ -10,6 +10,7 @@ import Contato from "../controllers/contatoController.js"
 import diacritics from 'diacritics'
 import axios from 'axios'
 import dotenv from 'dotenv'
+import Mensagens from "./mensagemController.js"
 dotenv.config()
 
 const baseURL = process.env.BASEURL
@@ -71,39 +72,33 @@ class ura {
 
             try {
                 if (deploy.uf != agendamento.client.address.state) {
-                    console.log("ura NF Inicio")
-                    let texto =
-                        `Ola *${agendamento.client.name}*, tudo bem? 😃\n\n`
-                        + `Verifiquei aqui que você mora fora da *Cidade de São Paulo*\n\n`
-                        + `Para combinarmos a melhor data para realizar a coleta do produto\n\n`
-                        + `Posso te transferir para um dos nossos atendentes? 😉`
+                    console.log("ura NF Inicio UF")
+                    let template = await Mensagens.buscaMensagemTemplate("agendamento-inicio-uf")
+                    let texto = template.replace("{{1}}", botMensagem.parameters.name)
 
                     //coloca mensagem no Bot
                     botMensagem.text = texto
                     botMensagem.template = "botao"
                     fila.botStage = "validaAtendimento"
                     this.preparaMensagemBot(botMensagem, fila)
-                } 
+                }
                 else if (botMensagem.parameters.product == "Produto nao cadastrado") {
                     console.log("ura NF Inicio produto nao cadastrado")
-                    let texto =
-                        `Ola *${agendamento.client.name}*, tudo bem? 😃\n\n`
-                        + `Fiz uma busca porem no meu sistema porem nao encontrei o produto 😕\n\n`
-                        + `Gostaria de falar diretamente com um atendente?`
+                    let template = await Mensagens.buscaMensagemTemplate("agendamento-inicio-produtoNaoCadastrado")
+                    let texto = template.replace("{{1}}", botMensagem.parameters.name)
 
                     //coloca mensagem no Bot
                     botMensagem.text = texto
                     botMensagem.template = "botao"
                     fila.botStage = "validaAtendimento"
                     this.preparaMensagemBot(botMensagem, fila)
-                } 
+                }
                 else {
-                    console.log("ura NF Inicio")
-                    let texto =
-                        `*Olá ${botMensagem.parameters.name}, tudo bem?* 😃\n\n`
-                        + `Localizei aqui que você quer devolver:\n\n*${botMensagem.parameters.product}*\n\n`
-                        + `Nós somos transportadores autorizados: \n\n*${botMensagem.parameters.shipper}*\n\n`
-                        + `Gostaria de agendar a devolução?\n\n`
+                    console.log("ura NF Inicio Sucesso")
+                    let template = await Mensagens.buscaMensagemTemplate("agendamento-inicio-sucesso")
+                    let texto = template.replace("{{1}}", botMensagem.parameters.name)
+                        .replace("{{2}}", botMensagem.parameters.product)
+                        .replace("{{3}}", botMensagem.parameters.shipper)
 
                     //coloca mensagem no Bot
                     botMensagem.text = texto
@@ -114,11 +109,9 @@ class ura {
                 }
             } catch (error) {
                 console.log("ura NF Inicio")
-                let texto =
-                    `Ola *${agendamento.client.name}*, tudo bem? 😃\n\n`
-                    + `Verifiquei aqui que você é cliente do *${agendamento.shipper.name}*\n\n`
-                    + `Para combinarmos a melhor data para realizar a coleta do produto\n\n`
-                    + `Posso te transferir para um dos nossos atendentes? 😉`
+                let template = await Mensagens.buscaMensagemTemplate("agendamento-inicio-naoDeploy")
+                let texto = template.replace("{{1}}", botMensagem.parameters.name)
+                    .replace("{{2}}", botMensagem.parameters.shipper)
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -132,24 +125,10 @@ class ura {
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 // Instruções
                 console.log("ura NF aceitaTermos")
-                let instrucoes =
-                    "*Instruções*\n\n"
-                    + "Nosso horário de coleta é das *08h* às *18h*, de segunda à sexta.\n"
-                    + "Seu produto deve estar desmontado.\n"
-                    + "Se possível, embalado, caso contrário faremos a coleta de forma que seu produto esteja protegido.\n\n"
-                    + "Os produtos a serem coletados serão conferidos pelo responsável da coleta:\n"
-                    + " - Modelo;\n"
-                    + " - Marca;\n"
-                    + " - Número de série;\n"
-                    + " - IMEI, em caso de celulares e smartwatches;\n"
-                    + " - Tamanho;\n"
-                    + " - Outros detalhes de acordo com cada produto;\n"
-                    + "A coleta só poderá ser realizada se um responsável maior de 18 anos estiver presente.\n\n"
-                    + "Para sua segurança:\n"
-                    + "Você receberá um documento assinado pelo responsável da coleta, comprovando a realização da mesma.\n"
-                    + "Você deverá assinar uma via do comprovante, precisamos de seu nome completo e documento (RG ou CPF).\n"
+                let template = await Mensagens.buscaMensagemTemplate("agendamento-aceitaTermos")
+                let texto = template
 
-                botMensagem.text = instrucoes;
+                botMensagem.text = texto;
                 botMensagem.template = "BotaoEditavel"
                 botMensagem.parameters = {
                     opcao1: "Concordo",
@@ -161,8 +140,8 @@ class ura {
             //caso Inicio negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF Inicio negativo")
-                let texto = `*Ok, sem problemas* 😉\n\n`
-                    + `Gostaria de falar diretamente com um atendente?`
+                let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
+                let texto = template
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -199,13 +178,10 @@ class ura {
                 }
 
                 if (checklist === true) {
-                    let texto =
-                        `*Perfeito!* 😉\n\n`
-                        + `Olha o que eu encontrei:\n\n`
-                        + `Estado da embalagem:\n*${agendamento.checklist.statusPackaging}*\n\n`
-                        + `Motivo da Devolução:\n*${agendamento.checklist.reason}*\n\n`
-                        + `Detalhes:\n*${agendamento.checklist.details}*\n\n`
-                        + `Os dados que você informou estão corretos?`
+                    let template = await Mensagens.buscaMensagemTemplate("agendamento-checklist")
+                    let texto = template.replace("{{1}}", agendamento.checklist.statusPackaging)
+                        .replace("{{2}}", agendamento.checklist.reason)
+                        .replace("{{3}}", agendamento.checklist.details)
 
                     // Coloca mensagem no Bot
                     botMensagem.text = texto;
@@ -214,25 +190,22 @@ class ura {
                     this.preparaMensagemBot(botMensagem, fila);
                 }
                 else {
-                    let texto =
-                        `*Huuum...* 🤔\n\n`
-                        + `Acho que esta faltando algumas informações\n\n`
-                        + `Para evitar problemas, vou te tranferir para um dos nossos atendentes\n`
-                        + `Aguarde um momento, embreve você será atendido! 😉`
+                    let template = await Mensagens.buscaMensagemTemplate("agendamento-semChecklist")
+                    let texto = template
 
                     // Coloca mensagem no Bot
                     botMensagem.text = texto;
                     botMensagem.template = "";
                     fila.botStage = "0"
-                    fila.status = "finalizado"
+                    fila.status = "espera"
                     this.preparaMensagemBot(botMensagem, fila)
                 }
             }
             //caso Inicio negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Discordo") {
                 console.log("ura NF aceitaTermos negativo")
-                let texto = `Ok, sem problemas 😉\n\n`
-                    + `Gostaria de falar diretamente com um atendente?`
+                let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
+                let texto = template
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -252,15 +225,17 @@ class ura {
             //caso Inicio positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF confirmaEndereco");
-                let texto =
-                    `*Certo!* 🙂\n\n` +
-                    "Encontrei este endereço em meu banco de dados:\n\n" +
-                    `Rua:\n*${agendamento.client.address.street}*\n\n` +
-                    `Bairro:\n*${agendamento.client.address.district}*\n\n` +
-                    `Cidade:\n*${agendamento.client.address.city}* - *${agendamento.client.address.state}*\n\n` +
-                    `Cep:\n*${agendamento.client.address.cep}*\n\n` +
-                    `${agendamento.client.address.complement ? `Complemento:\n*${agendamento.client.address.complement}*\n\n` : ''}` +
-                    "As informações acima estão corretas?";
+                let template = await Mensagens.buscaMensagemTemplate("agendamento-endereco")
+                let texto = template.replace("{{1}}", agendamento.client.address.street)
+                    .replace("{{2}}", agendamento.client.address.district)
+                    .replace("{{3}}", agendamento.client.address.city)
+                    .replace("{{4}}", agendamento.client.address.state)
+                    .replace("{{5}}", agendamento.client.address.cep)
+                {
+                    agendamento.client.address.complement ?
+                        texto = texto.replace("{{6}}", agendamento.client.address.complement)
+                        : texto = texto.replace("\nComplemento:\n*{{6}}*\n", '')
+                }
 
                 // Coloca mensagem no Bot
                 botMensagem.text = texto;
@@ -271,8 +246,8 @@ class ura {
             //caso Inicio negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF aceitaTermos negativo")
-                let texto = `*Ok, sem problemas* 😉\n\n`
-                    + `Gostaria de falar diretamente com um atendente?`
+                let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
+                let texto = template
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -292,7 +267,8 @@ class ura {
             //Caso Confirma endereço positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF produtoDesmontado")
-                let texto = `O produto que você está devolvendo está desmontado?`
+                let template = await Mensagens.buscaMensagemTemplate("agendamento-produtoDesmontado")
+                let texto = template
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
@@ -302,8 +278,8 @@ class ura {
             //Caso Confirma endereço negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF confirmaEndereco negativo")
-                let texto = `*Ok, sem problemas* 😉\n\n`
-                    + `Gostaria de falar diretamente com um atendente?`
+                let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
+                let texto = template
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -322,11 +298,13 @@ class ura {
         else if (fila.botStage == "NF apartamento") {
             //Caso produto desmontado positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
+                console.log("ura NF apartamento")
                 agendamento.protocol.push(fila.protocol)
                 agendamento.disassembledProduct = true
                 Coleta.atualizaAgendamento(agendamento)
-                console.log("ura NF apartamento")
-                let texto = `Você mora em apartamento?`
+
+                let template = await Mensagens.buscaMensagemTemplate("agendamento-apartamento")
+                let texto = template
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
@@ -338,8 +316,8 @@ class ura {
                 console.log("ura NF produtoDesmontado negativo")
                 agendamento.disassembledProduct = false
                 Coleta.atualizaAgendamento(agendamento)
-                let texto = `*Ok, sem problemas* 😉\n\n`
-                    + `Gostaria de falar diretamente com um atendente?`
+                let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
+                let texto = template
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -359,7 +337,8 @@ class ura {
             //Caso mora em apartamento positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF andar")
-                let texto = `Em qual andar você mora?`
+                let template = await Mensagens.buscaMensagemTemplate("agendamento-andar")
+                let texto = template
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "opcoes"
@@ -397,7 +376,9 @@ class ura {
                 agendamento.residence.floor = ultimaMensagem.text
                 Coleta.atualizaAgendamento(agendamento)
 
-                let texto = `Possui elevador de serviço e é permitido o seu uso?`
+                let template = await Mensagens.buscaMensagemTemplate("agendamento-elevador")
+                let texto = template
+
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
@@ -436,9 +417,8 @@ class ura {
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 agendamento.residence.elevator = false
                 Coleta.atualizaAgendamento(agendamento)
-
-                let texto = `*Ok, sem problemas* 😉\n\n`
-                    + `Gostaria de falar diretamente com um atendente?`
+                let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
+                let texto = template
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -463,8 +443,8 @@ class ura {
             //Caso confirma data negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 console.log("ura NF elevador Negativo")
-                let texto = `*Ok, sem problemas* 😉\n\n`
-                    + `Gostaria de falar diretamente com um atendente?`
+                let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
+                let texto = template
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -485,6 +465,7 @@ class ura {
             let dataAgendamento = await Coleta.calculaDataAgendamento(agendamento.freightDate, agendamento.shipper, agendamento.client.address.cep) //Calcula data de agendamento
 
             if (dataAgendamento !== "Fora de SP") {
+                console.log("ura NF apartamento negativo")
                 axios.put(`${baseURL}nfe/${agendamento.nfe._id}`, { // salva data no banco
                     appointmentDate: dataAgendamento
                 })
@@ -496,10 +477,8 @@ class ura {
 
                 dataAgendamento = dataAgendamento.format('DD/MM/YYYY')
 
-                console.log("ura NF apartamento negativo")
-                let texto = `*Data em que iremos coletar o produto:* \n\n`
-                    + `*${dataAgendamento}*`
-                    + `\n\nVocê concorda com a data de coleta?`
+                let template = await Mensagens.buscaMensagemTemplate("agendamento-dataAgendamento")
+                let texto = template.replace("{{1}}", dataAgendamento)
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
@@ -507,9 +486,8 @@ class ura {
                 this.preparaMensagemBot(botMensagem, fila)
             }
             else {
-                let texto = `*Poxa...* 😣\n\n`
-                    + `Não possuo datas disponiveis para a coleta no momento\n\n`
-                    + `Gostaria de falar diretamente com um atendente?`
+                let template = await Mensagens.buscaMensagemTemplate("agendamento-dataAgendamento-erro")
+                let texto = template
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
@@ -525,11 +503,8 @@ class ura {
                 console.log("ura NF confirmaData")
                 const statusAgendamento = await Coleta.enviaAgendamentoEsl(agendamento)
 
-                let texto = `*Agendado com sucesso* ☺️\n\n`
-                    + `Seu número de protocolo é:\n`
-                    + `*${fila.protocol}*\n\n`
-                    + `Em caso de dúvidas, estaremos aqui sempre que precisar\n\n`
-                    + `*Até mais* 👋🏻`
+                let template = await Mensagens.buscaMensagemTemplate("agendamento-protocolo")
+                let texto = template.replace("{{1}}", fila.protocol)
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -546,9 +521,8 @@ class ura {
                     .then(resposta => console.log("Salvou no banco"))
                     .catch(error => console.log(error))
 
-                console.log("ura NF confimaData Negativo")
-                let texto = `*Ok, sem problemas* 😉\n\n`
-                    + `Gostaria de falar diretamente com um atendente?`
+                let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
+                let texto = template
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -565,12 +539,11 @@ class ura {
         }
 
         else if (fila.botStage == "validaAtendimento") {
-            //Caso mora em apartamento positivo
+            //Caso mora em validaAtendimento positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                console.log("ura NF andar")
-                let texto = `*Maravilha!* 😃\n\n`
-                    + `Estou te transferindo para um dos nossos atendentes\n\n`
-                    + `Aguarde e em breve você será atendido!`
+                console.log("ura NF validaAtendimento")
+                let template = await Mensagens.buscaMensagemTemplate("validaAtendimento")
+                let texto = template
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -579,11 +552,11 @@ class ura {
                 fila.status = "espera"
                 this.preparaMensagemBot(botMensagem, fila)
             }
-            //Caso mora em apartamento negativo
+            //Caso mora em validaAtendimento negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                let texto = `*Sem problemas* 😌\n\n`
-                    + `Estarei aqui sempre que precisar\n\n`
-                    + `Até a próxima 👋🏻`
+                console.log("ura NF validaAtendimento negativo")
+                let template = await Mensagens.buscaMensagemTemplate("validaAtendimento-negativa")
+                let texto = template
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -665,9 +638,8 @@ class ura {
                     await Nfe.deletaNfeHoje(contato._id)
                     await Coleta.deletaAgendamento(agendamento._id)
 
-                    let texto = `*Poxa... os dados nao conferem* 😕\n\n`
-                        + `Bom... neste caso podemos tentar novamente pelo *CPF/CNPJ* ou pela *Nota fiscal*, mas se preferir eu posso te transferir para um dos nossos atendentes`
-                        + `\n\nO que você prefere?`
+                    let template = await Mensagens.buscaMensagemTemplate("validaTitular-invalido")
+                    let texto = template
 
                     botMensagem.text = texto
                     botMensagem.template = "opcoes"
@@ -690,9 +662,8 @@ class ura {
         if (fila.botStage == 0) {
             //inicio
             console.log("ura 0")
-            let texto = `*Olá, tudo bem?* 🙂\n\n`
-                + `Fiz uma breve busca em nosso banco de dados e infelizmente não encontramos devolução registrada com este telefone.\n\n`
-                + `Poderia digitar o número de *CPF* ou *CNPJ* do consumidor para eu realizar mais uma consulta? *(digite apenas números)*`;
+            let template = await Mensagens.buscaMensagemTemplate("naoEncontrouTelefone")
+            let texto = template
 
             botMensagem.text = texto
             botMensagem.template = ""
@@ -726,10 +697,8 @@ class ura {
                         await Coleta.criaAgendamento(contato._id, element._id, embarcador._id, element.key); // Cria agendamento
                     }
 
-
-                    let texto =
-                        `*Legal, encontrei* 😊\n\n`
-                        + `Por motivos de segurança, poderia me informar o *primeiro nome* do titular da compra?`
+                    let template = await Mensagens.buscaMensagemTemplate("confirmaNomeTitular")
+                    let texto = template
 
                     botMensagem.text = texto
                     botMensagem.template = ""
@@ -737,9 +706,8 @@ class ura {
                     return this.preparaMensagemBot(botMensagem, fila)
                 }
                 else {
-                    let texto = `*Poxa... Me desculpe* 😕\n\n`
-                        + `Não consegui localizar este *CPF/CNPJ* em nosso Sistema.\n`
-                        + `\nPosso tentar localizar pelo número da Nota Fiscal ou se preferir, transfiro você para um de nossos atendentes.`
+                    let template = await Mensagens.buscaMensagemTemplate("naoEncontrouCpfCnpj")
+                    let texto = template
 
                     botMensagem.text = texto
                     botMensagem.template = "BotaoEditavel"
@@ -756,12 +724,8 @@ class ura {
 
                 if (isNaN(mensagem)) {
                     console.log("A string não é um número.");
-                    let texto = `*Desculpe* 😕\n\n`
-                        + `Aparentemente você não digitou um número de *CPF* ou *CNPJ*\n\n`
-                        + `Vale lembrar:\n`
-                        + `*CPF:* possui *11* dígitos\n`
-                        + `*CNPJ:* possui *14* dígitos\n\n`
-                        + `Vamos tentar novamente?`
+                    let template = await Mensagens.buscaMensagemTemplate("cpfCnpjSemNumeros")
+                    let texto = template
 
                     botMensagem.text = texto
                     botMensagem.template = "botao"
@@ -769,13 +733,8 @@ class ura {
                     return this.preparaMensagemBot(botMensagem, fila)
                 } else {
                     console.log("A string é um número.");
-                    let texto = `*Poxa* 😕\n\n`
-                        + `Parece que tem algo errado com este CPF ou CNPJ\n\n`
-                        + `*${ultimaMensagem.text}*\n\n`
-                        + `Vale lembrar que:\n`
-                        + `*CPF:* possui *11 dígitos*\n`
-                        + `*CNPJ:* possui *14 dígitos*\n\n`
-                        + `Vamos tentar novamente?`
+                    let template = await Mensagens.buscaMensagemTemplate("erroCpfCnpj")
+                    let texto = template.replace("{{1}}", ultimaMensagem.text)
 
                     botMensagem.text = texto
                     botMensagem.template = "botao"
@@ -788,8 +747,8 @@ class ura {
         else if (fila.botStage == "invalidoCpfCnpj") {
             console.log("ura invalidoCpfCnpj")
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                let texto = `*Legal!* 😁\n\n`
-                    + `Digite novamente o *CPF* ou *CNPJ* *(apenas números)*`
+                let template = await Mensagens.buscaMensagemTemplate("invalidoCpfCnpj")
+                let texto = template
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -797,8 +756,8 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                let texto = `*Sem problemas!* 😌\n\n`
-                    + `Posso tentar localizar pelo *Número da Nota Fiscal* ou se preferir posso te transferir para um de nossos atendentes?`
+                let template = await Mensagens.buscaMensagemTemplate("invalidoCpfCnpj-negativa")
+                let texto = template
 
                 botMensagem.text = texto
                 botMensagem.template = "BotaoEditavel"
@@ -820,8 +779,8 @@ class ura {
         else if (fila.botStage == "buscaNotaFiscal") {
             console.log("ura buscaNotaFiscal")
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Nota Fiscal") {
-                let texto = `*Certo!* 😌\n\n`
-                    + `Consegue me passar o *Número da Nota fiscal* para eu fazer uma busca aqui para você`
+                let template = await Mensagens.buscaMensagemTemplate("buscaNotaFiscal")
+                let texto = template
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -829,9 +788,8 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Atendente") {
-                let texto = `*Sem problemas.* 😌\n\n`
-                    + `Estou te transferindo para um dos nossos atendentes,\n`
-                    + `Em breve você será atendido.`
+                let template = await Mensagens.buscaMensagemTemplate("buscaNotaFiscal-negativa")
+                let texto = template
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -867,9 +825,8 @@ class ura {
                 let nf = await Nfe.criaNfBySql(dadosSql, fila.from._id, embarcador) //Cria as NFs no banco Mongo
                 await Coleta.criaAgendamento(contato._id, nf._id, embarcador._id, nf.key) // Cria agendamento
 
-                let texto = `*Boaa!* 😎\n\n`
-                    + `Encontrei uma Nota Fiscal aqui!\n\n`
-                    + `Por motivos de segurança, poderia me informar o *primeiro nome* ou os *4 primeiros digitos* do *CPF/CNPJ* do titular desta Nota Fiscal?`
+                let template = await Mensagens.buscaMensagemTemplate("consultaNotaFiscal")
+                let texto = template
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -877,9 +834,8 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             else {
-                let texto = `*Xiii, Não encontrei* 😣\n\n`
-                    + `Bom... neste caso podemos tentar novamente pelo *CPF/CNPJ* ou pela *Nota fiscal*, mas se preferir eu posso te transferir para um dos nossos atendentes`
-                    + `\n\nO que você prefere?`
+                let template = await Mensagens.buscaMensagemTemplate("consultaNotaFiscal-negativa")
+                let texto = template
 
                 botMensagem.text = texto
                 botMensagem.template = "opcoes"
@@ -935,9 +891,8 @@ class ura {
             //Caso mora em apartamento positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF andar")
-                let texto = `*Maravilha!* 😃\n\n`
-                    + `Estou te transferindo para um dos nossos atendentes\n\n`
-                    + `Aguarde e em breve você será atendido!`
+                let template = await Mensagens.buscaMensagemTemplate("validaAtendimento")
+                let texto = template
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
@@ -948,9 +903,8 @@ class ura {
             }
             //Caso mora em apartamento negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                let texto = `*Sem problemas* 😌\n\n`
-                    + `Estarei aqui sempre que precisar\n\n`
-                    + `Até a próxima 👋🏻`
+                let template = await Mensagens.buscaMensagemTemplate("validaAtendimento-negativa")
+                let texto = template
 
                 botMensagem.text = texto
                 botMensagem.template = ""
