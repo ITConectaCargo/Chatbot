@@ -6,6 +6,7 @@ import usuario from "./usuarioRoutes.js"
 import coleta from "./coletaRoutes.js"
 import nfe from "./nfeRoutes.js"
 import embarcador from "./embarcadorRoutes.js";
+import mensagem from "./mensagemRoutes.js";
 
 const routes = (app) => {
     app.route('/').get((req, res) => {
@@ -21,6 +22,7 @@ const routes = (app) => {
         fila,
         coleta,
         nfe,
+        mensagem,
     )
 }
 

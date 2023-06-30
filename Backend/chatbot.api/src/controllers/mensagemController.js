@@ -1,5 +1,6 @@
 import axios from 'axios'
 import dotenv from 'dotenv'
+import mensagemTemplate from '../models/mensagemTemplate.js'
 dotenv.config()
 
 const token = process.env.TOKEN
@@ -304,6 +305,15 @@ class mensagem {
             })
         } catch (error) {
             console.log(error)
+        }
+    }
+
+    static buscaMensagemTemplate = async (modelo) => {
+        try {
+            const template = await mensagemTemplate.findOne({model: modelo})
+            return template.text
+        } catch (error) {
+            return error
         }
     }
 }

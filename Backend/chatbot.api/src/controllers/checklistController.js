@@ -11,8 +11,7 @@ class checklist {
         let texto = ''
         if (parametros) {
             if (parametros.checkModelo == 'magazine') { //Magazine
-                const url = parametros.checkUrl
-                    .replace("{{chaveNfe}}", chaveNfe)
+                const url = parametros.checkUrl + `/${chaveNfe}.pdf`
     
                 const estadoRegex = /ESTADO DA EMBALAGEM:(.*?)l   MOTIVO DA COLETA:/gm;
                 const motivoRegex = /MOTIVO DA COLETA:(.*?)l   DETALHES:/gm;
@@ -20,10 +19,7 @@ class checklist {
                 texto = await this.checklistBusca(estadoRegex, motivoRegex, detalhesRegex, url)
             }
             else if (parametros.checkModelo == 'kabum') { //Kabum
-                const url = parametros.checkUrl
-                    .replace("{{chaveNfe}}", chaveNfe)
-                    .replace("{{raizCnpj}}", raizCnpj)
-                    .replace("{{cnpj}}", cnpj)
+                const url = parametros.checkUrl + `/${raizCnpj}/${cnpj}/${chaveNfe}.pdf`
     
                 const estadoRegex = /Situa çã o   da   Embalagem   Para   Coleta:(.*?)Caro   Cliente/gm;
                 const motivoRegex = /Motivo   de   Devolu çã o:(.*?)Observa çõ es   importantes   para   coleta:/gm;
@@ -44,10 +40,7 @@ class checklist {
                 }
             }
             else if (parametros.checkModelo == "conecta") { //multilazer e mvx
-                const url = parametros.checkUrl
-                    .replace("{{chaveNfe}}", chaveNfe)
-                    .replace("{{raizCnpj}}", raizCnpj)
-                    .replace("{{cnpj}}", cnpj)
+                const url = parametros.checkUrl + `/${raizCnpj}/${cnpj}/${chaveNfe}.pdf`
     
                 const estadoRegex = /ESTADO DA EMBALAGEM:(.*?)MOTIVO/gm;
                 const motivoRegex = /MOTIVO DA COLETA:(.*?)Detalhamento/gm;
