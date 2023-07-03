@@ -851,8 +851,8 @@ class ura {
 
         else if (fila.botStage == "invalidoNotaFiscal") {
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "CPF/CNPJ") {
-                let texto = `*Perfeito!* 😊\n\n`
-                    + `Poderia digitar o *CPF* ou *CNPJ*`
+                let template = await Mensagens.buscaMensagemTemplate("invalidoNotaFiscal-cpfCnpj")
+                let texto = template
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -860,8 +860,8 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Nota Fiscal") {
-                let texto = `*Perfeito!* 😊\n\n`
-                    + `Poderia digitar o *número da Nota Fiscal*?`
+                let template = await Mensagens.buscaMensagemTemplate("invalidoNotaFiscal-nf")
+                let texto = template
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -869,9 +869,8 @@ class ura {
                 return this.preparaMensagemBot(botMensagem, fila)
             }
             else if (ultimaMensagem.text == "3" || ultimaMensagem.text == "Atendente") {
-                let texto = `*Sem problemas* 😉\n\n`
-                    + `Estou te transferindo para um dos nossos atendentes\n\n`
-                    + `Em breve você será atendido`
+                let template = await Mensagens.buscaMensagemTemplate("invalidoNotaFiscal-atendente")
+                let texto = template
 
                 botMensagem.text = texto
                 botMensagem.template = ""
@@ -963,9 +962,9 @@ class ura {
 
                 if (eValido === true) {
                     console.log("valido")
-                    let texto = `Ola *${agendamento.client.name}*! 😃\n\n`
-                        + `Vejo que você não possui coletas a agendar\n\n`
-                        + `Gostaria de falar diretamente com um dos nossos atendentes?`
+
+                    let template = await Mensagens.buscaMensagemTemplate("invalidoNotaFiscal-atendente")
+                    let texto = template.replace("{{1}}", agendamento.client.name)
 
                     //coloca mensagem no Bot
                     botMensagem.text = texto
@@ -1002,9 +1001,8 @@ class ura {
                     await Nfe.deletaNfeHoje(contato._id)
                     await Coleta.deletaAgendamento(agendamento._id)
 
-                    let texto = `*Poxa... os dados nao conferem* 😕\n\n`
-                        + `Bom... neste caso podemos tentar novamente pelo *CPF/CNPJ* ou pela *Nota fiscal*, mas se preferir eu posso te transferir para um dos nossos atendentes`
-                        + `\n\nO que você prefere?`
+                    let template = await Mensagens.buscaMensagemTemplate("invalidoNotaFiscal-validoSemNf")
+                    let texto = template.replace("{{1}}", agendamento.client.name)
 
                     botMensagem.text = texto
                     botMensagem.template = "opcoes"
