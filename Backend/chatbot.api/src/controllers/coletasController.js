@@ -261,14 +261,14 @@ class coleta {
                 let nota = await Nf.criaNfBySql(dadosSql, contato._id, embarcador)
                 for (let i = 0; i < nota.length; i++) {
                     const element = nota[i];
-                    await this.criaAgendamento(contato._id, element._id, embarcador._id, element.key); // Cria agendamento
+                    await this.criaAgendamento(contato, element._id, embarcador._id, element.key); // Cria agendamento
                 }
             }
         }
         return contato
     }
 
-    static criaAgendamento = async (clienteId, nfeId, embarcadorId, chaveNfe, protocolo) => {
+    static criaAgendamento = async (cliente, nfeId, embarcadorId, chaveNfe, protocolo) => {
         let coletaStatus = ""
         let dataFrete = ""
         let descricao = ""
@@ -305,7 +305,21 @@ class coleta {
         try {
             const agendamento = {
                 protocol: protocolo,
-                client: clienteId,
+                client: {
+                    id: cliente._id,
+                    name: cliente.name,
+                    tel: cliente.tel,
+                    cpfCnpj: cliente.cpfCnpj,
+                    address: {
+                        street: cliente.address.street,
+                        district: cliente.address.district,
+                        city: cliente.address.city,
+                        state: cliente.address.state,
+                        cep: cliente.address.cep,
+                        complement: cliente.address.complement,
+                        reference: cliente.address.reference
+                    },
+                },
                 nfe: nfeId,
                 shipper: embarcadorId,
                 status: coletaStatus,

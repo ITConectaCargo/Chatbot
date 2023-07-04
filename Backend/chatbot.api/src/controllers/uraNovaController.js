@@ -44,8 +44,7 @@ class ura {
 
         //Verifica se existe NF deste cliente
         try {
-            let agendamento = await Agendamentos.findOne({ client: fila.from, status: { $in: ['114', '308'] } }) //busca NF status 114 (a Agendar) ou 308(reagendar)
-                .populate("client")
+            let agendamento = await Agendamentos.findOne({ "client.id": fila.from, status: { $in: ['114', '308'] } }) //busca NF status 114 (a Agendar) ou 308(reagendar)
                 .populate("nfe")
                 .populate("shipper")
                 .exec()
@@ -69,9 +68,11 @@ class ura {
         if (fila.botStage == 0) {
             const raizCnpj = agendamento.shipper.cpfCnpj.substr(0, 8)
             const [deploy] = await Coleta.consultaDeploySql(raizCnpj)
+            deploy.cidade = diacritics.remove(deploy.cidade.trim()) //Remove caracteres especiais
+            agendamento.client.address.city = diacritics.remove(agendamento.client.address.city.trim())
 
             try {
-                if (deploy.municipio != agendamento.client.address.city) {
+                if (deploy.cidade.toLowerCase() != agendamento.client.address.city.toLowerCase()) {
                     console.log("ura NF Inicio UF")
                     let template = await Mensagens.buscaMensagemTemplate("agendamento-inicio-uf")
                     let texto = template.replace("{{1}}", botMensagem.parameters.name)
@@ -694,7 +695,7 @@ class ura {
                     let nf = await Nfe.criaNfBySql(dadosSql, fila.from._id, embarcador) //Cria as NFs no banco Mongo
                     for (let i = 0; i < nf.length; i++) {
                         let element = nf[i];
-                        await Coleta.criaAgendamento(contato._id, element._id, embarcador._id, element.key); // Cria agendamento
+                        await Coleta.criaAgendamento(contato, element._id, embarcador._id, element.key); // Cria agendamento
                     }
 
                     let template = await Mensagens.buscaMensagemTemplate("confirmaNomeTitular")
@@ -825,7 +826,7 @@ class ura {
                 let nf = await Nfe.criaNfBySql(dadosSql, fila.from._id, embarcador) //Cria as NFs no banco Mongo
                 for (let i = 0; i < nf.length; i++) {
                     let element = nf[i];
-                    await Coleta.criaAgendamento(contato._id, element._id, embarcador._id, element.key); // Cria agendamento
+                    await Coleta.criaAgendamento(contato, element._id, embarcador._id, element.key); // Cria agendamento
                 }
                 
                 let template = await Mensagens.buscaMensagemTemplate("consultaNotaFiscal")
@@ -927,8 +928,7 @@ class ura {
             let agendamento = ""
 
             try {
-                agendamento = await Agendamentos.findOne({ client: fila.from })
-                    .populate("client")
+                agendamento = await Agendamentos.findOne({ "client.id": fila.from })
                     .populate("nfe")
                     .populate("shipper")
                     .exec()
