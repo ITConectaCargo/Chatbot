@@ -36,6 +36,7 @@ class checklist {
     
                 //busca o que esta entre [x] e [ do motivo
                 while ((match = itensSelecionados.exec(texto.motivo)) !== null) {
+                    
                     texto.motivo = match[1];
                 }
             }

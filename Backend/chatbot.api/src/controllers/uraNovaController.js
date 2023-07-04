@@ -71,7 +71,7 @@ class ura {
             const [deploy] = await Coleta.consultaDeploySql(raizCnpj)
 
             try {
-                if (deploy.uf != agendamento.client.address.state) {
+                if (deploy.municipio != agendamento.client.address.city) {
                     console.log("ura NF Inicio UF")
                     let template = await Mensagens.buscaMensagemTemplate("agendamento-inicio-uf")
                     let texto = template.replace("{{1}}", botMensagem.parameters.name)
@@ -823,8 +823,11 @@ class ura {
                 let contato = await Contato.atualizaDadosContatoBySql(dadosSql[0], fila.from._id) //Atualiza contato com os dados vindo do SQL
                 let embarcador = await Embarcador.criaEmbarcadorSql(dadosSql[0])
                 let nf = await Nfe.criaNfBySql(dadosSql, fila.from._id, embarcador) //Cria as NFs no banco Mongo
-                await Coleta.criaAgendamento(contato._id, nf._id, embarcador._id, nf.key) // Cria agendamento
-
+                for (let i = 0; i < nf.length; i++) {
+                    let element = nf[i];
+                    await Coleta.criaAgendamento(contato._id, element._id, embarcador._id, element.key); // Cria agendamento
+                }
+                
                 let template = await Mensagens.buscaMensagemTemplate("consultaNotaFiscal")
                 let texto = template
 
@@ -963,7 +966,7 @@ class ura {
                 if (eValido === true) {
                     console.log("valido")
 
-                    let template = await Mensagens.buscaMensagemTemplate("invalidoNotaFiscal-validoSemNf")
+                    let template = await Mensagens.buscaMensagemTemplate("validaTitular-validoSemNf")
                     let texto = template.replace("{{1}}", agendamento.client.name)
 
                     //coloca mensagem no Bot
@@ -1001,8 +1004,8 @@ class ura {
                     await Nfe.deletaNfeHoje(contato._id)
                     await Coleta.deletaAgendamento(agendamento._id)
 
-                    let template = await Mensagens.buscaMensagemTemplate("invalidoNotaFiscal-invalido")
-                    let texto = template.replace("{{1}}", agendamento.client.name)
+                    let template = await Mensagens.buscaMensagemTemplate("validaTitular-atendente")
+                    let texto = template
 
                     botMensagem.text = texto
                     botMensagem.template = "opcoes"
