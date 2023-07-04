@@ -226,10 +226,10 @@ class ura {
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 console.log("ura NF confirmaEndereco");
                 let template = await Mensagens.buscaMensagemTemplate("agendamento-endereco")
-                let texto = template.replace("{{1}}", agendamento.client.address.street)
-                    .replace("{{2}}", agendamento.client.address.district)
-                    .replace("{{3}}", agendamento.client.address.city)
-                    .replace("{{4}}", agendamento.client.address.state)
+                let texto = template.replace("{{1}}", agendamento.client.address.street.trim())
+                    .replace("{{2}}", agendamento.client.address.district.trim())
+                    .replace("{{3}}", agendamento.client.address.city.trim())
+                    .replace("{{4}}", agendamento.client.address.state.trim())
                     .replace("{{5}}", agendamento.client.address.cep)
                 {
                     agendamento.client.address.complement ?
@@ -963,7 +963,7 @@ class ura {
                 if (eValido === true) {
                     console.log("valido")
 
-                    let template = await Mensagens.buscaMensagemTemplate("invalidoNotaFiscal-atendente")
+                    let template = await Mensagens.buscaMensagemTemplate("invalidoNotaFiscal-validoSemNf")
                     let texto = template.replace("{{1}}", agendamento.client.name)
 
                     //coloca mensagem no Bot
@@ -1001,7 +1001,7 @@ class ura {
                     await Nfe.deletaNfeHoje(contato._id)
                     await Coleta.deletaAgendamento(agendamento._id)
 
-                    let template = await Mensagens.buscaMensagemTemplate("invalidoNotaFiscal-validoSemNf")
+                    let template = await Mensagens.buscaMensagemTemplate("invalidoNotaFiscal-invalido")
                     let texto = template.replace("{{1}}", agendamento.client.name)
 
                     botMensagem.text = texto

@@ -169,7 +169,7 @@ class whatsapp {
                     });
                 }
             }
-            else {
+            else if(!contato){
                 //adiciona o contato no mongo com os dados do whatsapp
                 console.log("nao encontrou nada no BD")
                 let newContato = new Contatos({
