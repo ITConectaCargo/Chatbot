@@ -346,6 +346,8 @@ class coleta {
                     protocol: dados.protocol,
                     appointmentDate: dados.appointmentDate,
                     disassembledProduct: dados.disassembledProduct,
+                    status: dados.status,
+                    statusDescription: dados.statusDescription,
                     checklist: {
                         statusPackaging: dados.checklist.statusPackaging,
                         reason: dados.checklist.reason,
@@ -443,6 +445,14 @@ class coleta {
                 res.status(500).json(error);
             }
         */
+        const agendado = true
+
+        if (agendado) {
+            agendamento.status = 300
+            agendamento.statusDescription = "Agendado"
+
+            this.atualizaAgendamento(agendamento)
+        }
     }
 
     static calculaDataAgendamento = async (dataNf, embarcador, cep) => {

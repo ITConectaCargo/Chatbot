@@ -7,6 +7,7 @@ import Nfe from '../controllers/nfeController.js'
 import Coleta from "./coletasController.js"
 import Fila from './filaController.js'
 import Contato from "../controllers/contatoController.js"
+import moment from "moment"
 import diacritics from 'diacritics'
 import axios from 'axios'
 import dotenv from 'dotenv'
@@ -44,7 +45,7 @@ class ura {
 
         //Verifica se existe NF deste cliente
         try {
-            let agendamento = await Agendamentos.findOne({ "client.id": fila.from, status: { $in: ['114', '308'] } }) //busca NF status 114 (a Agendar) ou 308(reagendar)
+            let agendamento = await Agendamentos.findOne({ "client.id": fila.from, status: { $in: ['114', '308', '300'] } }) //busca NF status 114 (a Agendar) 308(reagendar) ou 300 (agendado)
                 .populate("nfe")
                 .populate("shipper")
                 .exec()
@@ -72,7 +73,26 @@ class ura {
             agendamento.client.address.city = diacritics.remove(agendamento.client.address.city.trim())
 
             try {
-                if (deploy.cidade.toLowerCase() != agendamento.client.address.city.toLowerCase()) {
+                if (agendamento.status == "300") {
+                    console.log("ura NF Inicio status 300")
+
+                    let template = await Mensagens.buscaMensagemTemplate("agendamento-inicio-agendado")
+                    let texto = template.replace("{{1}}", botMensagem.parameters.name)
+                        .replace("{{2}}", moment(agendamento.appointmentDate).format('DD/MM/YYYY'))
+
+                    //coloca mensagem no Bot
+                    botMensagem.text = texto
+                    botMensagem.template = "opcoes"
+                    botMensagem.parameters = {
+                        opcao1: "Reagendar",
+                        opcao2: "Atendimento",
+                        opcao3: "Sair"
+                    }
+                    fila.botStage = "reagendamento"
+                    this.preparaMensagemBot(botMensagem, fila)
+
+                }
+                else if (deploy.cidade.toLowerCase() != agendamento.client.address.city.toLowerCase()) {
                     console.log("ura NF Inicio UF")
                     let template = await Mensagens.buscaMensagemTemplate("agendamento-inicio-uf")
                     let texto = template.replace("{{1}}", botMensagem.parameters.name)
@@ -95,7 +115,7 @@ class ura {
                     this.preparaMensagemBot(botMensagem, fila)
                 }
                 else {
-                    console.log("ura NF Inicio Sucesso")
+                    console.log("ura agendamento Inicio Sucesso")
                     let template = await Mensagens.buscaMensagemTemplate("agendamento-inicio-sucesso")
                     let texto = template.replace("{{1}}", botMensagem.parameters.name)
                         .replace("{{2}}", botMensagem.parameters.product)
@@ -104,7 +124,7 @@ class ura {
                     //coloca mensagem no Bot
                     botMensagem.text = texto
                     botMensagem.template = "botao"
-                    fila.botStage = "NF aceitaTermos"
+                    fila.botStage = "agendamento aceitaTermos"
                     this.preparaMensagemBot(botMensagem, fila)
 
                 }
@@ -122,10 +142,10 @@ class ura {
             }
         }
 
-        else if (fila.botStage == "NF aceitaTermos") {
+        else if (fila.botStage == "agendamento aceitaTermos") {
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
                 // Instruções
-                console.log("ura NF aceitaTermos")
+                console.log("ura agendamento aceitaTermos")
                 let template = await Mensagens.buscaMensagemTemplate("agendamento-aceitaTermos")
                 let texto = template
 
@@ -135,12 +155,12 @@ class ura {
                     opcao1: "Concordo",
                     opcao2: "Discordo"
                 }
-                fila.botStage = "NF checklist"
+                fila.botStage = "agendamento checklist"
                 await this.preparaMensagemBot(botMensagem, fila);
             }
             //caso Inicio negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                console.log("ura NF Inicio negativo")
+                console.log("ura agendamento Inicio negativo")
                 let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
                 let texto = template
 
@@ -153,16 +173,16 @@ class ura {
             //caso nao aperte botao
             else {
                 botMensagem.template = "naoApertouBotao"
-                fila.botStage = "NF aceitaTermos"
+                fila.botStage = "agendamento aceitaTermos"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
 
-        else if (fila.botStage == "NF checklist") {
+        else if (fila.botStage == "agendamento checklist") {
             //caso Inicio positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Concordo") {
                 let checklist = false
-                console.log("ura NF confirmaEndereco");
+                console.log("ura agendamento confirmaEndereco");
                 if (agendamento.checklist.statusPackaging == undefined || agendamento.checklist.reason == undefined || agendamento.checklist.details == undefined) {
                     let dadosCheklist = await Checklist.consultaChecklist(agendamento.nfe.key)
                     if (dadosCheklist) {
@@ -187,7 +207,7 @@ class ura {
                     // Coloca mensagem no Bot
                     botMensagem.text = texto;
                     botMensagem.template = "botao";;
-                    fila.botStage = "NF confirmaEndereco";
+                    fila.botStage = "agendamento confirmaEndereco";
                     this.preparaMensagemBot(botMensagem, fila);
                 }
                 else {
@@ -204,7 +224,7 @@ class ura {
             }
             //caso Inicio negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Discordo") {
-                console.log("ura NF aceitaTermos negativo")
+                console.log("ura agendamento aceitaTermos negativo")
                 let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
                 let texto = template
 
@@ -217,15 +237,15 @@ class ura {
             //caso nao aperte botao
             else {
                 botMensagem.template = "naoApertouBotao"
-                fila.botStage = "NF checklist"
+                fila.botStage = "agendamento checklist"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
 
-        else if (fila.botStage == "NF confirmaEndereco") {
+        else if (fila.botStage == "agendamento confirmaEndereco") {
             //caso Inicio positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                console.log("ura NF confirmaEndereco");
+                console.log("ura agendamento confirmaEndereco");
                 let template = await Mensagens.buscaMensagemTemplate("agendamento-endereco")
                 let texto = template.replace("{{1}}", agendamento.client.address.street.trim())
                     .replace("{{2}}", agendamento.client.address.district.trim())
@@ -233,20 +253,20 @@ class ura {
                     .replace("{{4}}", agendamento.client.address.state.trim())
                     .replace("{{5}}", agendamento.client.address.cep)
                 {
-                    agendamento.client.address.complement ?
-                        texto = texto.replace("{{6}}", agendamento.client.address.complement)
-                        : texto = texto.replace("\nComplemento:\n*{{6}}*\n", '')
+                    texto = (agendamento.client.address.complement) ? //se existir complemento
+                        texto.replace("{{6}}", agendamento.client.address.complement)
+                        : texto.replace("\nComplemento:\n*{{6}}*\n", '')
                 }
 
                 // Coloca mensagem no Bot
                 botMensagem.text = texto;
                 botMensagem.template = "botao";
-                fila.botStage = "NF produtoDesmontado";
+                fila.botStage = "agendamento produtoDesmontado";
                 this.preparaMensagemBot(botMensagem, fila);
             }
             //caso Inicio negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                console.log("ura NF aceitaTermos negativo")
+                console.log("ura agendamento aceitaTermos negativo")
                 let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
                 let texto = template
 
@@ -259,26 +279,26 @@ class ura {
             //caso nao aperte botao
             else {
                 botMensagem.template = "naoApertouBotao"
-                fila.botStage = "NF confirmaEndereco"
+                fila.botStage = "agendamento confirmaEndereco"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
 
-        else if (fila.botStage == "NF produtoDesmontado") {
+        else if (fila.botStage == "agendamento produtoDesmontado") {
             //Caso Confirma endereço positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                console.log("ura NF produtoDesmontado")
+                console.log("ura agendamento produtoDesmontado")
                 let template = await Mensagens.buscaMensagemTemplate("agendamento-produtoDesmontado")
                 let texto = template
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF apartamento"
+                fila.botStage = "agendamento apartamento"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso Confirma endereço negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                console.log("ura NF confirmaEndereco negativo")
+                console.log("ura agendamento confirmaEndereco negativo")
                 let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
                 let texto = template
 
@@ -291,15 +311,15 @@ class ura {
             //caso nao aperte botao
             else {
                 botMensagem.template = "naoApertouBotao"
-                fila.botStage = "NF produtoDesmontado"
+                fila.botStage = "agendamento produtoDesmontado"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
 
-        else if (fila.botStage == "NF apartamento") {
+        else if (fila.botStage == "agendamento apartamento") {
             //Caso produto desmontado positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                console.log("ura NF apartamento")
+                console.log("ura agendamento apartamento")
                 agendamento.protocol.push(fila.protocol)
                 agendamento.disassembledProduct = true
                 Coleta.atualizaAgendamento(agendamento)
@@ -309,12 +329,12 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF andar"
+                fila.botStage = "agendamento andar"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso produto desmontado negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                console.log("ura NF produtoDesmontado negativo")
+                console.log("ura agendamento produtoDesmontado negativo")
                 agendamento.disassembledProduct = false
                 Coleta.atualizaAgendamento(agendamento)
                 let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
@@ -329,15 +349,15 @@ class ura {
             //caso nao aperte botao
             else {
                 botMensagem.template = "naoApertouBotao"
-                fila.botStage = "NF apartamento"
+                fila.botStage = "agendamento apartamento"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
 
-        else if (fila.botStage == "NF andar") {
+        else if (fila.botStage == "agendamento andar") {
             //Caso mora em apartamento positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                console.log("ura NF andar")
+                console.log("ura agendamento andar")
                 let template = await Mensagens.buscaMensagemTemplate("agendamento-andar")
                 let texto = template
                 //coloca mensagem no Bot
@@ -348,7 +368,7 @@ class ura {
                     opcao2: "Entre 4º e 10º Andar",
                     opcao3: "Acima do 10º Andar"
                 }
-                fila.botStage = "NF elevador"
+                fila.botStage = "agendamento elevador"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso mora em apartamento negativo
@@ -358,21 +378,21 @@ class ura {
                 agendamento.residence.elevator = ""
                 Coleta.atualizaAgendamento(agendamento)
 
-                fila.botStage = "NF calculaData"
+                fila.botStage = "agendamento calculaData"
                 this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento)
             }
             //caso nao aperte botao
             else {
                 botMensagem.template = "naoApertouBotao"
-                fila.botStage = "NF andar"
+                fila.botStage = "agendamento andar"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
 
-        else if (fila.botStage == "NF elevador") {
+        else if (fila.botStage == "agendamento elevador") {
             //Caso andar acima do 4 andar positivo
             if (ultimaMensagem.text == "2" || ultimaMensagem.text == "3" || ultimaMensagem.text == "Entre 4º e 10º Andar" || ultimaMensagem.text == "Acima do 10º Andar") {
-                console.log("ura NF elevador")
+                console.log("ura agendamento elevador")
                 agendamento.residence.type = "Apartamento"
                 agendamento.residence.floor = ultimaMensagem.text
                 Coleta.atualizaAgendamento(agendamento)
@@ -383,7 +403,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF confirmaElevador"
+                fila.botStage = "agendamento confirmaElevador"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             //Caso ate 3º andar
@@ -393,25 +413,25 @@ class ura {
                 agendamento.residence.elevator = true
                 Coleta.atualizaAgendamento(agendamento)
 
-                fila.botStage = "NF calculaData"
+                fila.botStage = "agendamento calculaData"
                 this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento)
             }
             //caso nao aperte botao
             else {
                 botMensagem.template = "naoApertouBotao"
-                fila.botStage = "NF elevador"
+                fila.botStage = "agendamento elevador"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
 
-        else if (fila.botStage == "NF confirmaElevador") {
+        else if (fila.botStage == "agendamento confirmaElevador") {
             //Caso andar acima do 4 andar positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                console.log("ura NF confirmaElevador")
+                console.log("ura agendamento confirmaElevador")
                 agendamento.residence.elevator = true
                 Coleta.atualizaAgendamento(agendamento)
 
-                fila.botStage = "NF calculaData"
+                fila.botStage = "agendamento calculaData"
                 this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, agendamento)
             }
             //Caso ate 3º andar
@@ -430,20 +450,20 @@ class ura {
             //caso nao aperte botao
             else {
                 botMensagem.template = "naoApertouBotao"
-                fila.botStage = "NF elevador"
+                fila.botStage = "agendamento elevador"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
 
-        else if (fila.botStage == "NF aceitaData") {
+        else if (fila.botStage == "agendamento aceitaData") {
             //Caso confirma data positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                fila.botStage = "NF calculaData"
+                fila.botStage = "agendamento calculaData"
                 this.uraAtendimentoAgendamento(fila, ultimaMensagem, botMensagem, nf)
             }
             //Caso confirma data negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                console.log("ura NF elevador Negativo")
+                console.log("ura agendamento elevador Negativo")
                 let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
                 let texto = template
 
@@ -456,17 +476,17 @@ class ura {
             //caso nao aperte botao
             else {
                 botMensagem.template = "naoApertouBotao"
-                fila.botStage = "NF aceitaData"
+                fila.botStage = "agendamento aceitaData"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
 
-        else if (fila.botStage == "NF calculaData") {
+        else if (fila.botStage == "agendamento calculaData") {
             // busca uma data 
             let dataAgendamento = await Coleta.calculaDataAgendamento(agendamento.freightDate, agendamento.shipper, agendamento.client.address.cep) //Calcula data de agendamento
 
             if (dataAgendamento !== "Fora de SP") {
-                console.log("ura NF apartamento negativo")
+                console.log("ura agendamento apartamento negativo")
                 axios.put(`${baseURL}nfe/${agendamento.nfe._id}`, { // salva data no banco
                     appointmentDate: dataAgendamento
                 })
@@ -483,7 +503,7 @@ class ura {
                 //coloca mensagem no Bot
                 botMensagem.text = texto
                 botMensagem.template = "botao"
-                fila.botStage = "NF confirmaData"
+                fila.botStage = "agendamento confirmaData"
                 this.preparaMensagemBot(botMensagem, fila)
             }
             else {
@@ -498,10 +518,10 @@ class ura {
 
         }
 
-        else if (fila.botStage == "NF confirmaData") {
+        else if (fila.botStage == "agendamento confirmaData") {
             //Caso confirma data positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                console.log("ura NF confirmaData")
+                console.log("ura agendamento confirmaData")
                 const statusAgendamento = await Coleta.enviaAgendamentoEsl(agendamento)
 
                 let template = await Mensagens.buscaMensagemTemplate("agendamento-protocolo")
@@ -534,7 +554,7 @@ class ura {
             //caso nao aperte botao
             else {
                 botMensagem.template = "naoApertouBotao"
-                fila.botStage = "NF confirmaData"
+                fila.botStage = "agendamento confirmaData"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
@@ -542,7 +562,7 @@ class ura {
         else if (fila.botStage == "validaAtendimento") {
             //Caso mora em validaAtendimento positivo
             if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Sim") {
-                console.log("ura NF validaAtendimento")
+                console.log("ura agendamento validaAtendimento")
                 let template = await Mensagens.buscaMensagemTemplate("validaAtendimento")
                 let texto = template
 
@@ -555,7 +575,7 @@ class ura {
             }
             //Caso mora em validaAtendimento negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
-                console.log("ura NF validaAtendimento negativo")
+                console.log("ura agendamento validaAtendimento negativo")
                 let template = await Mensagens.buscaMensagemTemplate("validaAtendimento-negativa")
                 let texto = template
 
@@ -568,7 +588,7 @@ class ura {
             //caso nao aperte botao
             else {
                 botMensagem.template = "naoApertouBotao"
-                fila.botStage = "NF andar"
+                fila.botStage = "agendamento andar"
                 return this.preparaMensagemBot(botMensagem, fila)
             }
         }
@@ -636,8 +656,8 @@ class ura {
                     }
 
                     //apaga Nfs geradas na data de hoje 
-                    await Nfe.deletaNfeHoje(contato._id)
-                    await Coleta.deletaAgendamento(agendamento._id)
+                    Nfe.deletaNfeHoje(contato._id)
+                    Coleta.deletaAgendamento(agendamento._id)
 
                     let template = await Mensagens.buscaMensagemTemplate("validaTitular-invalido")
                     let texto = template
@@ -655,6 +675,52 @@ class ura {
 
                 }
             }, 3000);
+        }
+
+        else if (fila.botStage == "reagendamento") {
+            //Caso mora em validaAtendimento positivo
+            if (ultimaMensagem.text == "1" || ultimaMensagem.text == "Reagendar") {
+                console.log("ura reagendamento validaAtendimento")
+                let template = await Mensagens.buscaMensagemTemplate("validaAtendimento")
+                let texto = "Em construção..."
+
+                //coloca mensagem no Bot
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "0"
+                fila.status = "finalizado"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //Caso mora em validaAtendimento negativo
+            else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Atendimento") {
+                console.log("ura reagendamento Atendimento")
+                let template = await Mensagens.buscaMensagemTemplate("validaAtendimento")
+                let texto = template
+
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "0"
+                fila.status = "finalizado"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //Caso mora em validaAtendimento negativo
+            else if (ultimaMensagem.text == "3" || ultimaMensagem.text == "Sair") {
+                console.log("ura reagendamento Sair")
+                let template = await Mensagens.buscaMensagemTemplate("validaAtendimento-negativa")
+                let texto = "Em construção..."
+
+                botMensagem.text = texto
+                botMensagem.template = ""
+                fila.botStage = "0"
+                fila.status = "finalizado"
+                this.preparaMensagemBot(botMensagem, fila)
+            }
+            //caso nao aperte botao
+            else {
+                botMensagem.template = "naoApertouBotao"
+                fila.botStage = "agendamento andar"
+                return this.preparaMensagemBot(botMensagem, fila)
+            }
         }
     }
 
@@ -815,7 +881,7 @@ class ura {
                 try {
                     dadosSql = await Coleta.consultaByNf(ultimaMensagem.text)
                 } catch (error) {
-                    console.log("NF nao encontrada")
+                    console.log("agendamento nao encontrada")
                 }
             }
 
@@ -828,7 +894,7 @@ class ura {
                     let element = nf[i];
                     await Coleta.criaAgendamento(contato, element._id, embarcador._id, element.key); // Cria agendamento
                 }
-                
+
                 let template = await Mensagens.buscaMensagemTemplate("consultaNotaFiscal")
                 let texto = template
 
