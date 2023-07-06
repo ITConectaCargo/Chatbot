@@ -1,6 +1,6 @@
 import Fila from '../models/fila.js'
 import Coleta from './coletasController.js'
-import Ura from "./uraNovaController.js"
+import Ura from "./uraController.js"
 
 class fila {
 
