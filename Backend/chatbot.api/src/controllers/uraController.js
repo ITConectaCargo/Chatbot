@@ -878,22 +878,35 @@ class ura {
                 console.log("ura agendamento confirmaData")
                 const statusAgendamento = await Coleta.enviaAgendamentoEsl(agendamento)
 
-                let template = await Mensagens.buscaMensagemTemplate("agendamento-protocolo")
-                let texto = template.replace("{{1}}", fila.protocol)
+                if (statusAgendamento == "sucesso") {
+                    let template = await Mensagens.buscaMensagemTemplate("agendamento-protocolo")
+                    let texto = template.replace("{{1}}", fila.protocol)
 
-                //coloca mensagem no Bot
-                botMensagem.text = texto
-                botMensagem.template = ""
-                fila.botStage = "0"
-                fila.status = "finalizado"
-                this.preparaMensagemBot(botMensagem, fila)
+                    //coloca mensagem no Bot
+                    botMensagem.text = texto
+                    botMensagem.template = ""
+                    fila.botStage = "0"
+                    fila.status = "finalizado"
+                    this.preparaMensagemBot(botMensagem, fila)
+                } else {
+                    let template = await Mensagens.buscaMensagemTemplate("agendamento-confirmaData-erro")
+                    let texto = template
+
+                    //coloca mensagem no Bot
+                    botMensagem.text = texto
+                    botMensagem.template = "botao"
+                    fila.botStage = "validaAtendimento"
+                    this.preparaMensagemBot(botMensagem, fila)
+                }
+
+
             }
             //Caso confirma data negativo
             else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Não") {
                 axios.put(`${baseURL}nfe/${agendamento.nfe._id}`, { //salva data no banco
                     appointmentDate: ""
                 })
-                    .then(resposta => console.log("Salvou no banco"))
+                    .then(console.log("Salvou no banco"))
                     .catch(error => console.log(error))
 
                 let template = await Mensagens.buscaMensagemTemplate("falarAtendente")
@@ -1034,8 +1047,9 @@ class ura {
     }
 
     static async uraReagendamento(fila, ultimaMensagem, botMensagem, agendamento) {
+        console.log("ura reagendamento")
         try {
-            if (fila.status == "0") {
+            if (fila.botStage == "0") {
                 console.log("ura NF Inicio status 300")
 
                 let template = await Mensagens.buscaMensagemTemplate("agendamento-inicio-agendado")
@@ -1044,11 +1058,10 @@ class ura {
 
                 //coloca mensagem no Bot
                 botMensagem.text = texto
-                botMensagem.template = "opcoes"
+                botMensagem.template = "BotaoEditavel"
                 botMensagem.parameters = {
                     opcao1: "Reagendar",
-                    opcao2: "Atendimento",
-                    opcao3: "Sair"
+                    opcao2: "Finalizar"
                 }
                 fila.botStage = "reagendamento"
                 this.preparaMensagemBot(botMensagem, fila)
@@ -1069,22 +1082,10 @@ class ura {
                     this.preparaMensagemBot(botMensagem, fila)
                 }
                 //Caso mora em validaAtendimento negativo
-                else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Atendimento") {
+                else if (ultimaMensagem.text == "2" || ultimaMensagem.text == "Finalizar") {
                     console.log("ura reagendamento Atendimento")
-                    let template = await Mensagens.buscaMensagemTemplate("validaAtendimento")
-                    let texto = template
-
-                    botMensagem.text = texto
-                    botMensagem.template = ""
-                    fila.botStage = "0"
-                    fila.status = "espera"
-                    this.preparaMensagemBot(botMensagem, fila)
-                }
-                //Caso mora em validaAtendimento negativo
-                else if (ultimaMensagem.text == "3" || ultimaMensagem.text == "Sair") {
-                    console.log("ura reagendamento Sair")
                     let template = await Mensagens.buscaMensagemTemplate("validaAtendimento-negativa")
-                    let texto = "Em construção..."
+                    let texto = template
 
                     botMensagem.text = texto
                     botMensagem.template = ""
@@ -1095,7 +1096,7 @@ class ura {
                 //caso nao aperte botao
                 else {
                     botMensagem.template = "naoApertouBotao"
-                    fila.botStage = "agendamento andar"
+                    fila.botStage = "reagendamento"
                     return this.preparaMensagemBot(botMensagem, fila)
                 }
             }

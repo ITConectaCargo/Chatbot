@@ -97,7 +97,7 @@ class fila {
     static async verificaAtendimento(fila) {
         console.log("verificando atendimento")
         let botStage = ""
-        let status = ""
+        let status = ''
 
         if (fila) {
             //se status for finalizado

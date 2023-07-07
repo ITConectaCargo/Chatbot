@@ -7,6 +7,7 @@ import Nf from './nfeController.js';
 import Checklist from './checklistController.js';
 import Contato from './contatoController.js';
 import Embarcador from './embarcadorController.js';
+import { request } from 'graphql-request';
 import moment from 'moment'
 import axios from 'axios';
 import fetch from 'node-fetch';
@@ -250,25 +251,73 @@ class coleta {
             console.log("contato preenchido")
             let existeNota = ""
             try {
-                existeNota = await Nfe.exists({ key: dadosSql.chaveNfe });
+                existeNota = await Nfe.findOne({ key: dadosSql.chaveNfe });
             } catch (error) {
                 console.log("Nf nao localizada")
             }
 
             if (!existeNota || existeNota === "") {
                 console.log("Nao existe nota")
-                let embarcador = await Embarcador.criaEmbarcadorSql(dadosSql)
-                let nota = await Nf.criaNfBySql(dadosSql, contato._id, embarcador)
-                for (let i = 0; i < nota.length; i++) {
-                    const element = nota[i];
-                    await this.criaAgendamento(contato, element._id, embarcador._id, element.key); // Cria agendamento
+                const embarcador = await Embarcador.criaEmbarcadorSql(dadosSql)
+                const nota = await Nf.criaNfBySql(dadosSql, contato._id, embarcador)
+                await this.criaAgendamento(contato, element._id, embarcador._id, element.key); // Cria agendamento
+            }
+            else {
+                const agenda = await Agendamento.findOne({ nfe: existeNota._id })
+                const els =  await this.consultaAgendamento(existeNota.key)
+
+                if(els.coletaStatus != agenda.status){
+                    agenda.status = els.coletaStatus
+                    agenda.statusDescription = els.descricao
+                    await this.atualizaAgendamento(agenda)
                 }
             }
+
         }
         return contato
     }
 
     static criaAgendamento = async (cliente, nfeId, embarcadorId, chaveNfe, protocolo) => {
+        const agendamentoStatus = await this.consultaAgendamento(chaveNfe)
+        const checklist = await Checklist.consultaChecklist(chaveNfe)
+
+        try {
+            const agendamento = {
+                protocol: protocolo,
+                client: {
+                    id: cliente._id,
+                    name: cliente.name,
+                    tel: cliente.tel,
+                    cpfCnpj: cliente.cpfCnpj,
+                    address: {
+                        street: cliente.address.street,
+                        district: cliente.address.district,
+                        city: cliente.address.city,
+                        state: cliente.address.state,
+                        cep: cliente.address.cep,
+                        complement: cliente.address.complement,
+                        reference: cliente.address.reference
+                    },
+                },
+                nfe: nfeId,
+                shipper: embarcadorId,
+                status: agendamentoStatus.coletaStatus,
+                statusDescription: agendamentoStatus.descricao,
+                freightDate: agendamentoStatus.dataFrete,
+                checklist: {
+                    statusPackaging: checklist.estadoPacote,
+                    reason: checklist.motivo,
+                    details: checklist.detalhes,
+                },
+            }
+            const newAgendamento = await Agendamento.create(agendamento);
+            return newAgendamento
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+    static consultaAgendamento = async (chaveNfe) => {
         let coletaStatus = ""
         let dataFrete = ""
         let descricao = ""
@@ -292,47 +341,17 @@ class coleta {
                 dataFrete = objetoMaisRecente.occurrence_at;
                 descricao = objetoMaisRecente.occurrence.description;
 
+                return {
+                    coletaStatus: coletaStatus,
+                    dataFrete: dataFrete,
+                    descricao: descricao               
+                }
+
             } else {
                 // Caso nenhum objeto seja encontrado
                 console.log('Nenhum objeto encontrado');
+                return null
             }
-        } catch (error) {
-            console.log(error)
-        }
-
-        let checklist = await Checklist.consultaChecklist(chaveNfe)
-
-        try {
-            const agendamento = {
-                protocol: protocolo,
-                client: {
-                    id: cliente._id,
-                    name: cliente.name,
-                    tel: cliente.tel,
-                    cpfCnpj: cliente.cpfCnpj,
-                    address: {
-                        street: cliente.address.street,
-                        district: cliente.address.district,
-                        city: cliente.address.city,
-                        state: cliente.address.state,
-                        cep: cliente.address.cep,
-                        complement: cliente.address.complement,
-                        reference: cliente.address.reference
-                    },
-                },
-                nfe: nfeId,
-                shipper: embarcadorId,
-                status: coletaStatus,
-                statusDescription: descricao,
-                freightDate: dataFrete,
-                checklist: {
-                    statusPackaging: checklist.estadoPacote,
-                    reason: checklist.motivo,
-                    details: checklist.detalhes,
-                },
-            }
-            const newAgendamento = await Agendamento.create(agendamento);
-            return newAgendamento
         } catch (error) {
             console.log(error)
         }
@@ -369,92 +388,6 @@ class coleta {
         }
     }
 
-    static consultaAgendamentoEsl = async (req, res) => {
-        const chaveNfe = req.params.chaveNfe;
-
-        try {
-            const response = await fetch(`https://conecta.eslcloud.com.br/api/invoice_occurrences?invoice_key=${chaveNfe}`, {
-                headers: {
-                    Authorization: `Bearer ${process.env.TOKENCONSULTAELS}`
-                }
-            });
-
-            const dados = await response.json();
-            res.status(200).json(dados.data);
-        } catch (error) {
-            console.log(error);
-            res.status(500).json(error);
-        }
-    }
-
-    static enviaAgendamentoEsl = async (agendamento) => {
-        let comentario = `Telefone: ${agendamento.client.tel} // `
-
-        if (agendamento.residence.type == 'Casa') {
-            comentario += `Residencia: ${agendamento.residence.type} //`;
-        }
-        else if (agendamento.residence.elevator == true) {
-            comentario += `Residencia: ${agendamento.residence.type}, Andar: ${agendamento.residence.floor}, Elevador: Sim //`;
-        }
-        else {
-            comentario += `Residencia: ${agendamento.residence.type}, Andar: ${agendamento.residence.floor}, Elevador: Não //`;
-        }
-
-        let query = `
-        {
-	        "query":"mutation ReversePickFreightScheduleCreate {
-		        reversePickFreightScheduleCreate(
-                key: ${agendamento.nfe.key},
-                params: {
-                    invoiceOccurrence: {
-                    occurrenceCode: 300,
-                    occurrenceId: null,
-                    comments: \"${comentario}\",
-                    occurrenceAt: ${new Date()}
-                    }
-                },
-                schedulingDate: ${agendamento.appointmentDate},
-                schedulingPeriod: \"all\"
-            	) 
-            	{
-                errors
-                success
-            	}
-            }"
-        }
-          `
-        console.log(query)
-
-        /*  
-            try {
-                const response = await fetch(`https://conecta.eslcloud.com.br/graphql`, 
-                    {
-                        method: 'POST',
-                        headers: {
-                            Authorization: `Bearer ${process.env.TOKENAGENGAMENTOELS}`
-                        },
-                        body: JSON.stringify({ query }),
-                    });
-        
-                    const dados = await response.json();
-                    
-                res.status(200).json(dados.data);
-        
-            } catch(error) {
-                console.log(error);
-                res.status(500).json(error);
-            }
-        */
-        const agendado = true
-
-        if (agendado) {
-            agendamento.status = 300
-            agendamento.statusDescription = "Agendado"
-
-            this.atualizaAgendamento(agendamento)
-        }
-    }
-
     static calculaDataAgendamento = async (dataNf, embarcador, cep) => {
         let raizCnpj = embarcador.cpfCnpj.substr(0, 8)
         let inicioCep = cep.substr(0, 5)
@@ -487,6 +420,93 @@ class coleta {
             return "Fora de SP"
         }
 
+    }
+
+    static consultaAgendamentoEsl = async (req, res) => {
+        const chaveNfe = req.params.chaveNfe;
+
+        try {
+            const response = await fetch(`https://conecta.eslcloud.com.br/api/invoice_occurrences?invoice_key=${chaveNfe}`, {
+                headers: {
+                    Authorization: `Bearer ${process.env.TOKENCONSULTAELS}`
+                }
+            });
+
+            const dados = await response.json();
+            res.status(200).json(dados.data);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json(error);
+        }
+    }
+
+    static enviaAgendamentoEsl = async (agendamento) => {
+        const dataAtual = new Date()
+        let agendado = true
+        let comentario = `Telefone: ${agendamento.client.tel} // `
+
+        if (agendamento.residence.type == 'Casa') {
+            comentario += `Residencia: ${agendamento.residence.type} //`;
+        }
+        else if (agendamento.residence.elevator == true) {
+            comentario += `Residencia: ${agendamento.residence.type}, Andar: ${agendamento.residence.floor}, Elevador: Sim //`;
+        }
+        else {
+            comentario += `Residencia: ${agendamento.residence.type}, Andar: ${agendamento.residence.floor}, Elevador: Não //`;
+        }
+
+        const query = `
+    mutation ReversePickFreightScheduleCreate($key: String!, $params: FreightScheduleInput!) {
+      reversePickFreightScheduleCreate(key: $key, params: $params) {
+        errors
+        success
+      }
+    }
+  `;
+
+        const variables = {
+            key: agendamento.nfe.key,
+            params: {
+                invoiceOccurrence: {
+                    occurrenceAt: moment(dataAtual).utcOffset("-03:00").format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+                    occurrenceCode: 300,
+                    occurrenceId: null,
+                    comments: comentario
+                },
+                schedulingDate: moment(agendamento.appointmentDate).utcOffset("-03:00").format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+                schedulingPeriod: "all"
+            }
+        };
+
+        /*
+        try {
+            const endpoint = 'https://conecta.eslcloud.com.br/graphql';
+            const headers = {
+                Authorization: `Bearer ${process.env.TOKENAGENGAMENTOELS}`
+            };
+
+            const response = await request(endpoint, query, variables, headers);
+            const result = response.reversePickFreightScheduleCreate;
+
+            if (result.success) {
+                agendado = true
+            }
+        } catch (error) {
+            console.error(error);
+        }
+        */
+
+
+        if (agendado == true) {
+            agendamento.status = 300;
+            agendamento.statusDescription = "Agendado";
+            this.atualizaAgendamento(agendamento);
+
+            return "sucesso"
+        }
+        else {
+            return "falha"
+        }
     }
 
     static deletaAgendamento = async (agendamentoId) => {
