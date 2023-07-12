@@ -446,15 +446,16 @@ class ura {
             agendamento.client.address.city = diacritics.remove(agendamento.client.address.city.trim())
 
             try {
-                if (deploy.cidade.toLowerCase() != agendamento.client.address.city.toLowerCase()) {
+                if (deploy.uf.toLowerCase() != agendamento.client.address.state.toLowerCase()) {
                     console.log("ura NF Inicio UF")
                     let template = await Mensagens.buscaMensagemTemplate("agendamento-inicio-uf")
                     let texto = template.replace("{{1}}", botMensagem.parameters.name)
 
                     //coloca mensagem no Bot
                     botMensagem.text = texto
-                    botMensagem.template = "botao"
-                    fila.botStage = "validaAtendimento"
+                    botMensagem.template = ""
+                    fila.botStage = "0"
+                    fila.status = "espera"
                     this.preparaMensagemBot(botMensagem, fila)
                 }
                 else if (botMensagem.parameters.product == "Produto nao cadastrado") {
@@ -464,8 +465,9 @@ class ura {
 
                     //coloca mensagem no Bot
                     botMensagem.text = texto
-                    botMensagem.template = "botao"
-                    fila.botStage = "validaAtendimento"
+                    botMensagem.template = ""
+                    fila.botStage = "0"
+                    fila.status = "espera"
                     this.preparaMensagemBot(botMensagem, fila)
                 }
                 else {

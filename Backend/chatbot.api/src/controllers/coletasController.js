@@ -264,9 +264,9 @@ class coleta {
             }
             else {
                 const agenda = await Agendamento.findOne({ nfe: existeNota._id })
-                const els =  await this.consultaAgendamento(existeNota.key)
+                const els = await this.consultaAgendamento(existeNota.key)
 
-                if(els.coletaStatus != agenda.status){
+                if (els.coletaStatus != agenda.status) {
                     agenda.status = els.coletaStatus
                     agenda.statusDescription = els.descricao
                     await this.atualizaAgendamento(agenda)
@@ -330,7 +330,7 @@ class coleta {
 
             resposta.data.forEach(element => {
                 let dataElemento = moment(element.occurrence_at);
-                if (dataElemento > dataMaisRecente) {
+                if (dataElemento >= dataMaisRecente) {
                     dataMaisRecente = dataElemento;
                     objetoMaisRecente = element;
                 }
@@ -344,7 +344,7 @@ class coleta {
                 return {
                     coletaStatus: coletaStatus,
                     dataFrete: dataFrete,
-                    descricao: descricao               
+                    descricao: descricao
                 }
 
             } else {
@@ -442,7 +442,7 @@ class coleta {
 
     static enviaAgendamentoEsl = async (agendamento) => {
         const dataAtual = new Date()
-        let agendado = true
+        let agendado = false
         let comentario = `Telefone: ${agendamento.client.tel} // `
 
         if (agendamento.residence.type == 'Casa') {
@@ -456,13 +456,12 @@ class coleta {
         }
 
         const query = `
-    mutation ReversePickFreightScheduleCreate($key: String!, $params: FreightScheduleInput!) {
-      reversePickFreightScheduleCreate(key: $key, params: $params) {
-        errors
-        success
-      }
-    }
-  `;
+            mutation ReversePickFreightScheduleCreate($key: String!, $params: FreightScheduleInput!) {
+            reversePickFreightScheduleCreate(key: $key, params: $params) {
+                errors
+                success
+            }
+        }`
 
         const variables = {
             key: agendamento.nfe.key,
@@ -478,6 +477,8 @@ class coleta {
             }
         };
 
+
+        agendado = true
         /*
         try {
             const endpoint = 'https://conecta.eslcloud.com.br/graphql';
@@ -495,7 +496,6 @@ class coleta {
             console.error(error);
         }
         */
-
 
         if (agendado == true) {
             agendamento.status = 300;
